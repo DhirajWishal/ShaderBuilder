@@ -1,7 +1,8 @@
 // Copyright (c) 2022 Dhiraj Wishal
 #pragma once
 
-#include "Types/DataType.hpp"
+#include "Types/Callable.hpp"
+#include "Types/Vec4.hpp"
 
 namespace ShaderBuilder
 {
@@ -15,6 +16,22 @@ namespace ShaderBuilder
 	 */
 	class Builder
 	{
+		/**
+		 * Built-ins structure.
+		 * This contains all the built-in types.
+		 */
+		struct BuiltIns final
+		{
+			/**
+			 * Explicit constructor.
+			 *
+			 * @param stream The code stream.
+			 */
+			explicit BuiltIns(CodeStream& stream);
+
+			Vec4 gl_Position;
+		};
+
 	public:
 		/**
 		 * Default constructor.
@@ -48,6 +65,75 @@ namespace ShaderBuilder
 		}
 
 		/**
+		 * Create a new variable.
+		 *
+		 * @param variableName The name of the variable.
+		 * @param arguments The optional initializer arguments.
+		 */
+		template<class Type, class... Arguments>
+		[[nodiscard]] Type createVariable(std::string&& variableName, Arguments&&... arguments)
+		{
+			return Type(std::forward<Arguments>(arguments)..., std::move(variableName), m_ShaderCode);
+		}
+
+		/**
+		 * Create a new parameter.
+		 *
+		 * @param variableName The name of the variable.
+		 */
+		template<class Type>
+		[[nodiscard]] Type createParameter(std::string&& variableName)
+		{
+			return Type(std::move(variableName), m_ShaderCode, MetaInformation::ParameterType);
+		}
+
+		/**
+		 * Create a new function.
+		 *
+		 * @param functionName The name of the function.
+		 * @param function The function containing the body.
+		 * @param parameters The function's parameter types.
+		 * @return The callable type.
+		 */
+		template<class Return, class... Arguments, class Function>
+		[[nodiscard]] Callable<Return, Arguments...> createFunction(std::string&& functionName, Function&& function, Arguments&&... parameters)
+		{
+			const auto callable = Callable<Return, Arguments...>("void", std::move(functionName), m_ShaderCode, std::forward<Arguments>(parameters)...);
+
+			m_ShaderCode << std::endl << "{" << std::endl;
+			function();
+			m_ShaderCode << "}" << std::endl;
+
+			return callable;
+		}
+
+		/**
+		 * Return something from the current function.
+		 *
+		 * @param variable The variable to return.
+		 */
+		template<class Type>
+		void functionReturn(Type&& variable)
+		{
+			m_ShaderCode << "return " << variable.getName() << std::endl;
+		}
+
+		/**
+		 * Get the internally stored built-in types.
+		 *
+		 * @return The built-ins.
+		 */
+		[[nodiscard]] BuiltIns& getBuiltIns() { return m_BuiltIns; }
+
+		/**
+		 * Get the internally stored built-in types.
+		 *
+		 * @return The built-ins.
+		 */
+		[[nodiscard]] const BuiltIns& getBuiltIns() const { return m_BuiltIns; }
+
+	public:
+		/**
 		 * Get the internally stored code as GLSL.
 		 *
 		 * @return The GLSL code.
@@ -55,7 +141,8 @@ namespace ShaderBuilder
 		[[nodiscard]] std::string getGLSL() const { return m_ShaderCode.str(); }
 
 	private:
-		std::stringstream m_ShaderCode;
+		CodeStream m_ShaderCode;
+		BuiltIns m_BuiltIns;
 	};
 } // namespace ShaderBuilder
 

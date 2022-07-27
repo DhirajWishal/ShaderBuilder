@@ -10,12 +10,18 @@ int main()
 {
 	ShaderBuilder::Builder shaderSource;
 
-	SB_CREATE_INPUT(shaderSource, ShaderBuilder::Vec3, 0, inPosition);
-	SB_CREATE_INPUT(shaderSource, ShaderBuilder::Vec2, 12, inTextureCoordinates);
+	auto inPosition = shaderSource.createInput<ShaderBuilder::Vec3>(0, "inPosition");
+	auto inTextureCoordinates = shaderSource.createInput<ShaderBuilder::Vec2>(12, "inTextureCoordinates");
+	auto outTextureCoordinates = shaderSource.createOutput<ShaderBuilder::Vec2>(0, "outTextureCoordinates");
 
-	SB_CREATE_OUTPUT(shaderSource, ShaderBuilder::Vec2, 0, outTextureCoordinates);
-
-	outTextureCoordinates = inTextureCoordinates;
+	auto rando = shaderSource.createFunction<void>(
+		"main",
+		[&]()
+		{
+			auto temp = shaderSource.createVariable<ShaderBuilder::Vec4>("temp", 1, 2, 3, 4);
+			shaderSource.getBuiltIns().gl_Position = temp;
+			outTextureCoordinates = inTextureCoordinates;
+		});
 
 	std::cout << shaderSource.getGLSL() << std::endl;
 }

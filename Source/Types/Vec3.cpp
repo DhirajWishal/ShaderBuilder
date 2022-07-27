@@ -4,10 +4,11 @@
 
 namespace ShaderBuilder
 {
-	Vec3::Vec3(std::string&& variableName, CodeStream& codeStream)
-		: DataType("vec3", std::move(variableName), codeStream)
+	Vec3::Vec3(std::string&& variableName, CodeStream& codeStream, MetaInformation meta /*= MetaInformation::Variable*/)
+		: DataType("vec3", std::move(variableName), codeStream, meta)
 	{
-		m_CodeStream << ";" << std::endl;
+		if (meta & MetaInformation::Variable)
+			m_CodeStream << ";" << std::endl;
 	}
 
 } // namespace ShaderBuilder

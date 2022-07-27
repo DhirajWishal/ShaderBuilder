@@ -4,9 +4,10 @@
 
 namespace ShaderBuilder
 {
-	DataType::DataType(std::string_view typeName, std::string&& variableName, CodeStream& codeStream)
-		: m_TypeName(typeName), m_VariableName(std::move(variableName)), m_CodeStream(codeStream)
+	DataType::DataType(std::string_view typeName, std::string&& variableName, CodeStream& codeStream, MetaInformation meta /*= MetaInformation::Variable*/)
+		: m_TypeName(typeName), m_VariableName(std::move(variableName)), m_CodeStream(codeStream), m_MetaInformation(meta)
 	{
-		m_CodeStream << m_TypeName << " " << m_VariableName;
+		if (meta & MetaInformation::Variable)
+			m_CodeStream << m_TypeName << " " << m_VariableName;
 	}
 } // namespace ShaderBuilder

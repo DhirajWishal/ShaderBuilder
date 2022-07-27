@@ -15,11 +15,13 @@ add_library(
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Types/DataType.hpp"
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Types/Vec2.hpp"
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Types/Vec3.hpp"
+	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Types/Vec4.hpp"
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Builder.hpp"
 
 	"Types/DataType.cpp"
 	"Types/Vec2.cpp"
 	"Types/Vec3.cpp"
+	"Types/Vec4.cpp"
 	
 	"Builder.cpp" 
 	

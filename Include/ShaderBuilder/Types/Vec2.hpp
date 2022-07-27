@@ -16,8 +16,9 @@ namespace ShaderBuilder
 		 *
 		 * @param variableName The name of the variable.
 		 * @param codeStream The code stream to store the data in.
+		 * @param meta The meta information regarding the type.
 		 */
-		explicit Vec2(std::string&& variableName, CodeStream& codeStream);
+		explicit Vec2(std::string&& variableName, CodeStream& codeStream, MetaInformation meta = MetaInformation::Variable);
 
 		/**
 		 * Assignment operator.
