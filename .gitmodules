@@ -1,0 +1,3 @@
+[submodule "ThirdParty/SPIRV-Tools"]
+	path = ThirdParty/SPIRV-Tools
+	url = https://github.com/KhronosGroup/SPIRV-Tools

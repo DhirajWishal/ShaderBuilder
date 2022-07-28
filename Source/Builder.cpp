@@ -11,7 +11,7 @@ namespace ShaderBuilder
 	}
 
 	Builder::BuiltIns::BuiltIns(CodeStream& stream)
-		: gl_Position(Vec4("gl_Position", stream))
+		: gl_Position(Vec4("gl_Position", stream, MetaInformation::BuiltIn))
 	{
 	}
 
