@@ -9,10 +9,7 @@ namespace ShaderBuilder
 	 * Type traits structure.
 	 */
 	template <class Type>
-	struct TypeTraits
-	{
-		static_assert(false, "Invalid or unsupported type!");
-	};
+	struct TypeTraits;
 
 	/**
 	 * Void type traits.
@@ -23,7 +20,6 @@ namespace ShaderBuilder
 		using Type = void;
 		static constexpr const char Identifier[] = "%void";
 		static constexpr const char OpType[] = "OpTypeVoid";
-		static constexpr uint8_t Width = 0;
 	};
 
 	/**
@@ -35,7 +31,6 @@ namespace ShaderBuilder
 		using Type = bool;
 		static constexpr const char Identifier[] = "%bool";
 		static constexpr const char OpType[] = "OpTypeBool";
-		static constexpr uint8_t Width = 1;
 	};
 
 	/**

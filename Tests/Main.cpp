@@ -10,20 +10,24 @@ int main()
 {
 	ShaderBuilder::Builder shaderSource;
 
-	auto inPosition = shaderSource.createInput<ShaderBuilder::Vec3>(0, "inPosition");
-	auto inTextureCoordinates = shaderSource.createInput<ShaderBuilder::Vec2>(12, "inTextureCoordinates");
-	auto outTextureCoordinates = shaderSource.createOutput<ShaderBuilder::Vec2>(0, "outTextureCoordinates");
+	auto inPosition = ShaderBuilder::Vec3("inPosition");
+	auto inTextureCoordinates = ShaderBuilder::Vec2("inTextureCoordinates");
+	auto outTextureCoordinates = ShaderBuilder::Vec2("outTextureCoordinates");
 
-	auto rando = shaderSource.createFunction<void>("main", [&]()
-		{
-			auto temp =
-				shaderSource.createVariable<ShaderBuilder::Vec4>("temp", 1, 2, 3, 4);
-			shaderSource.getBuiltIns().gl_Position = temp;
-			outTextureCoordinates = inTextureCoordinates;
-		}
-	);
-
-	std::cout << shaderSource.getGLSL() << std::endl;
+	//auto inPosition = shaderSource.createInput<ShaderBuilder::Vec3>(0, "inPosition");
+	//auto inTextureCoordinates = shaderSource.createInput<ShaderBuilder::Vec2>(12, "inTextureCoordinates");
+	//auto outTextureCoordinates = shaderSource.createOutput<ShaderBuilder::Vec2>(0, "outTextureCoordinates");
+	//
+	//auto rando = shaderSource.createFunction<void>("main", [&]()
+	//	{
+	//		auto temp =
+	//			shaderSource.createVariable<ShaderBuilder::Vec4>("temp", 1, 2, 3, 4);
+	//		shaderSource.getBuiltIns().gl_Position = temp;
+	//		outTextureCoordinates = inTextureCoordinates;
+	//	}
+	//);
+	//
+	//std::cout << shaderSource.getGLSL() << std::endl;
 }
 
 /**

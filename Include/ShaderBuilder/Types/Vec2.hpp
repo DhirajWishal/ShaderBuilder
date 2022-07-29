@@ -7,9 +7,15 @@ namespace ShaderBuilder
 {
 	/**
 	 * Vector 2 data type.
+	 * 
+	 * @tparam Type The value type. Default is float.
 	 */
-	class Vec2 final : public DataType
+	template<class Type = float>
+	class Vec2 final : public DataType<Vec2<Type>>
 	{
+	public:
+		using Traits = TypeTraits<Vec2<Type>>;
+
 	public:
 		/**
 		 * Explicit constructor.
@@ -18,7 +24,7 @@ namespace ShaderBuilder
 		 * @param codeStream The code stream to store the data in.
 		 * @param meta The meta information regarding the type.
 		 */
-		explicit Vec2(std::string&& variableName, CodeStream& codeStream, MetaInformation meta = MetaInformation::Variable);
+		explicit Vec2(std::string&& variableName) : DataType<Vec2<Type>>(std::move(variableName)) {}
 
 		/**
 		 * Assignment operator.
@@ -26,14 +32,147 @@ namespace ShaderBuilder
 		 * @param other The other vector.
 		 * @return The altered vector reference.
 		 */
-		Vec2& operator=(const Vec2& other);
+		Vec2& operator=(const Vec2& other)
+		{
+			return *this;
+		}
 
 	public:
 		union
 		{
-			struct { float x, y; };
-			struct { float a, b; };
-			struct { float u, v; };
+			struct { Type x, y; };
+			struct { Type a, b; };
+			struct { Type u, v; };
 		};
+	};
+
+	/**
+	 * Vec2 int8_t specialization.
+	 */
+	template<>
+	struct TypeTraits<Vec2<int8_t>>
+	{
+		using Type = Vec2<int8_t>;
+		using ValueTraits = TypeTraits<int8_t>;
+		static constexpr const char Identifier[] = "%vec2_int8";
+		static constexpr const char OpType[] = "OpTypeVector";
+		static constexpr uint8_t ComponentCount = 2;
+	};
+
+	/**
+	 * Vec2 uint8_t specialization.
+	 */
+	template<>
+	struct TypeTraits<Vec2<uint8_t>>
+	{
+		using Type = Vec2<uint8_t>;
+		using ValueTraits = TypeTraits<uint8_t>;
+		static constexpr const char Identifier[] = "%vec2_uint8";
+		static constexpr const char OpType[] = "OpTypeVector";
+		static constexpr uint8_t ComponentCount = 2;
+	};
+
+	/**
+	 * Vec2 int16_t specialization.
+	 */
+	template<>
+	struct TypeTraits<Vec2<int16_t>>
+	{
+		using Type = Vec2<int16_t>;
+		using ValueTraits = TypeTraits<int16_t>;
+		static constexpr const char Identifier[] = "%vec2_int16";
+		static constexpr const char OpType[] = "OpTypeVector";
+		static constexpr uint8_t ComponentCount = 2;
+	};
+
+	/**
+	 * Vec2 uint16_t specialization.
+	 */
+	template<>
+	struct TypeTraits<Vec2<uint16_t>>
+	{
+		using Type = Vec2<uint16_t>;
+		using ValueTraits = TypeTraits<uint16_t>;
+		static constexpr const char Identifier[] = "%vec2_uint16";
+		static constexpr const char OpType[] = "OpTypeVector";
+		static constexpr uint8_t ComponentCount = 2;
+	};
+
+	/**
+	 * Vec2 int32_t specialization.
+	 */
+	template<>
+	struct TypeTraits<Vec2<int32_t>>
+	{
+		using Type = Vec2<int32_t>;
+		using ValueTraits = TypeTraits<int32_t>;
+		static constexpr const char Identifier[] = "%vec2_int32";
+		static constexpr const char OpType[] = "OpTypeVector";
+		static constexpr uint8_t ComponentCount = 2;
+	};
+
+	/**
+	 * Vec2 uint32_t specialization.
+	 */
+	template<>
+	struct TypeTraits<Vec2<uint32_t>>
+	{
+		using Type = Vec2<uint32_t>;
+		using ValueTraits = TypeTraits<uint32_t>;
+		static constexpr const char Identifier[] = "%vec2_uint32";
+		static constexpr const char OpType[] = "OpTypeVector";
+		static constexpr uint8_t ComponentCount = 2;
+	};
+
+	/**
+	 * Vec2 int64_t specialization.
+	 */
+	template<>
+	struct TypeTraits<Vec2<int64_t>>
+	{
+		using Type = Vec2<int64_t>;
+		using ValueTraits = TypeTraits<int64_t>;
+		static constexpr const char Identifier[] = "%vec2_int64";
+		static constexpr const char OpType[] = "OpTypeVector";
+		static constexpr uint8_t ComponentCount = 2;
+	};
+
+	/**
+	 * Vec2 uint64_t specialization.
+	 */
+	template<>
+	struct TypeTraits<Vec2<uint64_t>>
+	{
+		using Type = Vec2<uint64_t>;
+		using ValueTraits = TypeTraits<uint64_t>;
+		static constexpr const char Identifier[] = "%vec2_uint64";
+		static constexpr const char OpType[] = "OpTypeVector";
+		static constexpr uint8_t ComponentCount = 2;
+	};
+
+	/**
+	 * Vec2 float specialization.
+	 */
+	template<>
+	struct TypeTraits<Vec2<float>>
+	{
+		using Type = Vec2<float>;
+		using ValueTraits = TypeTraits<float>;
+		static constexpr const char Identifier[] = "%vec2_float";
+		static constexpr const char OpType[] = "OpTypeVector";
+		static constexpr uint8_t ComponentCount = 2;
+	};
+
+	/**
+	 * Vec2 double specialization.
+	 */
+	template<>
+	struct TypeTraits<Vec2<double>>
+	{
+		using Type = Vec2<double>;
+		using ValueTraits = TypeTraits<double>;
+		static constexpr const char Identifier[] = "%vec2_double";
+		static constexpr const char OpType[] = "OpTypeVector";
+		static constexpr uint8_t ComponentCount = 2;
 	};
 } // namespace ShaderBuilder

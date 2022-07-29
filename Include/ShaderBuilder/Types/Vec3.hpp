@@ -7,17 +7,160 @@ namespace ShaderBuilder
 {
 	/**
 	 * Vector 3 data type.
+	 * 
+	 * @tparam Type The value type. Default is float.
 	 */
-	class Vec3 final : public DataType
+	template<class Type = float>
+	class Vec3 final : public DataType<Vec3<Type>>
 	{
+	public:
+		using Traits = TypeTraits<Vec3<Type>>;
+
 	public:
 		/**
 		 * Explicit constructor.
 		 *
 		 * @param variableName The name of the variable.
-		 * @param codeStream The code stream to store the data in.
-		 * @param meta The meta information regarding the type.
 		 */
-		explicit Vec3(std::string&& variableName, CodeStream& codeStream, MetaInformation meta = MetaInformation::Variable);
+		explicit Vec3(std::string&& variableName) : DataType<Vec3<Type>>(std::move(variableName)) {}
+
+	public:
+		union
+		{
+			struct { Type x, y, z; };
+			struct { Type r, g, b; };
+			struct { Type u, v, w; };
+			struct { Type a, b, c; };
+		};
+	};
+
+	/**
+	 * Vec3 int8_t specialization.
+	 */
+	template<>
+	struct TypeTraits<Vec3<int8_t>>
+	{
+		using Type = Vec3<int8_t>;
+		using ValueTraits = TypeTraits<int8_t>;
+		static constexpr const char Identifier[] = "%vec3_int8";
+		static constexpr const char OpType[] = "OpTypeVector";
+		static constexpr uint8_t ComponentCount = 3;
+	};
+
+	/**
+	 * Vec3 uint8_t specialization.
+	 */
+	template<>
+	struct TypeTraits<Vec3<uint8_t>>
+	{
+		using Type = Vec3<uint8_t>;
+		using ValueTraits = TypeTraits<uint8_t>;
+		static constexpr const char Identifier[] = "%vec3_uint8";
+		static constexpr const char OpType[] = "OpTypeVector";
+		static constexpr uint8_t ComponentCount = 3;
+	};
+
+	/**
+	 * Vec3 int16_t specialization.
+	 */
+	template<>
+	struct TypeTraits<Vec3<int16_t>>
+	{
+		using Type = Vec3<int16_t>;
+		using ValueTraits = TypeTraits<int16_t>;
+		static constexpr const char Identifier[] = "%vec3_int16";
+		static constexpr const char OpType[] = "OpTypeVector";
+		static constexpr uint8_t ComponentCount = 3;
+	};
+
+	/**
+	 * Vec3 uint16_t specialization.
+	 */
+	template<>
+	struct TypeTraits<Vec3<uint16_t>>
+	{
+		using Type = Vec3<uint16_t>;
+		using ValueTraits = TypeTraits<uint16_t>;
+		static constexpr const char Identifier[] = "%vec3_uint16";
+		static constexpr const char OpType[] = "OpTypeVector";
+		static constexpr uint8_t ComponentCount = 3;
+	};
+
+	/**
+	 * Vec3 int32_t specialization.
+	 */
+	template<>
+	struct TypeTraits<Vec3<int32_t>>
+	{
+		using Type = Vec3<int32_t>;
+		using ValueTraits = TypeTraits<int32_t>;
+		static constexpr const char Identifier[] = "%vec3_int32";
+		static constexpr const char OpType[] = "OpTypeVector";
+		static constexpr uint8_t ComponentCount = 3;
+	};
+
+	/**
+	 * Vec3 uint32_t specialization.
+	 */
+	template<>
+	struct TypeTraits<Vec3<uint32_t>>
+	{
+		using Type = Vec3<uint32_t>;
+		using ValueTraits = TypeTraits<uint32_t>;
+		static constexpr const char Identifier[] = "%vec3_uint32";
+		static constexpr const char OpType[] = "OpTypeVector";
+		static constexpr uint8_t ComponentCount = 3;
+	};
+
+	/**
+	 * Vec3 int64_t specialization.
+	 */
+	template<>
+	struct TypeTraits<Vec3<int64_t>>
+	{
+		using Type = Vec3<int64_t>;
+		using ValueTraits = TypeTraits<int64_t>;
+		static constexpr const char Identifier[] = "%vec3_int64";
+		static constexpr const char OpType[] = "OpTypeVector";
+		static constexpr uint8_t ComponentCount = 3;
+	};
+
+	/**
+	 * Vec3 uint64_t specialization.
+	 */
+	template<>
+	struct TypeTraits<Vec3<uint64_t>>
+	{
+		using Type = Vec3<uint64_t>;
+		using ValueTraits = TypeTraits<uint64_t>;
+		static constexpr const char Identifier[] = "%vec3_uint64";
+		static constexpr const char OpType[] = "OpTypeVector";
+		static constexpr uint8_t ComponentCount = 3;
+	};
+
+	/**
+	 * Vec3 float specialization.
+	 */
+	template<>
+	struct TypeTraits<Vec3<float>>
+	{
+		using Type = Vec3<float>;
+		using ValueTraits = TypeTraits<float>;
+		static constexpr const char Identifier[] = "%vec3_float";
+		static constexpr const char OpType[] = "OpTypeVector";
+		static constexpr uint8_t ComponentCount = 3;
+	};
+
+	/**
+	 * Vec3 double specialization.
+	 */
+	template<>
+	struct TypeTraits<Vec3<double>>
+	{
+		using Type = Vec3<double>;
+		using ValueTraits = TypeTraits<double>;
+		static constexpr const char Identifier[] = "%vec3_double";
+		static constexpr const char OpType[] = "OpTypeVector";
+		static constexpr uint8_t ComponentCount = 3;
 	};
 } // namespace ShaderBuilder
