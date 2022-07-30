@@ -40,9 +40,8 @@ namespace ShaderBuilder
 	{
 		using Type = Vec4<int8_t>;
 		using ValueTraits = TypeTraits<int8_t>;
-		static constexpr const char Identifier[] = "%vec4_int8";
-		static constexpr const char OpType[] = "OpTypeVector";
-		static constexpr uint8_t ComponentCount = 4;
+		static constexpr std::string_view Identifier = "%vec4_int8";
+		static constexpr std::string_view Declaration = "%vec4_int8 = OpTypeVector %int8 4";
 	};
 
 	/**
@@ -53,9 +52,8 @@ namespace ShaderBuilder
 	{
 		using Type = Vec4<uint8_t>;
 		using ValueTraits = TypeTraits<uint8_t>;
-		static constexpr const char Identifier[] = "%vec4_uint8";
-		static constexpr const char OpType[] = "OpTypeVector";
-		static constexpr uint8_t ComponentCount = 4;
+		static constexpr std::string_view Identifier = "%vec4_uint8";
+		static constexpr std::string_view Declaration = "%vec4_uint8 = OpTypeVector %uint8 4";
 	};
 
 	/**
@@ -66,9 +64,8 @@ namespace ShaderBuilder
 	{
 		using Type = Vec4<int16_t>;
 		using ValueTraits = TypeTraits<int16_t>;
-		static constexpr const char Identifier[] = "%vec4_int16";
-		static constexpr const char OpType[] = "OpTypeVector";
-		static constexpr uint8_t ComponentCount = 4;
+		static constexpr std::string_view Identifier = "%vec4_int16";
+		static constexpr std::string_view Declaration = "%vec4_int16 = OpTypeVector %int16 4";
 	};
 
 	/**
@@ -79,9 +76,8 @@ namespace ShaderBuilder
 	{
 		using Type = Vec4<uint16_t>;
 		using ValueTraits = TypeTraits<uint16_t>;
-		static constexpr const char Identifier[] = "%vec4_uint16";
-		static constexpr const char OpType[] = "OpTypeVector";
-		static constexpr uint8_t ComponentCount = 4;
+		static constexpr std::string_view Identifier = "%vec4_uint16";
+		static constexpr std::string_view Declaration = "%vec4_uint16 = OpTypeVector %uint16 4";
 	};
 
 	/**
@@ -92,9 +88,8 @@ namespace ShaderBuilder
 	{
 		using Type = Vec4<int32_t>;
 		using ValueTraits = TypeTraits<int32_t>;
-		static constexpr const char Identifier[] = "%vec4_int32";
-		static constexpr const char OpType[] = "OpTypeVector";
-		static constexpr uint8_t ComponentCount = 4;
+		static constexpr std::string_view Identifier = "%vec4_int32";
+		static constexpr std::string_view Declaration = "%vec4_int32 = OpTypeVector %int32 4";
 	};
 
 	/**
@@ -105,9 +100,8 @@ namespace ShaderBuilder
 	{
 		using Type = Vec4<uint32_t>;
 		using ValueTraits = TypeTraits<uint32_t>;
-		static constexpr const char Identifier[] = "%vec4_uint32";
-		static constexpr const char OpType[] = "OpTypeVector";
-		static constexpr uint8_t ComponentCount = 4;
+		static constexpr std::string_view Identifier = "%vec4_uint32";
+		static constexpr std::string_view Declaration = "%vec4_uint32 = OpTypeVector %uint32 4";
 	};
 
 	/**
@@ -118,9 +112,8 @@ namespace ShaderBuilder
 	{
 		using Type = Vec4<int64_t>;
 		using ValueTraits = TypeTraits<int64_t>;
-		static constexpr const char Identifier[] = "%vec4_int64";
-		static constexpr const char OpType[] = "OpTypeVector";
-		static constexpr uint8_t ComponentCount = 4;
+		static constexpr std::string_view Identifier = "%vec4_int64";
+		static constexpr std::string_view Declaration = "%vec4_int64 = OpTypeVector %int64 4";
 	};
 
 	/**
@@ -131,9 +124,8 @@ namespace ShaderBuilder
 	{
 		using Type = Vec4<uint64_t>;
 		using ValueTraits = TypeTraits<uint64_t>;
-		static constexpr const char Identifier[] = "%vec4_uint64";
-		static constexpr const char OpType[] = "OpTypeVector";
-		static constexpr uint8_t ComponentCount = 4;
+		static constexpr std::string_view Identifier = "%vec4_uint64";
+		static constexpr std::string_view Declaration = "%vec4_uint64 = OpTypeVector %uint64 4";
 	};
 
 	/**
@@ -144,9 +136,8 @@ namespace ShaderBuilder
 	{
 		using Type = Vec4<float>;
 		using ValueTraits = TypeTraits<float>;
-		static constexpr const char Identifier[] = "%vec4_float";
-		static constexpr const char OpType[] = "OpTypeVector";
-		static constexpr uint8_t ComponentCount = 4;
+		static constexpr std::string_view Identifier = "%vec4_float";
+		static constexpr std::string_view Declaration = "%vec4_float = OpTypeVector %float 4";
 	};
 
 	/**
@@ -157,8 +148,13 @@ namespace ShaderBuilder
 	{
 		using Type = Vec4<double>;
 		using ValueTraits = TypeTraits<double>;
-		static constexpr const char Identifier[] = "%vec4_double";
-		static constexpr const char OpType[] = "OpTypeVector";
-		static constexpr uint8_t ComponentCount = 4;
+		static constexpr std::string_view Identifier = "%vec4_double";
+		static constexpr std::string_view Declaration = "%vec4_double = OpTypeVector %double 4";
 	};
+
+	/**
+	 * Is complex type boolean specialization
+	 */
+	template<class Type>
+	constexpr bool IsCompexType<Vec4<Type>> = true;
 } // namespace ShaderBuilder

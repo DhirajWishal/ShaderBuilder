@@ -7,7 +7,7 @@ namespace ShaderBuilder
 {
 	/**
 	 * Vector 2 data type.
-	 * 
+	 *
 	 * @tparam Type The value type. Default is float.
 	 */
 	template<class Type = float>
@@ -54,9 +54,8 @@ namespace ShaderBuilder
 	{
 		using Type = Vec2<int8_t>;
 		using ValueTraits = TypeTraits<int8_t>;
-		static constexpr const char Identifier[] = "%vec2_int8";
-		static constexpr const char OpType[] = "OpTypeVector";
-		static constexpr uint8_t ComponentCount = 2;
+		static constexpr std::string_view Identifier = "%vec2_int8";
+		static constexpr std::string_view Declaration = "%vec2_int8 = OpTypeVector %int8 2";
 	};
 
 	/**
@@ -67,9 +66,8 @@ namespace ShaderBuilder
 	{
 		using Type = Vec2<uint8_t>;
 		using ValueTraits = TypeTraits<uint8_t>;
-		static constexpr const char Identifier[] = "%vec2_uint8";
-		static constexpr const char OpType[] = "OpTypeVector";
-		static constexpr uint8_t ComponentCount = 2;
+		static constexpr std::string_view Identifier = "%vec2_uint8";
+		static constexpr std::string_view Declaration = "%vec2_uint8 = OpTypeVector %uint8 2";
 	};
 
 	/**
@@ -80,9 +78,8 @@ namespace ShaderBuilder
 	{
 		using Type = Vec2<int16_t>;
 		using ValueTraits = TypeTraits<int16_t>;
-		static constexpr const char Identifier[] = "%vec2_int16";
-		static constexpr const char OpType[] = "OpTypeVector";
-		static constexpr uint8_t ComponentCount = 2;
+		static constexpr std::string_view Identifier = "%vec2_int16";
+		static constexpr std::string_view Declaration = "%vec2_int16 = OpTypeVector %int16 2";
 	};
 
 	/**
@@ -93,9 +90,8 @@ namespace ShaderBuilder
 	{
 		using Type = Vec2<uint16_t>;
 		using ValueTraits = TypeTraits<uint16_t>;
-		static constexpr const char Identifier[] = "%vec2_uint16";
-		static constexpr const char OpType[] = "OpTypeVector";
-		static constexpr uint8_t ComponentCount = 2;
+		static constexpr std::string_view Identifier = "%vec2_uint16";
+		static constexpr std::string_view Declaration = "%vec2_uint16 = OpTypeVector %uint16 2";
 	};
 
 	/**
@@ -106,9 +102,8 @@ namespace ShaderBuilder
 	{
 		using Type = Vec2<int32_t>;
 		using ValueTraits = TypeTraits<int32_t>;
-		static constexpr const char Identifier[] = "%vec2_int32";
-		static constexpr const char OpType[] = "OpTypeVector";
-		static constexpr uint8_t ComponentCount = 2;
+		static constexpr std::string_view Identifier = "%vec2_int32";
+		static constexpr std::string_view Declaration = "%vec2_int32 = OpTypeVector %int32 2";
 	};
 
 	/**
@@ -119,9 +114,8 @@ namespace ShaderBuilder
 	{
 		using Type = Vec2<uint32_t>;
 		using ValueTraits = TypeTraits<uint32_t>;
-		static constexpr const char Identifier[] = "%vec2_uint32";
-		static constexpr const char OpType[] = "OpTypeVector";
-		static constexpr uint8_t ComponentCount = 2;
+		static constexpr std::string_view Identifier = "%vec2_uint32";
+		static constexpr std::string_view Declaration = "%vec2_uint32 = OpTypeVector %uint32 2";
 	};
 
 	/**
@@ -132,9 +126,8 @@ namespace ShaderBuilder
 	{
 		using Type = Vec2<int64_t>;
 		using ValueTraits = TypeTraits<int64_t>;
-		static constexpr const char Identifier[] = "%vec2_int64";
-		static constexpr const char OpType[] = "OpTypeVector";
-		static constexpr uint8_t ComponentCount = 2;
+		static constexpr std::string_view Identifier = "%vec2_int64";
+		static constexpr std::string_view Declaration = "%vec2_int64 = OpTypeVector %int64 2";
 	};
 
 	/**
@@ -145,9 +138,8 @@ namespace ShaderBuilder
 	{
 		using Type = Vec2<uint64_t>;
 		using ValueTraits = TypeTraits<uint64_t>;
-		static constexpr const char Identifier[] = "%vec2_uint64";
-		static constexpr const char OpType[] = "OpTypeVector";
-		static constexpr uint8_t ComponentCount = 2;
+		static constexpr std::string_view Identifier = "%vec2_uint64";
+		static constexpr std::string_view Declaration = "%vec2_uint64 = OpTypeVector %uint64 2";
 	};
 
 	/**
@@ -158,9 +150,8 @@ namespace ShaderBuilder
 	{
 		using Type = Vec2<float>;
 		using ValueTraits = TypeTraits<float>;
-		static constexpr const char Identifier[] = "%vec2_float";
-		static constexpr const char OpType[] = "OpTypeVector";
-		static constexpr uint8_t ComponentCount = 2;
+		static constexpr std::string_view Identifier = "%vec2_float";
+		static constexpr std::string_view Declaration = "%vec2_float = OpTypeVector %float 2";
 	};
 
 	/**
@@ -171,8 +162,13 @@ namespace ShaderBuilder
 	{
 		using Type = Vec2<double>;
 		using ValueTraits = TypeTraits<double>;
-		static constexpr const char Identifier[] = "%vec2_double";
-		static constexpr const char OpType[] = "OpTypeVector";
-		static constexpr uint8_t ComponentCount = 2;
+		static constexpr std::string_view Identifier = "%vec2_double";
+		static constexpr std::string_view Declaration = "%vec2_double = OpTypeVector %double 2";
 	};
+
+	/**
+	 * Is complex type boolean specialization
+	 */
+	template<class Type>
+	constexpr bool IsCompexType<Vec2<Type>> = true;
 } // namespace ShaderBuilder

@@ -17,6 +17,7 @@ add_library(
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Types/Vec3.hpp"
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Types/Vec4.hpp"
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Builder.hpp"
+	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/BuilderError.hpp"
 	
 	"Builder.cpp" 
 	

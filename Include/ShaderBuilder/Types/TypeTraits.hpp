@@ -1,10 +1,31 @@
 // Copyright (c) 2022 Dhiraj Wishal
 #pragma once
 
+#include <array>
 #include <cstdint>
+#include <string_view>
 
 namespace ShaderBuilder
 {
+	/**
+	 * Static string concatenation function.
+	 *
+	 * @tparam Strings The strings to concatenate.
+	 * @return The concatenated string.
+	 */
+	template<std::string_view const&... Strings>
+	[[nodiscard]] consteval std::string_view StaticStringConcat()
+	{
+		constexpr std::size_t len = (Strings.size() + ... + 0);
+		std::array<char, len + 1> finalString{};
+
+		auto append = [i = 0, &finalString](auto const& s) mutable { for (auto c : s) finalString[i++] = c; };
+		(append(Strings), ...);
+		finalString[len] = 0;
+
+		return std::string_view{ finalString.data(), finalString.size() - 1 };
+	}
+
 	/**
 	 * Type traits structure.
 	 */
@@ -18,8 +39,8 @@ namespace ShaderBuilder
 	struct TypeTraits<void>
 	{
 		using Type = void;
-		static constexpr const char Identifier[] = "%void";
-		static constexpr const char OpType[] = "OpTypeVoid";
+		static constexpr std::string_view Identifier = "%void";
+		static constexpr std::string_view Declaration = "%void = OpTypeVoid";
 	};
 
 	/**
@@ -29,8 +50,8 @@ namespace ShaderBuilder
 	struct TypeTraits<bool>
 	{
 		using Type = bool;
-		static constexpr const char Identifier[] = "%bool";
-		static constexpr const char OpType[] = "OpTypeBool";
+		static constexpr std::string_view Identifier = "%bool";
+		static constexpr std::string_view Declaration = "%bool = OpTypeBool";
 	};
 
 	/**
@@ -40,10 +61,8 @@ namespace ShaderBuilder
 	struct TypeTraits<int8_t>
 	{
 		using Type = int8_t;
-		static constexpr const char Identifier[] = "%int8";
-		static constexpr const char OpType[] = "OpTypeInt";
-		static constexpr uint8_t Width = sizeof(Type);
-		static constexpr bool IsSigned = true;
+		static constexpr std::string_view Identifier = "%int8";
+		static constexpr std::string_view Declaration = "%int8 = OpTypeInt 8 1";
 	};
 
 	/**
@@ -53,10 +72,8 @@ namespace ShaderBuilder
 	struct TypeTraits<uint8_t>
 	{
 		using Type = uint8_t;
-		static constexpr const char Identifier[] = "%uint8";
-		static constexpr const char OpType[] = "OpTypeInt";
-		static constexpr uint8_t Width = sizeof(Type);
-		static constexpr bool IsSigned = false;
+		static constexpr std::string_view Identifier = "%uint8";
+		static constexpr std::string_view Declaration = "%uint8 = OpTypeInt 8 0";
 	};
 
 	/**
@@ -66,10 +83,8 @@ namespace ShaderBuilder
 	struct TypeTraits<int16_t>
 	{
 		using Type = int16_t;
-		static constexpr const char Identifier[] = "%int16";
-		static constexpr const char OpType[] = "OpTypeInt";
-		static constexpr uint8_t Width = sizeof(Type);
-		static constexpr bool IsSigned = true;
+		static constexpr std::string_view Identifier = "%int16";
+		static constexpr std::string_view Declaration = "%int16 = OpTypeInt 16 1";
 	};
 
 	/**
@@ -79,10 +94,8 @@ namespace ShaderBuilder
 	struct TypeTraits<uint16_t>
 	{
 		using Type = uint16_t;
-		static constexpr const char Identifier[] = "%uint16";
-		static constexpr const char OpType[] = "OpTypeInt";
-		static constexpr uint8_t Width = sizeof(Type);
-		static constexpr bool IsSigned = false;
+		static constexpr std::string_view Identifier = "%uint16";
+		static constexpr std::string_view Declaration = "%uint16 = OpTypeInt 16 0";
 	};
 
 	/**
@@ -92,10 +105,8 @@ namespace ShaderBuilder
 	struct TypeTraits<int32_t>
 	{
 		using Type = int32_t;
-		static constexpr const char Identifier[] = "%int32";
-		static constexpr const char OpType[] = "OpTypeInt";
-		static constexpr uint8_t Width = sizeof(Type);
-		static constexpr bool IsSigned = true;
+		static constexpr std::string_view Identifier = "%int32";
+		static constexpr std::string_view Declaration = "%int32 = OpTypeInt 32 1";
 	};
 
 	/**
@@ -105,10 +116,8 @@ namespace ShaderBuilder
 	struct TypeTraits<uint32_t>
 	{
 		using Type = uint32_t;
-		static constexpr const char Identifier[] = "%uint32";
-		static constexpr const char OpType[] = "OpTypeInt";
-		static constexpr uint8_t Width = sizeof(Type);
-		static constexpr bool IsSigned = false;
+		static constexpr std::string_view Identifier = "%uint32";
+		static constexpr std::string_view Declaration = "%uint32 = OpTypeInt 32 0";
 	};
 
 	/**
@@ -118,10 +127,8 @@ namespace ShaderBuilder
 	struct TypeTraits<int64_t>
 	{
 		using Type = int64_t;
-		static constexpr const char Identifier[] = "%int64";
-		static constexpr const char OpType[] = "OpTypeInt";
-		static constexpr uint8_t Width = sizeof(Type);
-		static constexpr bool IsSigned = true;
+		static constexpr std::string_view Identifier = "%int64";
+		static constexpr std::string_view Declaration = "%int64 = OpTypeInt 64 1";
 	};
 
 	/**
@@ -131,10 +138,8 @@ namespace ShaderBuilder
 	struct TypeTraits<uint64_t>
 	{
 		using Type = uint64_t;
-		static constexpr const char Identifier[] = "%uint64";
-		static constexpr const char OpType[] = "OpTypeInt";
-		static constexpr uint8_t Width = sizeof(Type);
-		static constexpr bool IsSigned = false;
+		static constexpr std::string_view Identifier = "%uint64";
+		static constexpr std::string_view Declaration = "%int64 = OpTypeInt 64 0";
 	};
 
 	/**
@@ -144,9 +149,8 @@ namespace ShaderBuilder
 	struct TypeTraits<float>
 	{
 		using Type = float;
-		static constexpr const char Identifier[] = "%float";
-		static constexpr const char OpType[] = "OpTypeFloat";
-		static constexpr uint8_t Width = sizeof(Type);
+		static constexpr std::string_view Identifier = "%float";
+		static constexpr std::string_view Declaration = "%float = OpTypeFloat 32";
 	};
 
 	/**
@@ -156,8 +160,13 @@ namespace ShaderBuilder
 	struct TypeTraits<double>
 	{
 		using Type = double;
-		static constexpr const char Identifier[] = "%double";
-		static constexpr const char OpType[] = "OpTypeFloat";
-		static constexpr uint8_t Width = sizeof(Type);
+		static constexpr std::string_view Identifier = "%double";
+		static constexpr std::string_view Declaration = "%double = OpTypeFloat 64";
 	};
+
+	/**
+	 * Is complex type boolean.
+	 */
+	template<class Type>
+	constexpr bool IsCompexType = false;
 } // namespace ShaderBuilder

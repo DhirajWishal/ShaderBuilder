@@ -9,15 +9,10 @@
 int main()
 {
 	ShaderBuilder::Builder shaderSource;
+	auto inPosition = shaderSource.createInput<ShaderBuilder::Vec3<float>>(0, "inPosition");
+	auto inTextureCoordinates = shaderSource.createInput<ShaderBuilder::Vec2<float>>(12, "inTextureCoordinates");
+	auto outTextureCoordinates = shaderSource.createOutput<ShaderBuilder::Vec2<float>>(0, "outTextureCoordinates");
 
-	auto inPosition = ShaderBuilder::Vec3("inPosition");
-	auto inTextureCoordinates = ShaderBuilder::Vec2("inTextureCoordinates");
-	auto outTextureCoordinates = ShaderBuilder::Vec2("outTextureCoordinates");
-
-	//auto inPosition = shaderSource.createInput<ShaderBuilder::Vec3>(0, "inPosition");
-	//auto inTextureCoordinates = shaderSource.createInput<ShaderBuilder::Vec2>(12, "inTextureCoordinates");
-	//auto outTextureCoordinates = shaderSource.createOutput<ShaderBuilder::Vec2>(0, "outTextureCoordinates");
-	//
 	//auto rando = shaderSource.createFunction<void>("main", [&]()
 	//	{
 	//		auto temp =
@@ -26,20 +21,6 @@ int main()
 	//		outTextureCoordinates = inTextureCoordinates;
 	//	}
 	//);
-	//
-	//std::cout << shaderSource.getGLSL() << std::endl;
-}
 
-/**
- * struct Camera final : public ShaderBuilder::Uniform
- * {
- *		Camera() : Uniform(0, 0, "Camera", &Camera::view,
- *&Camera::projection) {}
- *
- *		ShaderBuilder::Mat4 view = ShaderBuilder::Mat4("view",
- *ShaderBuilder::MetaInformation::Member); ShaderBuilder::Mat4 projection =
- *ShaderBuilder::Mat4("projection", ShaderBuilder::MetaInformation::Member);
- * };
- *
- * RegisterUniform<Camera>(0, 0, &Camera::view, &Camera::projection);
- */
+	std::cout << shaderSource.getString() << std::endl;
+}
