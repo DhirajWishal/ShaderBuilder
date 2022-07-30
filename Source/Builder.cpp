@@ -72,20 +72,17 @@ namespace ShaderBuilder
 
 		// Insert the type declarations.
 		finalTransform << "; Type declarations." << std::endl;
-		finalTransform << m_TypeDeclarations.str() << std::endl;
+		finalTransform << m_TypeDeclarations.str();
 		finalTransform << std::endl;
 
 		// Insert the function declarations.
 		finalTransform << "; Function declarations." << std::endl;
-		for (const auto& declaration : m_FunctionDefinitions)
-			finalTransform << declaration.str();
+		finalTransform << m_FunctionDeclarations.str();
 		finalTransform << std::endl;
 
 		// Insert the function definitions.
 		finalTransform << "; Function definitions." << std::endl;
-		for (const auto& definitions : m_FunctionDefinitions)
-			finalTransform << definitions.str();
-		finalTransform << std::endl;
+		finalTransform << m_FunctionDefinitions.str();
 
 		return finalTransform.str();
 	}

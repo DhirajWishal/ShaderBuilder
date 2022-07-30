@@ -21,5 +21,11 @@ int main()
 
 	auto camera = shaderSource.createUniform<Camera>(0, 0, "camera", &Camera::m_Position, &Camera::m_Color);
 
+	auto mainFunction = shaderSource.createFunction("main", [&shaderSource]()
+		{
+			auto temporary = shaderSource.createVariable<ShaderBuilder::Vec4<float>>("temporary");
+		}
+	);
+
 	std::cout << shaderSource.getString() << std::endl;
 }

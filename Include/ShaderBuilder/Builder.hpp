@@ -92,17 +92,23 @@ namespace ShaderBuilder
 		[[nodiscard]] Type createVariable(std::string&& name)
 		{
 			registerType<Type>();
-			m_TypeDeclarations << "%" << name << " = OpTypePointer Function " << TypeTraits<Type>::Identifier << std::endl;
+
+			std::string variableType = "%variable_" + name + " = OpTypePointer Function " + TypeTraits<Type>::Identifier;
+
+			if (m_TypeAvailability.insert(variableType).second)
+				m_TypeDeclarations << variableType << std::endl;
+
+			m_FunctionDefinitions << "%" << name << " = OpVariable " << "%variable_" << name << " Function" << std::endl;
 			m_DebugInstructions.m_Names << "OpName %" << name << " \"" << name << "\"" << std::endl;
 			return Type(std::move(name));
 		}
 
 		/**
 		 * Create a new Uniform.
-		 * 
+		 *
 		 * Note that members should be pointers to the member variables and should be in the same order they appear in the actual struct.
 		 * For example,
-		 * 
+		 *
 		 * ```c++
 		 * struct Camera { Mat4 Projection = Mat4("Projection"); Mat4 View = Mat4("View"); };
 		 * builder.createUniform<Camera>(0, 0, "camera", &Camera::Projection, &Camera::View);
@@ -166,6 +172,23 @@ namespace ShaderBuilder
 			return uniform;
 		}
 
+		/**
+		 * Create a new function.
+		 */
+		template<class Type>
+		decltype(auto) createFunction(std::string&& name, Type&& function)
+		{
+			using ReturnType = std::invoke_result_t<Type>;
+			registerCallable<Callable<ReturnType>>();
+
+			m_DebugInstructions.m_Names << "OpName %" << name << " \"" << name << "\"" << std::endl;
+			m_FunctionDefinitions << "%" << name << " = OpFunction " << TypeTraits<ReturnType>::Identifier << " None " << TypeTraits<Callable<ReturnType>>::Identifier << std::endl;
+			function();
+			m_FunctionDefinitions << "OpFunctionEnd" << std::endl;
+
+			return Callable<ReturnType>(std::move(name));
+		}
+
 	public:
 		/**
 		 * Get the internal string.
@@ -195,6 +218,20 @@ namespace ShaderBuilder
 			}
 		}
 
+		template<class Type>
+		void registerCallable()
+		{
+			// Try and register value types.
+			registerType<typename TypeTraits<Type>::ValueTraits::Type>();
+
+			// Register only if we haven't registered it previously
+			if (m_TypeAvailability.insert(TypeTraits<Type>::Declaration).second)
+			{
+				m_TypeDeclarations << TypeTraits<Type>::Declaration << std::endl;
+				m_UniqueIDs++;
+			}
+		}
+
 	private:
 		std::stringstream m_OpCompatibilityInstructions;		// All OpCapability instructions.
 		std::stringstream m_OpExtensionInstructions;			// Optional OpExtension instructions (extensions to SPIR-V).
@@ -211,12 +248,12 @@ namespace ShaderBuilder
 
 		std::stringstream m_Annotations;						// All annotation instructions:
 		std::stringstream m_TypeDeclarations;					// All type information.
-		std::set<const char*> m_TypeAvailability;			// Contains information if a type is registered or not.
+		std::set<std::string> m_TypeAvailability;				// Contains information if a type is registered or not.
 
 		std::string m_OpMemoryModel;							// The single required OpMemoryModel instruction.
 
-		std::vector<std::stringstream> m_FunctionDeclarations;	// All function declarations ("declarations" are functions without a body; there is no forward declaration to a function with a body).
-		std::vector<std::stringstream> m_FunctionDefinitions;	// All function definitions (functions with a body).
+		std::stringstream m_FunctionDeclarations;				// All function declarations ("declarations" are functions without a body; there is no forward declaration to a function with a body).
+		std::stringstream m_FunctionDefinitions;				// All function definitions (functions with a body).
 
 		uint32_t m_UniqueIDs = 1;
 	};
