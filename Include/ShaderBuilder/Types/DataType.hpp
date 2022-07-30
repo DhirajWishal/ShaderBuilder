@@ -1,4 +1,5 @@
 // Copyright (c) 2022 Dhiraj Wishal
+
 #pragma once
 
 #include "TypeTraits.hpp"
@@ -20,21 +21,7 @@ namespace ShaderBuilder
 		 *
 		 * @param variableName The name of the variable.
 		 */
-		explicit DataType(std::string&& variableName) : m_VariableName(std::move(variableName))
-		{
-			// Validate the name.
-			if (m_VariableName.find('%') != std::string::npos)
-			{
-				if (m_VariableName.find('%') > 0)
-				{
-					// Throw an error for invalid name.
-				}
-			}
-			else
-			{
-				m_VariableName = "%" + m_VariableName;
-			}
-		}
+		explicit DataType(std::string&& variableName) : m_VariableName(std::move(variableName)) {}
 
 		/**
 		 * Get the name of the variable/ function.
@@ -46,4 +33,18 @@ namespace ShaderBuilder
 	protected:
 		std::string m_VariableName;
 	};
+
+	/**
+	 * std::ostream& operator overload.
+	 *
+	 * @param stream The output stream.
+	 * @param dataType The data type to output.
+	 * @return The incoming stream.
+	 */
+	template<class Derived>
+	std::ostream& operator<<(std::ostream& stream, const DataType<Derived>& dataType)
+	{
+		stream << dataType.getName();
+		return stream;
+	}
 } // namespace ShaderBuilder

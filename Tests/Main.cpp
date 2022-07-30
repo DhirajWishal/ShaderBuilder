@@ -13,14 +13,13 @@ int main()
 	auto inTextureCoordinates = shaderSource.createInput<ShaderBuilder::Vec2<float>>(12, "inTextureCoordinates");
 	auto outTextureCoordinates = shaderSource.createOutput<ShaderBuilder::Vec2<float>>(0, "outTextureCoordinates");
 
-	//auto rando = shaderSource.createFunction<void>("main", [&]()
-	//	{
-	//		auto temp =
-	//			shaderSource.createVariable<ShaderBuilder::Vec4>("temp", 1, 2, 3, 4);
-	//		shaderSource.getBuiltIns().gl_Position = temp;
-	//		outTextureCoordinates = inTextureCoordinates;
-	//	}
-	//);
+	struct Camera final
+	{
+		ShaderBuilder::Vec4<float> m_Position = ShaderBuilder::Vec4<float>("m_Position");
+		ShaderBuilder::Vec2<float> m_Color = ShaderBuilder::Vec2<float>("m_Color");
+	};
+
+	auto camera = shaderSource.createUniform<Camera>(0, 0, "camera", &Camera::m_Position, &Camera::m_Color);
 
 	std::cout << shaderSource.getString() << std::endl;
 }

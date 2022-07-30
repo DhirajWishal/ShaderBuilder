@@ -1,4 +1,5 @@
 // Copyright (c) 2022 Dhiraj Wishal
+
 #pragma once
 
 #include "Types/Callable.hpp"
@@ -56,10 +57,11 @@ namespace ShaderBuilder
 		 * @return The created variable.
 		 */
 		template<class Type>
-		Type createInput(uint32_t location, std::string&& name)
+		[[nodiscard]] Type createInput(uint32_t location, std::string&& name)
 		{
 			registerType<Type>();
-			m_TypeDeclarations << "%" << name << " = OpTypePointer Input " << TypeTraits<Type>::Identifier.data() << std::endl;
+			m_TypeDeclarations << "%" << name << " = OpTypePointer Input " << TypeTraits<Type>::Identifier << std::endl;
+			m_DebugInstructions.m_Names << "OpName %" << name << " \"" << name << "\"" << std::endl;
 			return Type(std::move(name));
 		}
 
@@ -71,10 +73,11 @@ namespace ShaderBuilder
 		 * @return The created variable.
 		 */
 		template<class Type>
-		Type createOutput(uint32_t location, std::string&& name)
+		[[nodiscard]] Type createOutput(uint32_t location, std::string&& name)
 		{
 			registerType<Type>();
-			m_TypeDeclarations << "%" << name << " = OpTypePointer Output " << TypeTraits<Type>::Identifier.data() << std::endl;
+			m_TypeDeclarations << "%" << name << " = OpTypePointer Output " << TypeTraits<Type>::Identifier << std::endl;
+			m_DebugInstructions.m_Names << "OpName %" << name << " \"" << name << "\"" << std::endl;
 			return Type(std::move(name));
 		}
 
@@ -86,11 +89,81 @@ namespace ShaderBuilder
 		 * @return The created variable.
 		 */
 		template<class Type>
-		Type createVariable(std::string&& name)
+		[[nodiscard]] Type createVariable(std::string&& name)
 		{
 			registerType<Type>();
-			m_TypeDeclarations << "%" << name << " = OpTypePointer Function " << TypeTraits<Type>::Identifier.data() << std::endl;
+			m_TypeDeclarations << "%" << name << " = OpTypePointer Function " << TypeTraits<Type>::Identifier << std::endl;
+			m_DebugInstructions.m_Names << "OpName %" << name << " \"" << name << "\"" << std::endl;
 			return Type(std::move(name));
+		}
+
+		/**
+		 * Create a new Uniform.
+		 * 
+		 * Note that members should be pointers to the member variables and should be in the same order they appear in the actual struct.
+		 * For example,
+		 * 
+		 * ```c++
+		 * struct Camera { Mat4 Projection = Mat4("Projection"); Mat4 View = Mat4("View"); };
+		 * builder.createUniform<Camera>(0, 0, "camera", &Camera::Projection, &Camera::View);
+		 * ```
+		 *
+		 * @tparam Type The type of the uniform.
+		 * @tparam Members The uniform's members.
+		 * @param set The descriptor set index.
+		 * @param binding The uniform's binding.
+		 * @param name The name of the uniform.
+		 * @param members The members of the uniform.
+		 * @return The created uniform.
+		 */
+		template<class Type, class... Members>
+		[[nodiscard]] Type createUniform(uint32_t set, uint32_t binding, std::string&& name, Members... members)
+		{
+			// Create the uniform.
+			auto uniform = Type();
+
+			// Register the members.
+			std::vector<const char*> memberTypes;
+			auto registerMemberTypes = [this, &uniform, &memberTypes](auto member)
+			{
+				using MemberType = std::remove_cv_t<std::remove_reference_t<decltype(uniform.*member)>>;
+				registerType<MemberType>();
+
+				memberTypes.emplace_back(TypeTraits<MemberType>::Identifier);
+			};
+			(registerMemberTypes(members), ...);
+
+			// Setup type declarations.
+			m_TypeDeclarations << "%type_" << name << " = OpTypeStruct ";
+			for (const auto identifier : memberTypes)
+				m_TypeDeclarations << identifier << " ";
+			m_TypeDeclarations << std::endl;
+
+			m_TypeDeclarations << "%uniform_" << name << " = OpTypePointer Uniform %uniform_" << name << std::endl;
+			m_TypeDeclarations << "%" << name << " = OpVariable %uniform_" << name << " Uniform" << std::endl;
+
+			// Set the type debug information and annotations.
+			m_DebugInstructions.m_Names << "OpName %uniform_" << name << " \"" << name << "\"" << std::endl;
+			m_DebugInstructions.m_Names << "OpName %" << name << " \"\"" << std::endl;
+
+			m_Annotations << "OpDecorate %" << name << " DescriptorSet " << set << std::endl;
+			m_Annotations << "OpDecorate %" << name << " Binding " << binding << std::endl;
+
+			uint32_t counter = 0;
+			uint64_t offsets = 0;
+			auto logMemberInformation = [this, &uniform, &name, &counter, &offsets](auto member)
+			{
+				using MemberType = std::remove_cv_t<std::remove_reference_t<decltype(uniform.*member)>>;
+
+				m_DebugInstructions.m_Names << "OpMemberName %type_" << name << " " << counter << " \"" << uniform.*member << "\"" << std::endl;
+				m_Annotations << "OpMemberDecorate %type_" << name << " " << counter << " Offset " << offsets << std::endl;
+
+				counter++;
+				offsets += TypeTraits<MemberType>::Size;
+			};
+			(logMemberInformation(members), ...);
+
+			return uniform;
 		}
 
 	public:
@@ -138,7 +211,7 @@ namespace ShaderBuilder
 
 		std::stringstream m_Annotations;						// All annotation instructions:
 		std::stringstream m_TypeDeclarations;					// All type information.
-		std::set<std::string_view> m_TypeAvailability;			// Contains information if a type is registered or not.
+		std::set<const char*> m_TypeAvailability;			// Contains information if a type is registered or not.
 
 		std::string m_OpMemoryModel;							// The single required OpMemoryModel instruction.
 
