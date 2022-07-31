@@ -39,4 +39,7 @@ int main()
 
 	std::cout << "-------------------- HLSL --------------------" << std::endl;
 	std::cout << output.getHLSL();
+
+	std::cout << "-------------------- MSL --------------------" << std::endl;
+	std::cout << output.getMSL();
 }

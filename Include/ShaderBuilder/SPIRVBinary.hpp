@@ -44,6 +44,13 @@ namespace ShaderBuilder
 		[[nodsicard]] std::string getHLSL() const;
 
 		/**
+		 * Transpile the binary to MSL.
+		 *
+		 * @return The MSL code.
+		 */
+		[[nodsicard]] std::string getMSL() const;
+
+		/**
 		 * Get the stored binary data.
 		 *
 		 * @return The binary data vector.

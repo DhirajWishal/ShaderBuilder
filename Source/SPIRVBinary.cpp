@@ -6,6 +6,7 @@
 #include <spirv-tools/libspirv.hpp>
 #include <spirv_glsl.hpp>
 #include <spirv_hlsl.hpp>
+#include <spirv_msl.hpp>
 
 namespace ShaderBuilder
 {
@@ -23,7 +24,6 @@ namespace ShaderBuilder
 	std::string SPIRVBinary::getGLSL() const
 	{
 		spirv_cross::CompilerGLSL glsl(m_Binary);
-
 		spirv_cross::CompilerGLSL::Options options;
 		options.version = 450;
 		options.vulkan_semantics = true;
@@ -35,10 +35,13 @@ namespace ShaderBuilder
 	std::string SPIRVBinary::getHLSL() const
 	{
 		spirv_cross::CompilerHLSL hlsl(m_Binary);
-
-		spirv_cross::CompilerHLSL::Options options;
-		//hlsl.set_common_options(options);
-
 		return hlsl.compile();
 	}
+
+	std::string SPIRVBinary::getMSL() const
+	{
+		spirv_cross::CompilerMSL msl(m_Binary);
+		return msl.compile();
+	}
+
 } // namespace ShaderBuilder
