@@ -21,16 +21,22 @@ execute_process(
 	COMMAND ${PYTHON_EXECUTABLE} "utils/git-sync-deps"
 	WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/SPIRV-Tools"
 	COMMAND_ECHO STDOUT
+	ERROR_VARIABLE SPIRV_TOOLS_INIT_STATUS
 )
 
+# If there was an error with the initialization process, print it out.
+if (SPIRV_TOOLS_INIT_STATUS)
+	message(FATAL_ERROR "SPIR-V Tools Initialization failed with ${SPIRV_TOOLS_INIT_STATUS}")
+endif()
+
 # Set the SPIR-V Tools include, library and binary data.
-set(SPIRV_Tools_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/SPIRV-Tools/include)
+set(SPIRV_TOOLS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/SPIRV-Tools/include)
 
 # Add the SPIR-V Tools library as a subdirectory.
 add_subdirectory(ThirdParty/SPIRV-Tools)
 
 # Set the SPIR-V Cross include, library and binary data.
-set(SPIRV_Cross_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/SPIRV-Cross)
+set(SPIRV_CROSS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/SPIRV-Cross)
 
 # Add the SPIR-V Cross library as a subdirectory.
 set(CACHE SPIRV_CROSS_STATIC ON)

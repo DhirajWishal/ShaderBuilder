@@ -28,8 +28,8 @@ add_library(
 target_include_directories(
 	ShaderBuilder 
 
-	PRIVATE ${SPIRV_Tools_INCLUDE_DIR}
-	PRIVATE ${SPIRV_Cross_INCLUDE_DIR}
+	PRIVATE ${SPIRV_TOOLS_INCLUDE_DIR}
+	PRIVATE ${SPIRV_CROSS_INCLUDE_DIR}
 )
 
 # Add the target links.
