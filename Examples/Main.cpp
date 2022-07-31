@@ -32,13 +32,13 @@ int main()
 	const auto output = shaderSource.compile();
 
 	std::cout << "-------------------- Assembly --------------------" << std::endl;
-	std::cout << output.disassemble();
+	std::cout << output.disassemble() << std::endl;
 
 	std::cout << "-------------------- GLSL --------------------" << std::endl;
-	std::cout << output.getGLSL();
+	std::cout << output.getGLSL() << std::endl;
 
 	std::cout << "-------------------- HLSL --------------------" << std::endl;
-	std::cout << output.getHLSL();
+	std::cout << output.getHLSL() << std::endl;
 
 	std::cout << "-------------------- MSL --------------------" << std::endl;
 	std::cout << output.getMSL();

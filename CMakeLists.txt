@@ -55,6 +55,8 @@ if (NOT SPIRV_TOOLS_INIT_STATUS)
 	# Set the startup project for Visual Studio and set multi processor compilation for other projects that we build.
 	if (MSVC) 
 		set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ShaderBuilder)
+		target_compile_options(SPIRV-Tools-opt PRIVATE "/MP")	
+		target_compile_options(spirv-cross-c PRIVATE "/MP")	
 	endif ()
 else()
 	message(FATAL_ERROR "SPIR-V Tools Initialization failed with ${SPIRV_TOOLS_INIT_STATUS}")
