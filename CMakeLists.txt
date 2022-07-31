@@ -18,7 +18,8 @@ set(PREDEFINED_TARGETS_FOLDER "PredefinedTargets")
 
 # Execute the SPIR-V Tools initialization process.
 execute_process(
-	COMMAND "cd ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/SPIRV-Tools && python3 utils/git-sync-deps"
+	COMMAND ${PYTHON_EXECUTABLE} "utils/git-sync-deps"
+	WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/SPIRV-Tools"
 	COMMAND_ECHO STDOUT
 )
 
