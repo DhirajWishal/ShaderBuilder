@@ -17,7 +17,10 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(PREDEFINED_TARGETS_FOLDER "PredefinedTargets")
 
 # Execute the SPIR-V Tools initialization process.
-execute_process(COMMAND "cd ThirdParty/SPIRV-Tools && python3 utils/git-sync-deps")
+execute_process(
+	COMMAND "cd ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/SPIRV-Tools && python3 utils/git-sync-deps"
+	COMMAND_ECHO STDOUT
+)
 
 # Set the SPIR-V Tools include, library and binary data.
 set(SPIRV_Tools_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/SPIRV-Tools/include)
