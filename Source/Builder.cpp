@@ -5,13 +5,52 @@
 
 #include <spirv-tools/libspirv.hpp>
 
+namespace /* anonymous */
+{
+	/**
+	 * Get the addressing model string.
+	 *
+	 * @param model The addressing model.
+	 * @return The addressing model string.
+	 */
+	const char* GetAddressingModel(ShaderBuilder::AddressingModel model)
+	{
+		switch (model)
+		{
+		case ShaderBuilder::AddressingModel::Logical:							return "Logical ";
+		case ShaderBuilder::AddressingModel::Physical32:						return "Physical32 ";
+		case ShaderBuilder::AddressingModel::Physical64:						return "Physical64 ";
+		case ShaderBuilder::AddressingModel::PhysicalStorageBuffer64:			return "PhysicalStorageBuffer64 ";
+		default:																throw ShaderBuilder::BuilderError("Invalid addressing model!");
+		}
+	}
+
+	/**
+	 * Get the memory model string.
+	 *
+	 * @param model The memory model.
+	 * @return The memory model string.
+	 */
+	const char* GetMemoryModel(ShaderBuilder::MemoryModel model)
+	{
+		switch (model)
+		{
+		case ShaderBuilder::MemoryModel::Simple:								return "Simple";
+		case ShaderBuilder::MemoryModel::GLSL450:								return "GLSL450";
+		case ShaderBuilder::MemoryModel::OpenCL:								return "OpenCL";
+		case ShaderBuilder::MemoryModel::Vulkan:								return "Vulkan";
+		default:																throw ShaderBuilder::BuilderError("Invalid memory model!");
+		}
+	}
+}
+
 namespace ShaderBuilder
 {
 	Builder::Builder(Configuration config /*= Configuration()*/)
 	{
 		m_OpCompatibilityInstructions << "OpCapability Shader" << std::endl;
 		m_OpExtInstImportInstructions << "%1 = OpExtInstImport \"GLSL.std.450\"" << std::endl;
-		m_OpMemoryModel = "OpMemoryModel Logical GLSL450";
+		m_OpMemoryModel = std::string("OpMemoryModel ") + GetAddressingModel(config.m_AddressingModel) + GetMemoryModel(config.m_MemoryModel);
 	}
 
 	std::string Builder::getString() const
@@ -66,12 +105,12 @@ namespace ShaderBuilder
 
 	std::vector<uint32_t> Builder::compile() const
 	{
-		const auto shaderCode = getString();
-
-		spvtools::SpirvTools tools(SPV_ENV_UNIVERSAL_1_3);
+		spvtools::SpirvTools tools(SPV_ENV_UNIVERSAL_1_6);
 		tools.SetMessageConsumer([](spv_message_level_t level, const char*, const spv_position_t& position, const char* message) { throw BuilderError(message); });
 
 		std::vector<uint32_t> spirv;
+		const auto shaderCode = getString();
+
 		if (!tools.Assemble(shaderCode, &spirv))
 			throw BuilderError("Failed the assemble the assembly!");
 

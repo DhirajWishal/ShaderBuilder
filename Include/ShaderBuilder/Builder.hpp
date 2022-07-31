@@ -26,12 +26,36 @@ namespace ShaderBuilder
 	};
 
 	/**
+	 * Addressing model enum.
+	 */
+	enum class AddressingModel : uint8_t
+	{
+		Logical,
+		Physical32,
+		Physical64,
+		PhysicalStorageBuffer64
+	};
+
+	/**
+	 * Memory model enum.
+	 */
+	enum class MemoryModel : uint8_t
+	{
+		Simple,
+		GLSL450,
+		OpenCL,
+		Vulkan
+	};
+
+	/**
 	 * Configuration structure.
 	 * This contains basic information about the shader code that is being built.
 	 */
 	struct Configuration final
 	{
-		ShaderType m_Type = ShaderType::Vertex;
+		AddressingModel m_AddressingModel = AddressingModel::Logical;
+		MemoryModel m_MemoryModel = MemoryModel::GLSL450;
+
 	};
 
 	/**
@@ -231,7 +255,7 @@ namespace ShaderBuilder
 				m_EntryPoints << "Fragment ";
 				break;
 			case ShaderBuilder::ShaderType::Compute:
-				m_EntryPoints << "Compute ";
+				m_EntryPoints << "GLCompute ";
 				break;
 			}
 
@@ -281,6 +305,11 @@ namespace ShaderBuilder
 			}
 		}
 
+		/**
+		 * Register a function callback type.
+		 *
+		 * @tparam Type The callback type.
+		 */
 		template<class Type>
 		void registerCallable()
 		{
@@ -308,7 +337,7 @@ namespace ShaderBuilder
 
 		std::stringstream m_Annotations;						// All annotation instructions:
 		std::stringstream m_TypeDeclarations;					// All type information.
-		std::set<std::string> m_TypeAvailability;				// Contains information if a type is registered or not.
+		std::set<std::string_view> m_TypeAvailability;			// Contains information if a type is registered or not.
 
 		std::string m_OpMemoryModel;							// The single required OpMemoryModel instruction.
 
