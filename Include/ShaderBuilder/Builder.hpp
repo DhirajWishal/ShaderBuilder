@@ -60,7 +60,8 @@ namespace ShaderBuilder
 		[[nodiscard]] Type createInput(uint32_t location, std::string&& name)
 		{
 			registerType<Type>();
-			m_TypeDeclarations << "%" << name << " = OpTypePointer Input " << TypeTraits<Type>::Identifier << std::endl;
+			m_TypeDeclarations << "%input_" << name << " = OpTypePointer Input " << TypeTraits<Type>::Identifier << std::endl;
+			m_TypeDeclarations << "%" << name << " = OpVariable %input_" << name << " Input" << std::endl;
 			m_DebugNames << "OpName %" << name << " \"" << name << "\"" << std::endl;
 			return Type(std::move(name));
 		}
@@ -76,7 +77,8 @@ namespace ShaderBuilder
 		[[nodiscard]] Type createOutput(uint32_t location, std::string&& name)
 		{
 			registerType<Type>();
-			m_TypeDeclarations << "%" << name << " = OpTypePointer Output " << TypeTraits<Type>::Identifier << std::endl;
+			m_TypeDeclarations << "%output_" << name << " = OpTypePointer Output " << TypeTraits<Type>::Identifier << std::endl;
+			m_TypeDeclarations << "%" << name << " = OpVariable %output_" << name << " Output" << std::endl;
 			m_DebugNames << "OpName %" << name << " \"" << name << "\"" << std::endl;
 			return Type(std::move(name));
 		}
@@ -146,7 +148,7 @@ namespace ShaderBuilder
 				m_TypeDeclarations << identifier << " ";
 			m_TypeDeclarations << std::endl;
 
-			m_TypeDeclarations << "%uniform_" << name << " = OpTypePointer Uniform %uniform_" << name << std::endl;
+			m_TypeDeclarations << "%uniform_" << name << " = OpTypePointer Uniform %type_" << name << std::endl;
 			m_TypeDeclarations << "%" << name << " = OpVariable %uniform_" << name << " Uniform" << std::endl;
 
 			// Set the type debug information and annotations.
@@ -189,10 +191,58 @@ namespace ShaderBuilder
 
 			m_DebugNames << "OpName %" << name << " \"" << name << "\"" << std::endl;
 			m_FunctionDefinitions << "%" << name << " = OpFunction " << TypeTraits<ReturnType>::Identifier << " None " << TypeTraits<Callable<ReturnType>>::Identifier << std::endl;
+			m_FunctionDefinitions << "%function_block_" << name << " = OpLabel" << std::endl;
 			function();
+			m_FunctionDefinitions << "OpReturn" << std::endl;
 			m_FunctionDefinitions << "OpFunctionEnd" << std::endl;
 
 			return Callable<ReturnType>(std::move(name));
+		}
+
+		/**
+		 * Add an entry point to the shader.
+		 *
+		 * @tparam Attributes The input and output attribute types.
+		 * @param shaderType The type of the shader.
+		 * @param name The name of the entry point function.
+		 * @param attributes The names of the input and output attributes.
+		 */
+		template<class... Attributes>
+		void addEntryPoint(ShaderType shaderType, std::string&& name, Attributes&&... attributes)
+		{
+			m_EntryPoints << "OpEntryPoint ";
+
+			// Resolve the proper shader type.
+			switch (shaderType)
+			{
+			case ShaderBuilder::ShaderType::Vertex:
+				m_EntryPoints << "Vertex ";
+				break;
+			case ShaderBuilder::ShaderType::TessellationControl:
+				m_EntryPoints << "TessellationControl ";
+				break;
+			case ShaderBuilder::ShaderType::TessellationEvaluation:
+				m_EntryPoints << "TessellationEvaluation ";
+				break;
+			case ShaderBuilder::ShaderType::Geometry:
+				m_EntryPoints << "Geometry ";
+				break;
+			case ShaderBuilder::ShaderType::Fragment:
+				m_EntryPoints << "Fragment ";
+				break;
+			case ShaderBuilder::ShaderType::Compute:
+				m_EntryPoints << "Compute ";
+				break;
+			}
+
+			// Setup the entry point function information.
+			m_EntryPoints << "%" << name << " \"" << name << "\" ";
+
+			// Setup the inputs.
+			auto insertAttribute = [this](auto&& attribute) { m_EntryPoints << "%" << attribute << " "; };
+			(insertAttribute(std::move(attributes)), ...);
+
+			m_EntryPoints << std::endl;
 		}
 
 	public:
@@ -202,6 +252,13 @@ namespace ShaderBuilder
 		 * @return The string.
 		 */
 		[[nodiscard]] std::string getString() const;
+
+		/**
+		 * Compile the shader code and inform if there were any errors.
+		 *
+		 * @return The compiled binary.
+		 */
+		[[nodiscard]] std::vector<uint32_t> compile() const;
 
 	private:
 		/**

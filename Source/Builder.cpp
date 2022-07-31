@@ -3,30 +3,7 @@
 #include "ShaderBuilder/Builder.hpp"
 #include "ShaderBuilder/BuilderError.hpp"
 
-#include <future>
-
-namespace /* anonymous */
-{
-	/**
-	 * Get the execution model from the shader type.
-	 *
-	 * @param type The shader type.
-	 * @return The execution model string.
-	 */
-	std::string_view GetExecutionModel(ShaderBuilder::ShaderType type)
-	{
-		switch (type)
-		{
-		case ShaderBuilder::ShaderType::Vertex:						return "Vertex";
-		case ShaderBuilder::ShaderType::TessellationControl:		return "Vertex";
-		case ShaderBuilder::ShaderType::TessellationEvaluation:		return "Vertex";
-		case ShaderBuilder::ShaderType::Geometry:					return "Vertex";
-		case ShaderBuilder::ShaderType::Fragment:					return "Vertex";
-		case ShaderBuilder::ShaderType::Compute:					return "Vertex";
-		default:													throw ShaderBuilder::BuilderError("Invalid shader type!");
-		}
-	}
-}
+#include <spirv-tools/libspirv.hpp>
 
 namespace ShaderBuilder
 {
@@ -86,4 +63,22 @@ namespace ShaderBuilder
 
 		return finalTransform.str();
 	}
+
+	std::vector<uint32_t> Builder::compile() const
+	{
+		const auto shaderCode = getString();
+
+		spvtools::SpirvTools tools(SPV_ENV_UNIVERSAL_1_3);
+		tools.SetMessageConsumer([](spv_message_level_t level, const char*, const spv_position_t& position, const char* message) { throw BuilderError(message); });
+
+		std::vector<uint32_t> spirv;
+		if (!tools.Assemble(shaderCode, &spirv))
+			throw BuilderError("Failed the assemble the assembly!");
+
+		if (!tools.Validate(spirv))
+			throw BuilderError("The generated SPIR-V is invalid!");
+
+		return spirv;
+	}
+
 } // namespace ShaderBuilder

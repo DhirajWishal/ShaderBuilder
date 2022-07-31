@@ -16,6 +16,15 @@ project(
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(PREDEFINED_TARGETS_FOLDER "PredefinedTargets")
 
+# Execute the SPIR-V Tools initialization process.
+execute_process(COMMAND "cd ThirdParty/SPIRV-Tools && python utils/git-sync-deps")
+
+# Set the SPIR-V Tools include, library and binary data.
+set(SPIRV_Tools_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/SPIRV-Tools/include)
+
+# Add the SDL library as a subdirectory.
+add_subdirectory(ThirdParty/SPIRV-Tools)
+
 # Set the central include directory.
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include)
 

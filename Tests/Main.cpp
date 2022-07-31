@@ -27,5 +27,8 @@ int main()
 		}
 	);
 
+	shaderSource.addEntryPoint(ShaderBuilder::ShaderType::Vertex, "main", "inPosition", "inTextureCoordinates", "outTextureCoordinates");
+
 	std::cout << shaderSource.getString() << std::endl;
+	auto output = shaderSource.compile();
 }
