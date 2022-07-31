@@ -103,7 +103,7 @@ namespace ShaderBuilder
 		return finalTransform.str();
 	}
 
-	std::vector<uint32_t> Builder::compile() const
+	SPIRVBinary Builder::compile() const
 	{
 		spvtools::SpirvTools tools(SPV_ENV_UNIVERSAL_1_6);
 		tools.SetMessageConsumer([](spv_message_level_t level, const char*, const spv_position_t& position, const char* message) { throw BuilderError(message); });
@@ -117,7 +117,7 @@ namespace ShaderBuilder
 		if (!tools.Validate(spirv))
 			throw BuilderError("The generated SPIR-V is invalid!");
 
-		return spirv;
+		return SPIRVBinary(std::move(spirv));
 	}
 
 } // namespace ShaderBuilder

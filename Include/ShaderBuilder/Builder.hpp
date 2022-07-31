@@ -5,9 +5,9 @@
 #include "Callable.hpp"
 #include "Vec4.hpp"
 
+#include "SPIRVBinary.hpp"
+
 #include <sstream>
-#include <vector>
-#include <functional>
 #include <set>
 
 namespace ShaderBuilder
@@ -282,7 +282,7 @@ namespace ShaderBuilder
 		 *
 		 * @return The compiled binary.
 		 */
-		[[nodiscard]] std::vector<uint32_t> compile() const;
+		[[nodiscard]] SPIRVBinary compile() const;
 
 	private:
 		/**

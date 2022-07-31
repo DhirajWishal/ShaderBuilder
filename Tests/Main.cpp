@@ -29,6 +29,14 @@ int main()
 
 	shaderSource.addEntryPoint(ShaderBuilder::ShaderType::Vertex, "main", "inPosition", "inTextureCoordinates", "outTextureCoordinates");
 
-	std::cout << shaderSource.getString() << std::endl;
-	auto output = shaderSource.compile();
+	const auto output = shaderSource.compile();
+
+	std::cout << "-------------------- Assembly --------------------" << std::endl;
+	std::cout << output.disassemble();
+
+	std::cout << "-------------------- GLSL --------------------" << std::endl;
+	std::cout << output.getGLSL();
+
+	std::cout << "-------------------- HLSL --------------------" << std::endl;
+	std::cout << output.getHLSL();
 }

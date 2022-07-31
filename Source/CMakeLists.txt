@@ -18,18 +18,22 @@ add_library(
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Vec4.hpp"
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Builder.hpp"
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/BuilderError.hpp"
+	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/SPIRVBinary.hpp"
 	
 	"Builder.cpp" 
+	"SPIRVBinary.cpp"
 )
 
 # Add the target includes.
 target_include_directories(
 	ShaderBuilder 
+
 	PRIVATE ${SPIRV_Tools_INCLUDE_DIR}
+	PRIVATE ${SPIRV_Cross_INCLUDE_DIR}
 )
 
 # Add the target links.
-target_link_libraries(ShaderBuilder SPIRV-Tools-opt)
+target_link_libraries(ShaderBuilder SPIRV-Tools-opt spirv-cross-c)
 
 # Make sure to specify the C++ standard to C++20.
 set_property(TARGET ShaderBuilder PROPERTY CXX_STANDARD 20)

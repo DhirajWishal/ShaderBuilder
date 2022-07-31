@@ -22,8 +22,18 @@ execute_process(COMMAND "cd ThirdParty/SPIRV-Tools && python utils/git-sync-deps
 # Set the SPIR-V Tools include, library and binary data.
 set(SPIRV_Tools_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/SPIRV-Tools/include)
 
-# Add the SDL library as a subdirectory.
+# Add the SPIR-V Tools library as a subdirectory.
 add_subdirectory(ThirdParty/SPIRV-Tools)
+
+# Set the SPIR-V Cross include, library and binary data.
+set(SPIRV_Cross_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/SPIRV-Cross)
+
+# Add the SPIR-V Cross library as a subdirectory.
+set(CACHE SPIRV_CROSS_STATIC ON)
+set(CACHE SPIRV_CROSS_ENABLE_CPP ON)
+set(CACHE SPIRV_CROSS_ENABLE_GLSL ON)
+set(CACHE SPIRV_CROSS_ENABLE_HLSL ON)
+add_subdirectory(ThirdParty/SPIRV-Cross)
 
 # Set the central include directory.
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include)
