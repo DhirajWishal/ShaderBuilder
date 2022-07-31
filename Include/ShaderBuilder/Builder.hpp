@@ -208,7 +208,7 @@ namespace ShaderBuilder
 		 * @return The callable type.
 		 */
 		template<class Type>
-		decltype(auto) createFunction(std::string&& name, Type&& function)
+		[[nodiscard]] decltype(auto) createFunction(std::string&& name, Type&& function)
 		{
 			using ReturnType = std::invoke_result_t<Type>;
 			registerCallable<Callable<ReturnType>>();

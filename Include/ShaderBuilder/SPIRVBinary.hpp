@@ -34,21 +34,21 @@ namespace ShaderBuilder
 		 *
 		 * @return The GLSL code.
 		 */
-		[[nodsicard]] std::string getGLSL() const;
+		[[nodiscard]] std::string getGLSL() const;
 
 		/**
 		 * Transpile the binary to HLSL.
 		 *
 		 * @return The HLSL code.
 		 */
-		[[nodsicard]] std::string getHLSL() const;
+		[[nodiscard]] std::string getHLSL() const;
 
 		/**
 		 * Transpile the binary to MSL.
 		 *
 		 * @return The MSL code.
 		 */
-		[[nodsicard]] std::string getMSL() const;
+		[[nodiscard]] std::string getMSL() const;
 
 		/**
 		 * Get the stored binary data.

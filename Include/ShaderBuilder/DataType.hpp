@@ -29,7 +29,7 @@ namespace ShaderBuilder
 		 *
 		 * @return The name.
 		 */
-		[[nodsicard]] std::string getName() const { return m_VariableName; }
+		[[nodiscard]] std::string getName() const { return m_VariableName; }
 
 	protected:
 		std::string m_VariableName;

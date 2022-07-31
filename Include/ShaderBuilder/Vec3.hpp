@@ -31,7 +31,6 @@ namespace ShaderBuilder
 			struct { Type x, y, z; };
 			struct { Type r, g, b; };
 			struct { Type u, v, w; };
-			struct { Type a, b, c; };
 		};
 	};
 
