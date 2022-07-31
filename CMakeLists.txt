@@ -1,5 +1,5 @@
 # Copyright (c) 2022 Dhiraj Wishal
-# Main build script for Minte.
+# Main build script for Shader Builder.
 
 # Set the minimum required CMake version.
 cmake_minimum_required(VERSION 3.22.2)
@@ -16,9 +16,12 @@ project(
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(PREDEFINED_TARGETS_FOLDER "PredefinedTargets")
 
+# Find the python package.
+find_package (Python COMPONENTS Interpreter Development)
+
 # Execute the SPIR-V Tools initialization process.
 execute_process(
-	COMMAND ${PYTHON_EXECUTABLE} "utils/git-sync-deps"
+	COMMAND ${Python_EXECUTABLE} "utils/git-sync-deps"
 	WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/SPIRV-Tools"
 	COMMAND_ECHO STDOUT
 	ERROR_VARIABLE SPIRV_TOOLS_INIT_STATUS
