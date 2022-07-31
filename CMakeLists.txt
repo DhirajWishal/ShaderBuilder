@@ -17,7 +17,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(PREDEFINED_TARGETS_FOLDER "PredefinedTargets")
 
 # Find the python package.
-find_package (Python COMPONENTS Interpreter Development)
+find_package(Python COMPONENTS Interpreter Development)
 
 # Execute the SPIR-V Tools initialization process.
 execute_process(
@@ -50,7 +50,7 @@ if (NOT SPIRV_TOOLS_INIT_STATUS)
 
 	# Add the subdirectories.
 	add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Source)
-	add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Tests)
+	add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Examples)
 
 	# Set the startup project for Visual Studio and set multi processor compilation for other projects that we build.
 	if (MSVC) 

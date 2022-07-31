@@ -31,7 +31,7 @@ jobs:
   
     - name: Run
       working-directory: ${{github.workspace}}/build
-      run: ./Tests/ShaderBuilderTests
+      run: ./Tests/ShaderBuilderExamples
 
   # Build on MacOS.
   build-on-macos:
@@ -49,7 +49,7 @@ jobs:
   
     - name: Run
       working-directory: ${{github.workspace}}/build
-      run: ./Tests/ShaderBuilderTests
+      run: ./Tests/ShaderBuilderExamples
       
   # Build on Windows.
   build-on-windows:
@@ -66,5 +66,5 @@ jobs:
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
     - name: Run
-      working-directory: ${{github.workspace}}/build/${{env.BUILD_TYPE}}
-      run: ./Tests/ShaderBuilderTests
+      working-directory: ${{github.workspace}}/build
+      run: ./Tests/${{env.BUILD_TYPE}}/ShaderBuilderExamples

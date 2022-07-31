@@ -2,25 +2,25 @@
 
 # Set the basic project information.
 project(
-	ShaderBuilderTests
+	ShaderBuilderExamples
 	VERSION 1.0.0
-	DESCRIPTION "Sample application."
+	DESCRIPTION "Examples application."
 )
 
 # Add the executable.
 add_executable(
-	ShaderBuilderTests
+	ShaderBuilderExamples
 
 	"Main.cpp"
 )
 
 # Add the optick static library as a target link.
-target_link_libraries(ShaderBuilderTests ShaderBuilder)
+target_link_libraries(ShaderBuilderExamples ShaderBuilder)
 
 # Make sure to specify the C++ standard to C++20.
-set_property(TARGET ShaderBuilderTests PROPERTY CXX_STANDARD 20)
+set_property(TARGET ShaderBuilderExamples PROPERTY CXX_STANDARD 20)
 
 # If we are on MSVC, we can use the Multi Processor Compilation option.
 if (MSVC)
-	target_compile_options(ShaderBuilderTests PRIVATE "/MP")	
+	target_compile_options(ShaderBuilderExamples PRIVATE "/MP")	
 endif ()
