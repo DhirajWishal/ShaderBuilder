@@ -25,34 +25,34 @@ execute_process(
 )
 
 # If there was an error with the initialization process, print it out.
-if (SPIRV_TOOLS_INIT_STATUS)
+if (NOT SPIRV_TOOLS_INIT_STATUS)
+	# Set the SPIR-V Tools include, library and binary data.
+	set(SPIRV_TOOLS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/SPIRV-Tools/include)
+
+	# Add the SPIR-V Tools library as a subdirectory.
+	add_subdirectory(ThirdParty/SPIRV-Tools)
+
+	# Set the SPIR-V Cross include, library and binary data.
+	set(SPIRV_CROSS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/SPIRV-Cross)
+
+	# Add the SPIR-V Cross library as a subdirectory.
+	set(CACHE SPIRV_CROSS_STATIC ON)
+	set(CACHE SPIRV_CROSS_ENABLE_CPP ON)
+	set(CACHE SPIRV_CROSS_ENABLE_GLSL ON)
+	set(CACHE SPIRV_CROSS_ENABLE_HLSL ON)
+	add_subdirectory(ThirdParty/SPIRV-Cross)
+
+	# Set the central include directory.
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include)
+
+	# Add the subdirectories.
+	add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Source)
+	add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Tests)
+
+	# Set the startup project for Visual Studio and set multi processor compilation for other projects that we build.
+	if (MSVC) 
+		set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ShaderBuilder)
+	endif ()
+else()
 	message(FATAL_ERROR "SPIR-V Tools Initialization failed with ${SPIRV_TOOLS_INIT_STATUS}")
 endif()
-
-# Set the SPIR-V Tools include, library and binary data.
-set(SPIRV_TOOLS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/SPIRV-Tools/include)
-
-# Add the SPIR-V Tools library as a subdirectory.
-add_subdirectory(ThirdParty/SPIRV-Tools)
-
-# Set the SPIR-V Cross include, library and binary data.
-set(SPIRV_CROSS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/SPIRV-Cross)
-
-# Add the SPIR-V Cross library as a subdirectory.
-set(CACHE SPIRV_CROSS_STATIC ON)
-set(CACHE SPIRV_CROSS_ENABLE_CPP ON)
-set(CACHE SPIRV_CROSS_ENABLE_GLSL ON)
-set(CACHE SPIRV_CROSS_ENABLE_HLSL ON)
-add_subdirectory(ThirdParty/SPIRV-Cross)
-
-# Set the central include directory.
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include)
-
-# Add the subdirectories.
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Source)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Tests)
-
-# Set the startup project for Visual Studio and set multi processor compilation for other projects that we build.
-if (MSVC) 
-	set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ShaderBuilder)
-endif ()
