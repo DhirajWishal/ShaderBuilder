@@ -12,16 +12,15 @@ add_library(
 	ShaderBuilder
 	STATIC
 
-	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Types/DataType.hpp"
-	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Types/Vec2.hpp"
-	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Types/Vec3.hpp"
-	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Types/Vec4.hpp"
+	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/DataType.hpp"
+	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Vec2.hpp"
+	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Vec3.hpp"
+	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Vec4.hpp"
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Builder.hpp"
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/BuilderError.hpp"
-	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/SPIRVSource.hpp"
 	
 	"Builder.cpp" 
-	"SPIRVSource.cpp"
+	
 	
 )
 

@@ -60,9 +60,9 @@ namespace ShaderBuilder
 
 		// Insert the debug information.
 		finalTransform << "; Debug information." << std::endl;
-		finalTransform << m_DebugInstructions.m_Sources.str();
-		finalTransform << m_DebugInstructions.m_Names.str();
-		finalTransform << m_DebugInstructions.m_ModuleProcessedInstructions.str();
+		finalTransform << m_DebugSources.str();
+		finalTransform << m_DebugNames.str();
+		finalTransform << m_DebugModuleProcessedInstructions.str();
 		finalTransform << std::endl;
 
 		// Insert the annotations.

@@ -19,6 +19,7 @@ namespace ShaderBuilder
 		/**
 		 * Explicit constructor.
 		 *
+		 * @param source The source to record all the instructions to.
 		 * @param variableName The name of the variable.
 		 */
 		explicit DataType(std::string&& variableName) : m_VariableName(std::move(variableName)) {}

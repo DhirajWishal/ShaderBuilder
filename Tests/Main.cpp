@@ -1,8 +1,8 @@
 // Copyright (c) 2022 Dhiraj Wishal
 
 #include "ShaderBuilder/Builder.hpp"
-#include "ShaderBuilder/Types/Vec2.hpp"
-#include "ShaderBuilder/Types/Vec3.hpp"
+#include "ShaderBuilder/Vec2.hpp"
+#include "ShaderBuilder/Vec3.hpp"
 
 #include <iostream>
 
@@ -23,7 +23,7 @@ int main()
 
 	auto mainFunction = shaderSource.createFunction("main", [&shaderSource]()
 		{
-			auto temporary = shaderSource.createVariable<ShaderBuilder::Vec4<float>>("temporary");
+			auto temporary = shaderSource.createLocalVariable<ShaderBuilder::Vec4<float>>("temporary");
 		}
 	);
 

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "Types/Callable.hpp"
-#include "Types/Vec4.hpp"
+#include "Callable.hpp"
+#include "Vec4.hpp"
 
 #include <sstream>
 #include <vector>
@@ -61,7 +61,7 @@ namespace ShaderBuilder
 		{
 			registerType<Type>();
 			m_TypeDeclarations << "%" << name << " = OpTypePointer Input " << TypeTraits<Type>::Identifier << std::endl;
-			m_DebugInstructions.m_Names << "OpName %" << name << " \"" << name << "\"" << std::endl;
+			m_DebugNames << "OpName %" << name << " \"" << name << "\"" << std::endl;
 			return Type(std::move(name));
 		}
 
@@ -77,19 +77,20 @@ namespace ShaderBuilder
 		{
 			registerType<Type>();
 			m_TypeDeclarations << "%" << name << " = OpTypePointer Output " << TypeTraits<Type>::Identifier << std::endl;
-			m_DebugInstructions.m_Names << "OpName %" << name << " \"" << name << "\"" << std::endl;
+			m_DebugNames << "OpName %" << name << " \"" << name << "\"" << std::endl;
 			return Type(std::move(name));
 		}
 
 		/**
-		 * Create a new variable.
+		 * Create a new local variable.
+		 * These variables must be created within a function.
 		 *
 		 * @tparam Type The type of the variable.
 		 * @param name The variable name.
 		 * @return The created variable.
 		 */
 		template<class Type>
-		[[nodiscard]] Type createVariable(std::string&& name)
+		[[nodiscard]] Type createLocalVariable(std::string&& name)
 		{
 			registerType<Type>();
 
@@ -99,7 +100,7 @@ namespace ShaderBuilder
 				m_TypeDeclarations << variableType << std::endl;
 
 			m_FunctionDefinitions << "%" << name << " = OpVariable " << "%variable_" << name << " Function" << std::endl;
-			m_DebugInstructions.m_Names << "OpName %" << name << " \"" << name << "\"" << std::endl;
+			m_DebugNames << "OpName %" << name << " \"" << name << "\"" << std::endl;
 			return Type(std::move(name));
 		}
 
@@ -149,8 +150,8 @@ namespace ShaderBuilder
 			m_TypeDeclarations << "%" << name << " = OpVariable %uniform_" << name << " Uniform" << std::endl;
 
 			// Set the type debug information and annotations.
-			m_DebugInstructions.m_Names << "OpName %uniform_" << name << " \"" << name << "\"" << std::endl;
-			m_DebugInstructions.m_Names << "OpName %" << name << " \"\"" << std::endl;
+			m_DebugNames << "OpName %uniform_" << name << " \"" << name << "\"" << std::endl;
+			m_DebugNames << "OpName %" << name << " \"\"" << std::endl;
 
 			m_Annotations << "OpDecorate %" << name << " DescriptorSet " << set << std::endl;
 			m_Annotations << "OpDecorate %" << name << " Binding " << binding << std::endl;
@@ -161,7 +162,7 @@ namespace ShaderBuilder
 			{
 				using MemberType = std::remove_cv_t<std::remove_reference_t<decltype(uniform.*member)>>;
 
-				m_DebugInstructions.m_Names << "OpMemberName %type_" << name << " " << counter << " \"" << uniform.*member << "\"" << std::endl;
+				m_DebugNames << "OpMemberName %type_" << name << " " << counter << " \"" << uniform.*member << "\"" << std::endl;
 				m_Annotations << "OpMemberDecorate %type_" << name << " " << counter << " Offset " << offsets << std::endl;
 
 				counter++;
@@ -174,6 +175,11 @@ namespace ShaderBuilder
 
 		/**
 		 * Create a new function.
+		 *
+		 * @tparam Type The function type.
+		 * @param name The name of the function.
+		 * @param function The function definition.
+		 * @return The callable type.
 		 */
 		template<class Type>
 		decltype(auto) createFunction(std::string&& name, Type&& function)
@@ -181,7 +187,7 @@ namespace ShaderBuilder
 			using ReturnType = std::invoke_result_t<Type>;
 			registerCallable<Callable<ReturnType>>();
 
-			m_DebugInstructions.m_Names << "OpName %" << name << " \"" << name << "\"" << std::endl;
+			m_DebugNames << "OpName %" << name << " \"" << name << "\"" << std::endl;
 			m_FunctionDefinitions << "%" << name << " = OpFunction " << TypeTraits<ReturnType>::Identifier << " None " << TypeTraits<Callable<ReturnType>>::Identifier << std::endl;
 			function();
 			m_FunctionDefinitions << "OpFunctionEnd" << std::endl;
@@ -239,12 +245,9 @@ namespace ShaderBuilder
 		std::stringstream m_EntryPoints;						// All entry point declarations, using OpEntryPoint.
 		std::stringstream m_ExecutionModes;						// All execution-mode declarations, using OpExecutionMode or OpExecutionModeId.
 
-		struct
-		{
-			std::stringstream m_Sources;						// All OpString, OpSourceExtension, OpSource, and OpSourceContinued, without forward references.
-			std::stringstream m_Names;							// All OpName and all OpMemberName.
-			std::stringstream m_ModuleProcessedInstructions;	// All OpModuleProcessed instructions.
-		} m_DebugInstructions;
+		std::stringstream m_DebugSources;						// All OpString, OpSourceExtension, OpSource, and OpSourceContinued, without forward references.
+		std::stringstream m_DebugNames;							// All OpName and all OpMemberName.
+		std::stringstream m_DebugModuleProcessedInstructions;	// All OpModuleProcessed instructions.
 
 		std::stringstream m_Annotations;						// All annotation instructions:
 		std::stringstream m_TypeDeclarations;					// All type information.
