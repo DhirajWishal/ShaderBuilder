@@ -49,59 +49,14 @@ namespace ShaderBuilder
 {
 	Builder::Builder(Configuration config /*= Configuration()*/)
 	{
-		m_OpCompatibilityInstructions << "OpCapability Shader" << std::endl;
-		m_OpExtInstImportInstructions << "%1 = OpExtInstImport \"GLSL.std.450\"" << std::endl;
-		m_OpMemoryModel = std::string("OpMemoryModel ") + GetAddressingModel(config.m_AddressingModel) + GetMemoryModel(config.m_MemoryModel);
+		m_Source.insertCompatibilityInstruction("OpCapability Shader");
+		m_Source.insertExtInstImportInstruction("%1 = OpExtInstImport \"GLSL.std.450\"");
+		m_Source.setMemoryModel("OpMemoryModel ", GetAddressingModel(config.m_AddressingModel), GetMemoryModel(config.m_MemoryModel));
 	}
 
 	std::string Builder::getString() const
 	{
-		std::stringstream finalTransform;
-
-		// Setup the first words of the physical layout.
-		finalTransform << "; Magic:     0x07230203 (SPIR-V)" << std::endl;
-		finalTransform << "; Version:   0x00010000 (Version: 1.0.0)" << std::endl;
-		finalTransform << "; Generator: 0x00000000 (Shader Builder; 1)" << std::endl;
-		finalTransform << "; Bound:     " << m_TypeAvailability.size() + 1 << std::endl;
-		finalTransform << "; Schema:    0" << std::endl;
-		finalTransform << std::endl;
-
-		// Setup the instructions.
-		finalTransform << m_OpCompatibilityInstructions.str();
-		finalTransform << m_OpExtensionInstructions.str();
-		finalTransform << m_OpExtInstImportInstructions.str();
-		finalTransform << m_OpMemoryModel << std::endl;
-		finalTransform << m_EntryPoints.str();
-		finalTransform << m_ExecutionModes.str();
-		finalTransform << std::endl;
-
-		// Insert the debug information.
-		finalTransform << "; Debug information." << std::endl;
-		finalTransform << m_DebugSources.str();
-		finalTransform << m_DebugNames.str();
-		finalTransform << m_DebugModuleProcessedInstructions.str();
-		finalTransform << std::endl;
-
-		// Insert the annotations.
-		finalTransform << "; Annotations." << std::endl;
-		finalTransform << m_Annotations.str();
-		finalTransform << std::endl;
-
-		// Insert the type declarations.
-		finalTransform << "; Type declarations." << std::endl;
-		finalTransform << m_TypeDeclarations.str();
-		finalTransform << std::endl;
-
-		// Insert the function declarations.
-		finalTransform << "; Function declarations." << std::endl;
-		finalTransform << m_FunctionDeclarations.str();
-		finalTransform << std::endl;
-
-		// Insert the function definitions.
-		finalTransform << "; Function definitions." << std::endl;
-		finalTransform << m_FunctionDefinitions.str();
-
-		return finalTransform.str();
+		return m_Source.getSourceAssembly();
 	}
 
 	SPIRVBinary Builder::compile(bool shouldOptimize /*= true*/) const
@@ -111,9 +66,9 @@ namespace ShaderBuilder
 		auto tools = spvtools::SpirvTools(SPV_ENV_UNIVERSAL_1_6);
 		tools.SetMessageConsumer(errorMessageConsumer);
 
-		std::vector<uint32_t> spirv;
 		const auto shaderCode = getString();
 
+		std::vector<uint32_t> spirv;
 		if (!tools.Assemble(shaderCode, &spirv))
 			throw BuilderError("Failed the assemble the assembly!");
 
@@ -134,7 +89,7 @@ namespace ShaderBuilder
 				.RegisterPass(spvtools::CreateEliminateDeadMembersPass())
 				.RegisterPass(spvtools::CreateStripDebugInfoPass());
 
-			// Optimizeee!
+			// Optimize!
 			if (!optimizer.Run(spirv.data(), spirv.size(), &spirv))
 				throw BuilderError("Failed to optimize the binary!");
 		}

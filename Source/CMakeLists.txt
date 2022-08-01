@@ -19,10 +19,12 @@ add_library(
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Builder.hpp"
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/BuilderError.hpp"
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/SPIRVBinary.hpp"
+	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/InstructionStores.hpp"
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/SPIRVSource.hpp"
 	
 	"Builder.cpp" 
 	"SPIRVBinary.cpp"
+	"InstructionStores.cpp"
 	"SPIRVSource.cpp"
 )
 

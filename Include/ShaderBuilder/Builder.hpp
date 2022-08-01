@@ -5,6 +5,7 @@
 #include "Callable.hpp"
 #include "Vec4.hpp"
 
+#include "SPIRVSource.hpp"
 #include "SPIRVBinary.hpp"
 
 #include <sstream>
@@ -84,9 +85,10 @@ namespace ShaderBuilder
 		[[nodiscard]] Type createInput(uint32_t location, std::string&& name)
 		{
 			registerType<Type>();
-			m_TypeDeclarations << "%input_" << name << " = OpTypePointer Input " << TypeTraits<Type>::Identifier << std::endl;
-			m_TypeDeclarations << "%" << name << " = OpVariable %input_" << name << " Input" << std::endl;
-			m_DebugNames << "OpName %" << name << " \"" << name << "\"" << std::endl;
+			m_Source.insertTypeDeclaration("%input_", name, " = OpTypePointer Input ", TypeTraits<Type>::Identifier);
+			m_Source.insertTypeDeclaration("%", name, " = OpVariable %input_", name, " Input");
+			m_Source.insertDebugName("OpName %", name, " \"", name, "\"");
+
 			return Type(std::move(name));
 		}
 
@@ -101,9 +103,10 @@ namespace ShaderBuilder
 		[[nodiscard]] Type createOutput(uint32_t location, std::string&& name)
 		{
 			registerType<Type>();
-			m_TypeDeclarations << "%output_" << name << " = OpTypePointer Output " << TypeTraits<Type>::Identifier << std::endl;
-			m_TypeDeclarations << "%" << name << " = OpVariable %output_" << name << " Output" << std::endl;
-			m_DebugNames << "OpName %" << name << " \"" << name << "\"" << std::endl;
+			m_Source.insertTypeDeclaration("%output_", name, " = OpTypePointer Output ", TypeTraits<Type>::Identifier);
+			m_Source.insertTypeDeclaration("%", name, " = OpVariable %output_", name, " Output");
+			m_Source.insertDebugName("OpName %", name, " \"", name, "\"");
+
 			return Type(std::move(name));
 		}
 
@@ -119,14 +122,10 @@ namespace ShaderBuilder
 		[[nodiscard]] Type createLocalVariable(std::string&& name)
 		{
 			registerType<Type>();
+			m_Source.insertTypeDeclaration("%variable_", name, " = OpTypePointer Function ", TypeTraits<Type>::Identifier);
+			m_Source.insertFunctionDefinition("%", name, " = OpVariable ", "%variable_", name, " Function");
+			m_Source.insertDebugName("OpName %", name, " \"", name, "\"");
 
-			std::string variableType = "%variable_" + name + " = OpTypePointer Function " + TypeTraits<Type>::Identifier;
-
-			if (m_TypeAvailability.insert(variableType).second)
-				m_TypeDeclarations << variableType << std::endl;
-
-			m_FunctionDefinitions << "%" << name << " = OpVariable " << "%variable_" << name << " Function" << std::endl;
-			m_DebugNames << "OpName %" << name << " \"" << name << "\"" << std::endl;
 			return Type(std::move(name));
 		}
 
@@ -152,34 +151,22 @@ namespace ShaderBuilder
 		template<class Type, class... Members>
 		[[nodiscard]] Type createUniform(uint32_t set, uint32_t binding, std::string&& name, Members... members)
 		{
-			// Create the uniform.
-			auto uniform = Type();
-
 			// Register the members.
-			std::vector<const char*> memberTypes;
-			auto registerMemberTypes = [this, &uniform, &memberTypes](auto member)
-			{
-				using MemberType = std::remove_cv_t<std::remove_reference_t<decltype(uniform.*member)>>;
-				registerType<MemberType>();
-
-				memberTypes.emplace_back(TypeTraits<MemberType>::Identifier);
-			};
-			(registerMemberTypes(members), ...);
+			m_Source.insertTypeDeclaration("%type_", name, " = OpTypeStruct ", resolveMemberVariableTypeIdentifiers<Members...>());
 
 			// Setup type declarations.
-			m_TypeDeclarations << "%type_" << name << " = OpTypeStruct ";
-			for (const auto identifier : memberTypes) m_TypeDeclarations << identifier << " ";
-			m_TypeDeclarations << std::endl;
-
-			m_TypeDeclarations << "%uniform_" << name << " = OpTypePointer Uniform %type_" << name << std::endl;
-			m_TypeDeclarations << "%" << name << " = OpVariable %uniform_" << name << " Uniform" << std::endl;
+			m_Source.insertTypeDeclaration("%uniform_", name, " = OpTypePointer Uniform %type_", name);
+			m_Source.insertTypeDeclaration("%", name, " = OpVariable %uniform_", name, " Uniform");
 
 			// Set the type debug information and annotations.
-			m_DebugNames << "OpName %uniform_" << name << " \"" << name << "\"" << std::endl;
-			m_DebugNames << "OpName %" << name << " \"\"" << std::endl;
+			m_Source.insertDebugName("OpName %uniform_", name, " \"", name, "\"");
+			m_Source.insertDebugName("OpName %", name, " \"\"");
 
-			m_Annotations << "OpDecorate %" << name << " DescriptorSet " << set << std::endl;
-			m_Annotations << "OpDecorate %" << name << " Binding " << binding << std::endl;
+			m_Source.insertAnnotation("OpDecorate %", name, " DescriptorSet ", set);
+			m_Source.insertAnnotation("OpDecorate %", name, " Binding ", binding);
+
+			// Create the uniform.
+			auto uniform = Type();
 
 			uint32_t counter = 0;
 			uint64_t offsets = 0;
@@ -187,8 +174,8 @@ namespace ShaderBuilder
 			{
 				using MemberType = std::remove_cv_t<std::remove_reference_t<decltype(uniform.*member)>>;
 
-				m_DebugNames << "OpMemberName %type_" << name << " " << counter << " \"" << uniform.*member << "\"" << std::endl;
-				m_Annotations << "OpMemberDecorate %type_" << name << " " << counter << " Offset " << offsets << std::endl;
+				m_Source.insertDebugName("OpMemberName %type_", name, " ", counter, " \"", uniform.*member, "\"");
+				m_Source.insertAnnotation("OpMemberDecorate %type_", name, " ", counter, " Offset ", offsets);
 
 				counter++;
 				offsets += TypeTraits<MemberType>::Size;
@@ -212,12 +199,14 @@ namespace ShaderBuilder
 			using ReturnType = std::invoke_result_t<Type>;
 			registerCallable<Callable<ReturnType>>();
 
-			m_DebugNames << "OpName %" << name << " \"" << name << "\"" << std::endl;
-			m_FunctionDefinitions << "%" << name << " = OpFunction " << TypeTraits<ReturnType>::Identifier << " None " << TypeTraits<Callable<ReturnType>>::Identifier << std::endl;
-			m_FunctionDefinitions << "%function_block_" << name << " = OpLabel" << std::endl;
+			m_Source.insertDebugName("OpName %", name, " \"", name, "\"");
+			m_Source.insertFunctionDefinition("%", name, " = OpFunction ", TypeTraits<ReturnType>::Identifier, " None ", TypeTraits<Callable<ReturnType>>::Identifier);
+			m_Source.insertFunctionDefinition("%function_block_", name, " = OpLabel");
+
 			function();
-			m_FunctionDefinitions << "OpReturn" << std::endl;
-			m_FunctionDefinitions << "OpFunctionEnd" << std::endl;
+
+			m_Source.insertFunctionDefinition("OpReturn");
+			m_Source.insertFunctionDefinition("OpFunctionEnd");
 
 			return Callable<ReturnType>(std::move(name));
 		}
@@ -233,39 +222,40 @@ namespace ShaderBuilder
 		template<class... Attributes>
 		void addEntryPoint(ShaderType shaderType, std::string&& name, Attributes&&... attributes)
 		{
-			m_EntryPoints << "OpEntryPoint ";
+			std::stringstream entryPoint;
+			entryPoint << "OpEntryPoint ";
 
 			// Resolve the proper shader type.
 			switch (shaderType)
 			{
 			case ShaderBuilder::ShaderType::Vertex:
-				m_EntryPoints << "Vertex ";
+				entryPoint << "Vertex ";
 				break;
 			case ShaderBuilder::ShaderType::TessellationControl:
-				m_EntryPoints << "TessellationControl ";
+				entryPoint << "TessellationControl ";
 				break;
 			case ShaderBuilder::ShaderType::TessellationEvaluation:
-				m_EntryPoints << "TessellationEvaluation ";
+				entryPoint << "TessellationEvaluation ";
 				break;
 			case ShaderBuilder::ShaderType::Geometry:
-				m_EntryPoints << "Geometry ";
+				entryPoint << "Geometry ";
 				break;
 			case ShaderBuilder::ShaderType::Fragment:
-				m_EntryPoints << "Fragment ";
+				entryPoint << "Fragment ";
 				break;
 			case ShaderBuilder::ShaderType::Compute:
-				m_EntryPoints << "GLCompute ";
+				entryPoint << "GLCompute ";
 				break;
 			}
 
 			// Setup the entry point function information.
-			m_EntryPoints << "%" << name << " \"" << name << "\" ";
+			entryPoint << "%" << name << " \"" << name << "\" ";
 
 			// Setup the inputs.
-			auto insertAttribute = [this](auto&& attribute) { m_EntryPoints << "%" << attribute << " "; };
+			auto insertAttribute = [&entryPoint](auto&& attribute) { entryPoint << "%" << attribute << " "; };
 			(insertAttribute(std::move(attributes)), ...);
 
-			m_EntryPoints << std::endl;
+			m_Source.insertEntryPoint(entryPoint.str());
 		}
 
 	public:
@@ -297,9 +287,7 @@ namespace ShaderBuilder
 			if constexpr (IsCompexType<Type>)
 				registerType<typename TypeTraits<Type>::ValueTraits::Type>();
 
-			// Register only if we haven't registered it previously
-			if (m_TypeAvailability.insert(TypeTraits<Type>::Declaration).second)
-				m_TypeDeclarations << TypeTraits<Type>::Declaration << std::endl;
+			m_Source.insertTypeDeclaration(TypeTraits<Type>::Declaration);
 		}
 
 		/**
@@ -312,30 +300,29 @@ namespace ShaderBuilder
 		{
 			// Try and register value types.
 			registerType<typename TypeTraits<Type>::ValueTraits::Type>();
+			m_Source.insertTypeDeclaration(TypeTraits<Type>::Declaration);
+		}
 
-			// Register only if we haven't registered it previously
-			if (m_TypeAvailability.insert(TypeTraits<Type>::Declaration).second)
-				m_TypeDeclarations << TypeTraits<Type>::Declaration << std::endl;
+		/**
+		 * Resolve the member variable type identifiers to register.
+		 *
+		 * @tparam First The first type.
+		 * @tparam Rest The rest of the types.
+		 */
+		template<class First, class... Rest>
+		[[nodiscard]] std::string resolveMemberVariableTypeIdentifiers()
+		{
+			using MemberType = typename MemberVariableType<First>::Type;
+			registerType<MemberType>();
+
+			if constexpr (sizeof...(Rest) > 0)
+				return std::string(TypeTraits<MemberType>::Identifier) + " " + resolveMemberVariableTypeIdentifiers<Rest...>();
+
+			else
+				return std::string(TypeTraits<MemberType>::Identifier);
 		}
 
 	private:
-		std::stringstream m_OpCompatibilityInstructions;		// All OpCapability instructions.
-		std::stringstream m_OpExtensionInstructions;			// Optional OpExtension instructions (extensions to SPIR-V).
-		std::stringstream m_OpExtInstImportInstructions;		// Optional OpExtInstImport instructions.
-		std::stringstream m_EntryPoints;						// All entry point declarations, using OpEntryPoint.
-		std::stringstream m_ExecutionModes;						// All execution-mode declarations, using OpExecutionMode or OpExecutionModeId.
-
-		std::stringstream m_DebugSources;						// All OpString, OpSourceExtension, OpSource, and OpSourceContinued, without forward references.
-		std::stringstream m_DebugNames;							// All OpName and all OpMemberName.
-		std::stringstream m_DebugModuleProcessedInstructions;	// All OpModuleProcessed instructions.
-
-		std::stringstream m_Annotations;						// All annotation instructions:
-		std::stringstream m_TypeDeclarations;					// All type information.
-		std::set<std::string_view> m_TypeAvailability;			// Contains information if a type is registered or not.
-
-		std::string m_OpMemoryModel;							// The single required OpMemoryModel instruction.
-
-		std::stringstream m_FunctionDeclarations;				// All function declarations ("declarations" are functions without a body; there is no forward declaration to a function with a body).
-		std::stringstream m_FunctionDefinitions;				// All function definitions (functions with a body).
+		SPIRVSource m_Source;
 	};
 } // namespace ShaderBuilder

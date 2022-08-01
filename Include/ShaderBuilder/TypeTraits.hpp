@@ -161,4 +161,22 @@ namespace ShaderBuilder
 	 */
 	template<class Type>
 	constexpr bool IsCompexType = false;
+
+
+	/**
+	 * Member variable type structure.
+	 *
+	 * @tparam Type The type.
+	 */
+	template<class Type>
+	struct MemberVariableType;
+
+	/**
+	 * Member variable type structure.
+	 *
+	 * @tparam Class The class type.
+	 * @tparam Value The value type.
+	 */
+	template<class Class, class Value>
+	struct MemberVariableType<Value Class::*> { using Type = Value; };
 } // namespace ShaderBuilder
