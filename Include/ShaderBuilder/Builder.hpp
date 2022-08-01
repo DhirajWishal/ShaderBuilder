@@ -299,10 +299,7 @@ namespace ShaderBuilder
 
 			// Register only if we haven't registered it previously
 			if (m_TypeAvailability.insert(TypeTraits<Type>::Declaration).second)
-			{
 				m_TypeDeclarations << TypeTraits<Type>::Declaration << std::endl;
-				m_UniqueIDs++;
-			}
 		}
 
 		/**
@@ -318,10 +315,7 @@ namespace ShaderBuilder
 
 			// Register only if we haven't registered it previously
 			if (m_TypeAvailability.insert(TypeTraits<Type>::Declaration).second)
-			{
 				m_TypeDeclarations << TypeTraits<Type>::Declaration << std::endl;
-				m_UniqueIDs++;
-			}
 		}
 
 	private:
@@ -343,7 +337,5 @@ namespace ShaderBuilder
 
 		std::stringstream m_FunctionDeclarations;				// All function declarations ("declarations" are functions without a body; there is no forward declaration to a function with a body).
 		std::stringstream m_FunctionDefinitions;				// All function definitions (functions with a body).
-
-		uint32_t m_UniqueIDs = 1;
 	};
 } // namespace ShaderBuilder

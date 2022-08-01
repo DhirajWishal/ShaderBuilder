@@ -19,9 +19,11 @@ add_library(
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Builder.hpp"
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/BuilderError.hpp"
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/SPIRVBinary.hpp"
+	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/SPIRVSource.hpp"
 	
 	"Builder.cpp" 
 	"SPIRVBinary.cpp"
+	"SPIRVSource.cpp"
 )
 
 # Add the target includes.
@@ -30,6 +32,7 @@ target_include_directories(
 
 	PRIVATE ${SPIRV_TOOLS_INCLUDE_DIR}
 	PRIVATE ${SPIRV_CROSS_INCLUDE_DIR}
+	PRIVATE ${XXHASH_INCLUDE_DIR}
 )
 
 # Add the target links.

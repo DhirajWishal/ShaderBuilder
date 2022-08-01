@@ -62,7 +62,7 @@ namespace ShaderBuilder
 		finalTransform << "; Magic:     0x07230203 (SPIR-V)" << std::endl;
 		finalTransform << "; Version:   0x00010000 (Version: 1.0.0)" << std::endl;
 		finalTransform << "; Generator: 0x00000000 (Shader Builder; 1)" << std::endl;
-		finalTransform << "; Bound:     " << m_UniqueIDs << std::endl;
+		finalTransform << "; Bound:     " << m_TypeAvailability.size() + 1 << std::endl;
 		finalTransform << "; Schema:    0" << std::endl;
 		finalTransform << std::endl;
 

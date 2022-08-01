@@ -45,6 +45,9 @@ if (NOT SPIRV_TOOLS_INIT_STATUS)
 	set(CACHE SPIRV_CROSS_ENABLE_HLSL ON)
 	add_subdirectory(ThirdParty/SPIRV-Cross)
 
+	# Set the xxHash header include directory.
+	set(XXHASH_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/xxHash)
+
 	# Set the central include directory.
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include)
 

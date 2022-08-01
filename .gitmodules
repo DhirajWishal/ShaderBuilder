@@ -4,3 +4,6 @@
 [submodule "ThirdParty/SPIRV-Cross"]
 	path = ThirdParty/SPIRV-Cross
 	url = https://github.com/KhronosGroup/SPIRV-Cross
+[submodule "ThirdParty/xxHash"]
+	path = ThirdParty/xxHash
+	url = https://github.com/Cyan4973/xxHash
