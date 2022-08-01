@@ -168,8 +168,7 @@ namespace ShaderBuilder
 
 			// Setup type declarations.
 			m_TypeDeclarations << "%type_" << name << " = OpTypeStruct ";
-			for (const auto identifier : memberTypes)
-				m_TypeDeclarations << identifier << " ";
+			for (const auto identifier : memberTypes) m_TypeDeclarations << identifier << " ";
 			m_TypeDeclarations << std::endl;
 
 			m_TypeDeclarations << "%uniform_" << name << " = OpTypePointer Uniform %type_" << name << std::endl;
@@ -280,9 +279,10 @@ namespace ShaderBuilder
 		/**
 		 * Compile the shader code and inform if there were any errors.
 		 *
+		 * @param shouldOptimize Whether or not to optimize the generated SPIR-V binary. Default is true.
 		 * @return The compiled binary.
 		 */
-		[[nodiscard]] SPIRVBinary compile() const;
+		[[nodiscard]] SPIRVBinary compile(bool shouldOptimize = true) const;
 
 	private:
 		/**

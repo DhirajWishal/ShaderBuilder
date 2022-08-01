@@ -4,6 +4,7 @@
 #include "ShaderBuilder/BuilderError.hpp"
 
 #include <spirv-tools/libspirv.hpp>
+#include <spirv-tools/optimizer.hpp>
 
 namespace /* anonymous */
 {
@@ -103,10 +104,12 @@ namespace ShaderBuilder
 		return finalTransform.str();
 	}
 
-	SPIRVBinary Builder::compile() const
+	SPIRVBinary Builder::compile(bool shouldOptimize /*= true*/) const
 	{
-		spvtools::SpirvTools tools(SPV_ENV_UNIVERSAL_1_6);
-		tools.SetMessageConsumer([](spv_message_level_t level, const char*, const spv_position_t& position, const char* message) { throw BuilderError(message); });
+		auto errorMessageConsumer = [](spv_message_level_t level, const char*, const spv_position_t& position, const char* message) { throw BuilderError(message); };
+
+		auto tools = spvtools::SpirvTools(SPV_ENV_UNIVERSAL_1_6);
+		tools.SetMessageConsumer(errorMessageConsumer);
 
 		std::vector<uint32_t> spirv;
 		const auto shaderCode = getString();
@@ -116,6 +119,25 @@ namespace ShaderBuilder
 
 		if (!tools.Validate(spirv))
 			throw BuilderError("The generated SPIR-V is invalid!");
+
+		// Optimize the binary if requested to.
+		if (shouldOptimize)
+		{
+			auto optimizer = spvtools::Optimizer(SPV_ENV_UNIVERSAL_1_6);
+			optimizer.SetMessageConsumer(errorMessageConsumer);
+
+			// Configure it.
+			optimizer.RegisterPass(spvtools::CreateFreezeSpecConstantValuePass())
+				.RegisterPass(spvtools::CreateUnifyConstantPass())
+				.RegisterPass(spvtools::CreateStripNonSemanticInfoPass())
+				.RegisterPass(spvtools::CreateEliminateDeadFunctionsPass())
+				.RegisterPass(spvtools::CreateEliminateDeadMembersPass())
+				.RegisterPass(spvtools::CreateStripDebugInfoPass());
+
+			// Optimizeee!
+			if (!optimizer.Run(spirv.data(), spirv.size(), &spirv))
+				throw BuilderError("Failed to optimize the binary!");
+		}
 
 		return SPIRVBinary(std::move(spirv));
 	}
