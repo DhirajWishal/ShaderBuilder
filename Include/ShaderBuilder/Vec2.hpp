@@ -3,6 +3,7 @@
 #pragma once
 
 #include "DataType.hpp"
+#include "Utilities.hpp"
 
 namespace ShaderBuilder
 {
@@ -21,11 +22,54 @@ namespace ShaderBuilder
 		/**
 		 * Explicit constructor.
 		 *
+		 * @param source The source to insert the instructions to.
 		 * @param variableName The name of the variable.
-		 * @param codeStream The code stream to store the data in.
-		 * @param meta The meta information regarding the type.
 		 */
-		explicit Vec2(std::string&& variableName) : DataType<Vec2<Type>>(std::move(variableName)) {}
+		explicit Vec2(SPIRVSource& source, const std::string& variableName) : DataType<Vec2<Type>>(source, variableName), x(0), y(0) {}
+
+		/**
+		 * Explicit constructor.
+		 *
+		 * @param source The source to insert the instructions to.
+		 * @param variableName The name of the variable.
+		 * @param value The value to initialize the type with.
+		 */
+		explicit Vec2(SPIRVSource& source, const std::string& variableName, Type value) : DataType<Vec2<Type>>(source, variableName), x(value), y(value)
+		{
+			// Setup the values.
+			source.insertTypeDeclaration("%const_", static_cast<uint64_t>(value), " = OpConstant ", TypeTraits<Type>::Identifier, " ", value);
+
+			// Setup the vector constant.
+			const Type vector[] = { value, value };
+			const auto hash = GenerateHash(vector, sizeof(vector));
+			source.insertTypeDeclaration("%composite_", hash, " = OpConstantComposite ", Traits::Identifier, " %const_", value, " %const_", value);
+
+			// Initialization happens only within function definitions, so we can simply assign it there.
+			source.insertFunctionDefinition("OpStore %", variableName, " %composite_", hash);
+		}
+
+		/**
+		 * Explicit constructor.
+		 *
+		 * @param source The source to insert the instructions to.
+		 * @param variableName The name of the variable.
+		 * @param x The x to initialize the x member with.
+		 * @param y The y to initialize the y member with.
+		 */
+		explicit Vec2(SPIRVSource& source, const std::string& variableName, Type x, Type y) : DataType<Vec2<Type>>(source, variableName), x(x), y(y)
+		{
+			// Setup the values.
+			source.insertTypeDeclaration("%const_", static_cast<uint64_t>(x), " = OpConstant ", TypeTraits<Type>::Identifier, " ", x);
+			source.insertTypeDeclaration("%const_", static_cast<uint64_t>(y), " = OpConstant ", TypeTraits<Type>::Identifier, " ", y);
+
+			// Setup the vector constant.
+			const Type vector[] = { x, y };
+			const auto hash = GenerateHash(vector, sizeof(vector));
+			source.insertTypeDeclaration("%composite_", hash, " = OpConstantComposite ", Traits::Identifier, " %const_", x, " %const_", y);
+
+			// Initialization happens only within function definitions, so we can simply assign it there.
+			source.insertFunctionDefinition("OpStore %", variableName, " %composite_", hash);
+		}
 
 		/**
 		 * Assignment operator.
@@ -35,6 +79,11 @@ namespace ShaderBuilder
 		 */
 		Vec2& operator=(const Vec2& other)
 		{
+			DataType<Vec2<Type>>::m_Source.insertFunctionDefinition("OpCopyMemory %", DataType<Vec2<Type>>::m_VariableName, " %", other.getName());
+
+			x = other.x;
+			y = other.y;
+
 			return *this;
 		}
 
@@ -55,6 +104,7 @@ namespace ShaderBuilder
 	{
 		using Type = Vec2<int8_t>;
 		using ValueTraits = TypeTraits<int8_t>;
+		static constexpr const char RawIdentifier[] = "vec2_int8";
 		static constexpr const char Identifier[] = "%vec2_int8";
 		static constexpr const char Declaration[] = "%vec2_int8 = OpTypeVector %int8 2";
 		static constexpr uint8_t Size = sizeof(ValueTraits::Type) * 2;
@@ -68,6 +118,7 @@ namespace ShaderBuilder
 	{
 		using Type = Vec2<uint8_t>;
 		using ValueTraits = TypeTraits<uint8_t>;
+		static constexpr const char RawIdentifier[] = "vec2_uint8";
 		static constexpr const char Identifier[] = "%vec2_uint8";
 		static constexpr const char Declaration[] = "%vec2_uint8 = OpTypeVector %uint8 2";
 		static constexpr uint8_t Size = sizeof(ValueTraits::Type) * 2;
@@ -81,6 +132,7 @@ namespace ShaderBuilder
 	{
 		using Type = Vec2<int16_t>;
 		using ValueTraits = TypeTraits<int16_t>;
+		static constexpr const char RawIdentifier[] = "vec2_int16";
 		static constexpr const char Identifier[] = "%vec2_int16";
 		static constexpr const char Declaration[] = "%vec2_int16 = OpTypeVector %int16 2";
 		static constexpr uint8_t Size = sizeof(ValueTraits::Type) * 2;
@@ -94,6 +146,7 @@ namespace ShaderBuilder
 	{
 		using Type = Vec2<uint16_t>;
 		using ValueTraits = TypeTraits<uint16_t>;
+		static constexpr const char RawIdentifier[] = "vec2_uint16";
 		static constexpr const char Identifier[] = "%vec2_uint16";
 		static constexpr const char Declaration[] = "%vec2_uint16 = OpTypeVector %uint16 2";
 		static constexpr uint8_t Size = sizeof(ValueTraits::Type) * 2;
@@ -107,6 +160,7 @@ namespace ShaderBuilder
 	{
 		using Type = Vec2<int32_t>;
 		using ValueTraits = TypeTraits<int32_t>;
+		static constexpr const char RawIdentifier[] = "vec2_int32";
 		static constexpr const char Identifier[] = "%vec2_int32";
 		static constexpr const char Declaration[] = "%vec2_int32 = OpTypeVector %int32 2";
 		static constexpr uint8_t Size = sizeof(ValueTraits::Type) * 2;
@@ -120,6 +174,7 @@ namespace ShaderBuilder
 	{
 		using Type = Vec2<uint32_t>;
 		using ValueTraits = TypeTraits<uint32_t>;
+		static constexpr const char RawIdentifier[] = "vec2_uint32";
 		static constexpr const char Identifier[] = "%vec2_uint32";
 		static constexpr const char Declaration[] = "%vec2_uint32 = OpTypeVector %uint32 2";
 		static constexpr uint8_t Size = sizeof(ValueTraits::Type) * 2;
@@ -133,6 +188,7 @@ namespace ShaderBuilder
 	{
 		using Type = Vec2<int64_t>;
 		using ValueTraits = TypeTraits<int64_t>;
+		static constexpr const char RawIdentifier[] = "vec2_int64";
 		static constexpr const char Identifier[] = "%vec2_int64";
 		static constexpr const char Declaration[] = "%vec2_int64 = OpTypeVector %int64 2";
 		static constexpr uint8_t Size = sizeof(ValueTraits::Type) * 2;
@@ -146,6 +202,7 @@ namespace ShaderBuilder
 	{
 		using Type = Vec2<uint64_t>;
 		using ValueTraits = TypeTraits<uint64_t>;
+		static constexpr const char RawIdentifier[] = "vec2_uint64";
 		static constexpr const char Identifier[] = "%vec2_uint64";
 		static constexpr const char Declaration[] = "%vec2_uint64 = OpTypeVector %uint64 2";
 		static constexpr uint8_t Size = sizeof(ValueTraits::Type) * 2;
@@ -159,6 +216,7 @@ namespace ShaderBuilder
 	{
 		using Type = Vec2<float>;
 		using ValueTraits = TypeTraits<float>;
+		static constexpr const char RawIdentifier[] = "vec2_float";
 		static constexpr const char Identifier[] = "%vec2_float";
 		static constexpr const char Declaration[] = "%vec2_float = OpTypeVector %float 2";
 		static constexpr uint8_t Size = sizeof(ValueTraits::Type) * 2;
@@ -172,6 +230,7 @@ namespace ShaderBuilder
 	{
 		using Type = Vec2<double>;
 		using ValueTraits = TypeTraits<double>;
+		static constexpr const char RawIdentifier[] = "vec2_double";
 		static constexpr const char Identifier[] = "%vec2_double";
 		static constexpr const char Declaration[] = "%vec2_double = OpTypeVector %double 2";
 		static constexpr uint8_t Size = sizeof(ValueTraits::Type) * 2;

@@ -3,10 +3,12 @@
 #pragma once
 
 #include "Callable.hpp"
-#include "Vec4.hpp"
+#include "DataType.hpp"
 
 #include "SPIRVSource.hpp"
 #include "SPIRVBinary.hpp"
+
+#include "FunctionBuilder.hpp"
 
 #include <sstream>
 #include <set>
@@ -89,7 +91,7 @@ namespace ShaderBuilder
 			m_Source.insertTypeDeclaration("%", name, " = OpVariable %input_", name, " Input");
 			m_Source.insertDebugName("OpName %", name, " \"", name, "\"");
 
-			return Type(std::move(name));
+			return Type(m_Source, name);
 		}
 
 		/**
@@ -107,7 +109,7 @@ namespace ShaderBuilder
 			m_Source.insertTypeDeclaration("%", name, " = OpVariable %output_", name, " Output");
 			m_Source.insertDebugName("OpName %", name, " \"", name, "\"");
 
-			return Type(std::move(name));
+			return Type(m_Source, name);
 		}
 
 		/**
@@ -115,18 +117,20 @@ namespace ShaderBuilder
 		 * These variables must be created within a function.
 		 *
 		 * @tparam Type The type of the variable.
+		 * @tparam Types The initialization types.
 		 * @param name The variable name.
+		 * @param initializer The initializer types.
 		 * @return The created variable.
 		 */
-		template<class Type>
-		[[nodiscard]] Type createLocalVariable(std::string&& name)
+		template<class Type, class... Types>
+		[[nodiscard]] Type createLocalVariable(std::string&& name, Types&&... initializer)
 		{
 			registerType<Type>();
-			m_Source.insertTypeDeclaration("%variable_", name, " = OpTypePointer Function ", TypeTraits<Type>::Identifier);
-			m_Source.insertFunctionDefinition("%", name, " = OpVariable ", "%variable_", name, " Function");
+			m_Source.insertTypeDeclaration("%variable_type_", TypeTraits<Type>::RawIdentifier, " = OpTypePointer Function ", TypeTraits<Type>::Identifier);
+			m_Source.insertFunctionDefinition("%", name, " = OpVariable %variable_type_", TypeTraits<Type>::RawIdentifier, " Function");
 			m_Source.insertDebugName("OpName %", name, " \"", name, "\"");
 
-			return Type(std::move(name));
+			return Type(m_Source, name, std::forward<Types>(initializer)...);
 		}
 
 		/**
@@ -149,7 +153,7 @@ namespace ShaderBuilder
 		 * @return The created uniform.
 		 */
 		template<class Type, class... Members>
-		[[nodiscard]] Type createUniform(uint32_t set, uint32_t binding, std::string&& name, Members... members)
+		[[nodiscard]] Type createUniform(uint32_t set, uint32_t binding, const std::string& name, Members... members)
 		{
 			// Register the members.
 			m_Source.insertTypeDeclaration("%type_", name, " = OpTypeStruct ", resolveMemberVariableTypeIdentifiers<Members...>());
@@ -166,19 +170,17 @@ namespace ShaderBuilder
 			m_Source.insertAnnotation("OpDecorate %", name, " Binding ", binding);
 
 			// Create the uniform.
-			auto uniform = Type();
+			auto uniform = Type(m_Source, name);
 
 			uint32_t counter = 0;
 			uint64_t offsets = 0;
 			auto logMemberInformation = [this, &uniform, &name, &counter, &offsets](auto member)
 			{
-				using MemberType = std::remove_cv_t<std::remove_reference_t<decltype(uniform.*member)>>;
-
 				m_Source.insertDebugName("OpMemberName %type_", name, " ", counter, " \"", uniform.*member, "\"");
 				m_Source.insertAnnotation("OpMemberDecorate %type_", name, " ", counter, " Offset ", offsets);
 
 				counter++;
-				offsets += TypeTraits<MemberType>::Size;
+				offsets += TypeTraits<typename MemberVariableType<decltype(member)>::Type>::Size;
 			};
 			(logMemberInformation(members), ...);
 
@@ -190,7 +192,7 @@ namespace ShaderBuilder
 		 *
 		 * @tparam Type The function type.
 		 * @param name The name of the function.
-		 * @param function The function definition.
+		 * @param function The function definition. Make sure that the function must contain a single parameter of FunctionBuilder&.
 		 * @return The callable type.
 		 */
 		template<class Type>
@@ -200,15 +202,16 @@ namespace ShaderBuilder
 			registerCallable<Callable<ReturnType>>();
 
 			m_Source.insertDebugName("OpName %", name, " \"", name, "\"");
-			m_Source.insertFunctionDefinition("%", name, " = OpFunction ", TypeTraits<ReturnType>::Identifier, " None ", TypeTraits<Callable<ReturnType>>::Identifier);
-			m_Source.insertFunctionDefinition("%function_block_", name, " = OpLabel");
+			auto& functionDefinition = m_Source.createFunctionDefinition();
+			functionDefinition.insertFunctionDefinition("%", name, " = OpFunction ", TypeTraits<ReturnType>::Identifier, " None ", TypeTraits<Callable<ReturnType>>::Identifier);
+			functionDefinition.insertFunctionDefinition("%function_block_", name, " = OpLabel");
 
 			function();
 
-			m_Source.insertFunctionDefinition("OpReturn");
-			m_Source.insertFunctionDefinition("OpFunctionEnd");
+			functionDefinition.insertFunctionDefinition("OpReturn");
+			functionDefinition.insertFunctionDefinition("OpFunctionEnd");
 
-			return Callable<ReturnType>(std::move(name));
+			return Callable<ReturnType>(m_Source, name);
 		}
 
 		/**

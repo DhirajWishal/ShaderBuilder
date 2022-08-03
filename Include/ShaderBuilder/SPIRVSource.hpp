@@ -2,8 +2,7 @@
 
 #pragma once
 
-#include "InstructionStores.hpp"
-#include <vector>
+#include "FunctionBuilder.hpp"
 
 namespace ShaderBuilder
 {
@@ -143,6 +142,13 @@ namespace ShaderBuilder
 		template<class...Types>
 		void insertFunctionDefinition(Types&&... data) { m_FunctionDefinitions.insert(toString(std::forward<Types>(data)...)); }
 
+		/**
+		 * Create a new function builder.
+		 *
+		 * @return The created function builder.
+		 */
+		[[nodiscard]] FunctionBuilder& createFunctionBuilder() { return m_FunctionDefinitions.emplace_back(*this); }
+
 	public:
 		/**
 		 * Get the source assembly.
@@ -184,7 +190,7 @@ namespace ShaderBuilder
 		TypeDeclarationInstructions m_TypeDeclarations;
 
 		FunctionDeclarationInstructions m_FunctionDeclarations;
-		FunctionDefinitionInstructions m_FunctionDefinitions;
+		std::list<FunctionBuilder> m_FunctionDefinitions;
 
 		std::string m_MemoryModel;
 	};

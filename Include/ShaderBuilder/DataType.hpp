@@ -3,8 +3,7 @@
 #pragma once
 
 #include "TypeTraits.hpp"
-
-#include <string>
+#include "SPIRVSource.hpp"
 
 namespace ShaderBuilder
 {
@@ -22,7 +21,7 @@ namespace ShaderBuilder
 		 * @param source The source to record all the instructions to.
 		 * @param variableName The name of the variable.
 		 */
-		explicit DataType(std::string&& variableName) : m_VariableName(std::move(variableName)) {}
+		explicit DataType(SPIRVSource& source, const std::string& variableName) : m_VariableName(variableName), m_Source(source) {}
 
 		/**
 		 * Get the name of the variable/ function.
@@ -33,6 +32,7 @@ namespace ShaderBuilder
 
 	protected:
 		std::string m_VariableName;
+		SPIRVSource& m_Source;
 	};
 
 	/**

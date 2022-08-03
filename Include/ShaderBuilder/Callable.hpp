@@ -3,6 +3,7 @@
 #pragma once
 
 #include "DataType.hpp"
+#include "InstructionStores.hpp"
 
 namespace ShaderBuilder
 {
@@ -16,8 +17,11 @@ namespace ShaderBuilder
 	public:
 		/**
 		 * Explicit constructor.
+		 *
+		 * @param source The source to record all the instructions to.
+		 * @param name The name of the function.
 		 */
-		explicit Callable(std::string&& name) : DataType<Callable<Return, Arguments...>>(std::move(name)) {}
+		explicit Callable(SPIRVSource& source, const std::string& name) : DataType<Callable<Return, Arguments...>>(source, name) {}
 
 		/**
 		 * Function call operator overload.

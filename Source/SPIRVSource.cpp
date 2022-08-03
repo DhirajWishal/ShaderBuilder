@@ -42,7 +42,8 @@ namespace ShaderBuilder
 		finalTransform << std::endl;
 
 		finalTransform << "; Function definitions." << std::endl;
-		finalTransform << m_FunctionDefinitions.getString();
+		for (const auto& definition : m_FunctionDefinitions)
+			finalTransform << definition.getString();
 		finalTransform << std::endl;
 
 		return finalTransform.str();

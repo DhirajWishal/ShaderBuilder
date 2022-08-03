@@ -113,4 +113,10 @@ namespace ShaderBuilder
 	 * Function definition instructions store.
 	 */
 	class FunctionDefinitionInstructions final : public InstructionStore {};
+
+	/**
+	 * Block instruction class.
+	 * This class is used to store information regarding a single block.
+	 */
+	class BlockInstructions final : public InstructionStore {};
 } // namespace ShaderBuilder

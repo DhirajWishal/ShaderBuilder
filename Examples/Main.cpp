@@ -6,6 +6,15 @@
 
 #include <iostream>
 
+class Camera final : public ShaderBuilder::DataType<Camera>
+{
+public:
+	explicit Camera(ShaderBuilder::SPIRVSource& source, const std::string& name) : ShaderBuilder::DataType<Camera>(source, name), m_Position(source, "m_Position"), m_Color(source, "m_Color") {};
+
+	ShaderBuilder::Vec4<float> m_Position;
+	ShaderBuilder::Vec2<float> m_Color;
+};
+
 int main()
 {
 	ShaderBuilder::Builder shaderSource;
@@ -13,25 +22,25 @@ int main()
 	auto inTextureCoordinates = shaderSource.createInput<ShaderBuilder::Vec2<float>>(12, "inTextureCoordinates");
 	auto outTextureCoordinates = shaderSource.createOutput<ShaderBuilder::Vec2<float>>(0, "outTextureCoordinates");
 
-	struct Camera final
-	{
-		ShaderBuilder::Vec4<float> m_Position = ShaderBuilder::Vec4<float>("m_Position");
-		ShaderBuilder::Vec2<float> m_Color = ShaderBuilder::Vec2<float>("m_Color");
-	};
-
 	auto camera = shaderSource.createUniform<Camera>(0, 0, "camera", &Camera::m_Position, &Camera::m_Color);
 
 	auto mainFunction = shaderSource.createFunction("main", [&shaderSource]
 		{
-			auto temporary = shaderSource.createLocalVariable<ShaderBuilder::Vec4<float>>("temporary");
+			auto temporary = shaderSource.createLocalVariable<ShaderBuilder::Vec4<float>>("temporary", 100);
+			auto another = shaderSource.createLocalVariable<ShaderBuilder::Vec4<float>>("another");
+
+			another = temporary;
 		}
 	);
 
 	shaderSource.addEntryPoint(ShaderBuilder::ShaderType::Vertex, "main", "inPosition", "inTextureCoordinates", "outTextureCoordinates");
 
+	std::cout << "-------------------- Generated Assembly --------------------" << std::endl;
+	std::cout << shaderSource.getString() << std::endl;
+
 	const auto output = shaderSource.compile();
 
-	std::cout << "-------------------- Assembly --------------------" << std::endl;
+	std::cout << "-------------------- Compiled Assembly --------------------" << std::endl;
 	std::cout << output.disassemble() << std::endl;
 
 	std::cout << "-------------------- GLSL --------------------" << std::endl;

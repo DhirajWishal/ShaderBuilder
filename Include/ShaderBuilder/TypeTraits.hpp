@@ -19,6 +19,7 @@ namespace ShaderBuilder
 	struct TypeTraits<void>
 	{
 		using Type = void;
+		static constexpr const char RawIdentifier[] = "void";
 		static constexpr const char Identifier[] = "%void";
 		static constexpr const char Declaration[] = "%void = OpTypeVoid";
 		static constexpr uint8_t Size = 0;
@@ -31,6 +32,7 @@ namespace ShaderBuilder
 	struct TypeTraits<bool>
 	{
 		using Type = bool;
+		static constexpr const char RawIdentifier[] = "bool";
 		static constexpr const char Identifier[] = "%bool";
 		static constexpr const char Declaration[] = "%bool = OpTypeBool";
 		static constexpr uint8_t Size = sizeof(Type);
@@ -43,6 +45,7 @@ namespace ShaderBuilder
 	struct TypeTraits<int8_t>
 	{
 		using Type = int8_t;
+		static constexpr const char RawIdentifier[] = "int8";
 		static constexpr const char Identifier[] = "%int8";
 		static constexpr const char Declaration[] = "%int8 = OpTypeInt 8 1";
 		static constexpr uint8_t Size = sizeof(Type);
@@ -55,6 +58,7 @@ namespace ShaderBuilder
 	struct TypeTraits<uint8_t>
 	{
 		using Type = uint8_t;
+		static constexpr const char RawIdentifier[] = "uint8";
 		static constexpr const char Identifier[] = "%uint8";
 		static constexpr const char Declaration[] = "%uint8 = OpTypeInt 8 0";
 		static constexpr uint8_t Size = sizeof(Type);
@@ -67,6 +71,7 @@ namespace ShaderBuilder
 	struct TypeTraits<int16_t>
 	{
 		using Type = int16_t;
+		static constexpr const char RawIdentifier[] = "int16";
 		static constexpr const char Identifier[] = "%int16";
 		static constexpr const char Declaration[] = "%int16 = OpTypeInt 16 1";
 		static constexpr uint8_t Size = sizeof(Type);
@@ -79,6 +84,7 @@ namespace ShaderBuilder
 	struct TypeTraits<uint16_t>
 	{
 		using Type = uint16_t;
+		static constexpr const char RawIdentifier[] = "uint16";
 		static constexpr const char Identifier[] = "%uint16";
 		static constexpr const char Declaration[] = "%uint16 = OpTypeInt 16 0";
 		static constexpr uint8_t Size = sizeof(Type);
@@ -91,6 +97,7 @@ namespace ShaderBuilder
 	struct TypeTraits<int32_t>
 	{
 		using Type = int32_t;
+		static constexpr const char RawIdentifier[] = "int32";
 		static constexpr const char Identifier[] = "%int32";
 		static constexpr const char Declaration[] = "%int32 = OpTypeInt 32 1";
 		static constexpr uint8_t Size = sizeof(Type);
@@ -103,6 +110,7 @@ namespace ShaderBuilder
 	struct TypeTraits<uint32_t>
 	{
 		using Type = uint32_t;
+		static constexpr const char RawIdentifier[] = "uint32";
 		static constexpr const char Identifier[] = "%uint32";
 		static constexpr const char Declaration[] = "%uint32 = OpTypeInt 32 0";
 		static constexpr uint8_t Size = sizeof(Type);
@@ -115,6 +123,7 @@ namespace ShaderBuilder
 	struct TypeTraits<int64_t>
 	{
 		using Type = int64_t;
+		static constexpr const char RawIdentifier[] = "int64";
 		static constexpr const char Identifier[] = "%int64";
 		static constexpr const char Declaration[] = "%int64 = OpTypeInt 64 1";
 		static constexpr uint8_t Size = sizeof(Type);
@@ -127,6 +136,7 @@ namespace ShaderBuilder
 	struct TypeTraits<uint64_t>
 	{
 		using Type = uint64_t;
+		static constexpr const char RawIdentifier[] = "uint64";
 		static constexpr const char Identifier[] = "%uint64";
 		static constexpr const char Declaration[] = "%int64 = OpTypeInt 64 0";
 		static constexpr uint8_t Size = sizeof(Type);
@@ -139,6 +149,7 @@ namespace ShaderBuilder
 	struct TypeTraits<float>
 	{
 		using Type = float;
+		static constexpr const char RawIdentifier[] = "float";
 		static constexpr const char Identifier[] = "%float";
 		static constexpr const char Declaration[] = "%float = OpTypeFloat 32";
 		static constexpr uint8_t Size = sizeof(Type);
@@ -151,6 +162,7 @@ namespace ShaderBuilder
 	struct TypeTraits<double>
 	{
 		using Type = double;
+		static constexpr const char RawIdentifier[] = "double";
 		static constexpr const char Identifier[] = "%double";
 		static constexpr const char Declaration[] = "%double = OpTypeFloat 64";
 		static constexpr uint8_t Size = sizeof(Type);
