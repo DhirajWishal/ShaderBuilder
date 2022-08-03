@@ -3,13 +3,14 @@
 #include "ShaderBuilder/Builder.hpp"
 #include "ShaderBuilder/Vec2.hpp"
 #include "ShaderBuilder/Vec3.hpp"
+#include "ShaderBuilder/Vec4.hpp"
 
 #include <iostream>
 
 class Camera final : public ShaderBuilder::DataType<Camera>
 {
 public:
-	explicit Camera(ShaderBuilder::SPIRVSource& source, const std::string& name) : ShaderBuilder::DataType<Camera>(source, name), m_Position(source, "m_Position"), m_Color(source, "m_Color") {};
+	explicit Camera(ShaderBuilder::SPIRVSource& source, const std::string& name) : ShaderBuilder::DataType<Camera>(source, name), m_Position(source, "m_Position"), m_Color(source, "m_Color") {}
 
 	ShaderBuilder::Vec4<float> m_Position;
 	ShaderBuilder::Vec2<float> m_Color;
@@ -24,10 +25,10 @@ int main()
 
 	auto camera = shaderSource.createUniform<Camera>(0, 0, "camera", &Camera::m_Position, &Camera::m_Color);
 
-	auto mainFunction = shaderSource.createFunction("main", [&shaderSource]
+	auto mainFunction = shaderSource.createFunction<void>("main", [&shaderSource](ShaderBuilder::FunctionBuilder&& builder)
 		{
-			auto temporary = shaderSource.createLocalVariable<ShaderBuilder::Vec4<float>>("temporary", 100);
-			auto another = shaderSource.createLocalVariable<ShaderBuilder::Vec4<float>>("another");
+			auto temporary = builder.createVariable<ShaderBuilder::Vec4<float>>("temporary", 100);
+			auto another = builder.createVariable<ShaderBuilder::Vec4<float>>("another");
 
 			another = temporary;
 		}

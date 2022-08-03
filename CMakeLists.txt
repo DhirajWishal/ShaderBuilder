@@ -48,6 +48,9 @@ if (NOT SPIRV_TOOLS_INIT_STATUS)
 	# Set the xxHash header include directory.
 	set(XXHASH_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/xxHash)
 
+	# Set the json header include directory.
+	set(JSON_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/json/include)
+
 	# Set the central include directory.
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include)
 

@@ -2,28 +2,42 @@
 
 #pragma once
 
-#include "InstructionStores.hpp"
-#include "TypeTraits.hpp"
-
-#include <string>
-#include <list>
+#include "DataType.hpp"
+#include "SPIRVSource.hpp"
 
 namespace ShaderBuilder
 {
-	class SPIRVSource;
+	/**
+	 * Function builder return type structure.
+	 * This structure is used to deduce the return type of a function builder.
+	 */
+	template<class Type>
+	struct FunctionBuilderReturnType {};
 
 	/**
 	 * Function builder class.
 	 */
-	class FunctionBuilder final
+	class FunctionBuilder final : public DataType<FunctionBuilder>
 	{
 	public:
 		/**
 		 * Explicit constructor.
 		 *
 		 * @param source The source to record all the commands to.
+		 * @param name The name of the function.
+		 * @param returnType The return type containing the return type. Default is {};
 		 */
-		explicit FunctionBuilder(SPIRVSource& source) : m_Source(source) {}
+		template<class ReturnType>
+		explicit FunctionBuilder(SPIRVSource& source, const std::string& name, [[maybe_unused]] FunctionBuilderReturnType<ReturnType>&& returnType = {}) : DataType<FunctionBuilder>(source, name)
+		{
+			source.insertName("%" + name, name);
+			m_FunctionJSON["declaration"] = "%" + name + " = OpFunction " + TypeTraits<ReturnType>::Identifier + " None " + TypeTraits<Callable<ReturnType>>::Identifier;
+		}
+
+		/**
+		 * Default destructor.
+		 */
+		~FunctionBuilder();
 
 		/**
 		 * Create a new variable.
@@ -39,21 +53,13 @@ namespace ShaderBuilder
 		[[nodiscard]] Type createVariable(std::string&& name, Types&&... initializer)
 		{
 			registerType<Type>();
-			m_Source.insertTypeDeclaration("%variable_type_", TypeTraits<Type>::RawIdentifier, " = OpTypePointer Function ", TypeTraits<Type>::Identifier);
-			m_Source.insertDebugName("OpName %", name, " \"", name, "\"");
+			m_Source.insertType(std::string("%variable_type_") + TypeTraits<Type>::RawIdentifier, std::string("OpTypePointer Function ") + TypeTraits<Type>::Identifier);
+			m_Source.insertName("%" + name, name);
 
-			m_FunctionBlock.insert("%" + name + " = OpVariable %variable_type_" + TypeTraits<Type>::RawIdentifier + " Function");
+			m_FunctionJSON["variables"][name] = std::string("OpVariable %variable_type_") + TypeTraits<Type>::RawIdentifier + " Function";
 
 			return Type(m_Source, name, std::forward<Types>(initializer)...);
 		}
-
-	public:
-		/**
-		 * Convert the internal blocks to a string.
-		 *
-		 * @return The converted string.
-		 */
-		[[nodiscard]] std::string getString() const;
 
 	private:
 		/**
@@ -68,13 +74,10 @@ namespace ShaderBuilder
 			if constexpr (IsCompexType<Type>)
 				registerType<typename TypeTraits<Type>::ValueTraits::Type>();
 
-			m_Source.insertTypeDeclaration(TypeTraits<Type>::Declaration);
+			m_Source.insertType(TypeTraits<Type>::Identifier, TypeTraits<Type>::Declaration);
 		}
 
 	private:
-		BlockInstructions m_Variables;
-		BlockInstructions m_FunctionBlock;
-		std::list<BlockInstructions> m_BlockInstructions;
-		SPIRVSource& m_Source;
+		Json m_FunctionJSON;
 	};
 } // namespace ShaderBuilder

@@ -2,10 +2,12 @@
 
 #pragma once
 
-#include "FunctionBuilder.hpp"
+#include <nlohmann/json.hpp>
 
 namespace ShaderBuilder
 {
+	using Json = nlohmann::ordered_json;
+
 	/**
 	 * SPIR-V Source class.
 	 * This contains all the source information provided by the data types and others.
@@ -14,140 +16,95 @@ namespace ShaderBuilder
 	{
 	public:
 		/**
-		 * Insert a new set of compatibility instructions to the source.
-		 * Note that this will append an end line instruction at the end so you don't have to provide one.
-		 *
-		 * @tparam Types The data types.
-		 * @param data The data to enter.
+		 * Default constructor.
 		 */
-		template<class...Types>
-		void insertCompatibilityInstruction(Types&&... data) { m_CompatibilityInstructions.insert(toString(std::forward<Types>(data)...)); }
+		SPIRVSource();
 
 		/**
-		 * Insert a new set of extension instructions to the source.
-		 * Note that this will append an end line instruction at the end so you don't have to provide one.
+		 * Insert a new shader compatibility.
 		 *
-		 * @tparam Types The data types.
-		 * @param data The data to enter.
+		 * @param compatibility The shader compatibility.
 		 */
-		template<class...Types>
-		void insertExtensionInstruction(Types&&... data) { m_ExtensionInstructions.insert(toString(std::forward<Types>(data)...)); }
+		void insertCompatibility(const std::string& compatibility);
 
 		/**
-		 * Insert a new set of ExtInstImport instructions to the source.
-		 * Note that this will append an end line instruction at the end so you don't have to provide one.
+		 * Insert a new extension.
 		 *
-		 * @tparam Types The data types.
-		 * @param data The data to enter.
+		 * @param extension The extension to insert.
 		 */
-		template<class...Types>
-		void insertExtInstImportInstruction(Types&&... data) { m_ExtInstImportInstructions.insert(toString(std::forward<Types>(data)...)); }
+		void insertExtension(const std::string& extension);
 
 		/**
-		 * Set a memory model to the source.
+		 * Insert a new extended instruction set.
 		 *
-		 * @tparam Types The data types.
-		 * @param data The data to enter.
+		 * @param extensionName The extension name.
+		 * @param extension The instruction set.
 		 */
-		template<class...Types>
-		void setMemoryModel(Types&&... data) { m_MemoryModel = toString(std::forward<Types>(data)...); }
+		void insertExtendedInstructionSet(const std::string& extensionName, const std::string& extension);
 
 		/**
-		 * Insert a new set of entry point instructions to the source.
-		 * Note that this will append an end line instruction at the end so you don't have to provide one.
+		 * Set the memory model.
 		 *
-		 * @tparam Types The data types.
-		 * @param data The data to enter.
+		 * @param addressingModel The addressing model to set.
+		 * @param memoryModel The memory model to set.
 		 */
-		template<class...Types>
-		void insertEntryPoint(Types&&... data) { m_EntryPoints.insert(toString(std::forward<Types>(data)...)); }
+		void setMemoryModel(const std::string& addressingModel, const std::string& memoryModel);
 
 		/**
-		 * Insert a new set of execution modes instructions to the source.
-		 * Note that this will append an end line instruction at the end so you don't have to provide one.
+		 * Insert an entry point.
 		 *
-		 * @tparam Types The data types.
-		 * @param data The data to enter.
+		 * @param executionModel The execution model.
+		 * @param entryPointIdentifier The entry point identifier.
+		 * @param name The name of the entry point.
+		 * @param attributes The entry point's inputs and outputs.
 		 */
-		template<class...Types>
-		void insertExecutionMode(Types&&... data) { m_ExecutionModes.insert(toString(std::forward<Types>(data)...)); }
+		void insertEntryPoint(const std::string& executionModel, const std::string& entryPointIdentifier, const std::string& name, const std::vector<std::string>& attributes);
 
 		/**
-		 * Insert a new set of debug source instructions to the source.
-		 * Note that this will append an end line instruction at the end so you don't have to provide one.
+		 * Insert a new execution mode.
 		 *
-		 * @tparam Types The data types.
-		 * @param data The data to enter.
+		 * @param mode The execution model
 		 */
-		template<class...Types>
-		void insertDebugSource(Types&&... data) { m_DebugSources.insert(toString(std::forward<Types>(data)...)); }
+		void insertExecutionMode(const std::string& mode);
 
 		/**
-		 * Insert a new set of debug name instructions to the source.
-		 * Note that this will append an end line instruction at the end so you don't have to provide one.
+		 * Insert a new debug name.
 		 *
-		 * @tparam Types The data types.
-		 * @param data The data to enter.
+		 * @param type The type of the name.
+		 * @param name The name to insert.
 		 */
-		template<class...Types>
-		void insertDebugName(Types&&... data) { m_DebugNames.insert(toString(std::forward<Types>(data)...)); }
+		void insertName(const std::string& type, const std::string& name);
 
 		/**
-		 * Insert a new set of debug module processed instructions to the source.
-		 * Note that this will append an end line instruction at the end so you don't have to provide one.
+		 * Insert a new debug member name.
 		 *
-		 * @tparam Types The data types.
-		 * @param data The data to enter.
+		 * @param type The type of the name.
+		 * @param index The index of the variable in the structure.
+		 * @param name The name to insert.
 		 */
-		template<class...Types>
-		void insertDebugModuleProcessed(Types&&... data) { m_DebugModuleProcessedInstructions.insert(toString(std::forward<Types>(data)...)); }
+		void insertMemberName(const std::string& type, uint32_t index, const std::string& name);
 
 		/**
-		 * Insert a new set of annotation instructions to the source.
-		 * Note that this will append an end line instruction at the end so you don't have to provide one.
+		 * Insert a new annotation.
 		 *
-		 * @tparam Types The data types.
-		 * @param data The data to enter.
+		 * @param annotation The annotation to insert.
 		 */
-		template<class...Types>
-		void insertAnnotation(Types&&... data) { m_Annotations.insert(toString(std::forward<Types>(data)...)); }
+		void insertAnnotation(const std::string& annotation);
 
 		/**
-		 * Insert a new set of type declaration instructions to the source.
-		 * Note that this will append an end line instruction at the end so you don't have to provide one.
+		 * Insert a new type.
 		 *
-		 * @tparam Types The data types.
-		 * @param data The data to enter.
+		 * @param name The name of the type.
+		 * @param declaration The type declaration.
 		 */
-		template<class...Types>
-		void insertTypeDeclaration(Types&&... data) { m_TypeDeclarations.insert(toString(std::forward<Types>(data)...)); }
+		void insertType(const std::string& name, const std::string& declaration);
 
 		/**
-		 * Insert a new set of function declaration instructions to the source.
-		 * Note that this will append an end line instruction at the end so you don't have to provide one.
+		 * Insert a new function definition.
 		 *
-		 * @tparam Types The data types.
-		 * @param data The data to enter.
+		 * @param object The function definition.
 		 */
-		template<class...Types>
-		void insertFunctionDeclaration(Types&&... data) { m_FunctionDeclarations.insert(toString(std::forward<Types>(data)...)); }
-
-		/**
-		 * Insert a new set of function definition instructions to the source.
-		 * Note that this will append an end line instruction at the end so you don't have to provide one.
-		 *
-		 * @tparam Types The data types.
-		 * @param data The data to enter.
-		 */
-		template<class...Types>
-		void insertFunctionDefinition(Types&&... data) { m_FunctionDefinitions.insert(toString(std::forward<Types>(data)...)); }
-
-		/**
-		 * Create a new function builder.
-		 *
-		 * @return The created function builder.
-		 */
-		[[nodiscard]] FunctionBuilder& createFunctionBuilder() { return m_FunctionDefinitions.emplace_back(*this); }
+		void insertFunctionDefinition(Json&& object);
 
 	public:
 		/**
@@ -158,40 +115,6 @@ namespace ShaderBuilder
 		[[nodiscard]] std::string getSourceAssembly() const;
 
 	private:
-		/**
-		 * Convert the variadic arguments to a string.
-		 *
-		 * @tparam Types The variadic argument types.
-		 * @param data The data to convert.
-		 * @return The converted string.
-		 */
-		template<class...Types>
-		[[nodiscard]] std::string toString(Types&&... data) const
-		{
-			std::stringstream stream;
-			auto insertData = [this, &stream](auto&& member) { stream << std::move(member); };
-			(insertData(std::move(data)), ...);
-
-			return stream.str();
-		}
-
-	private:
-		CompatibiltyInstructions m_CompatibilityInstructions;
-		ExtensionInstructions m_ExtensionInstructions;
-		ExtInstImportInstructions m_ExtInstImportInstructions;
-		EntryPointInstructions m_EntryPoints;
-		ExecutionModeInstructions m_ExecutionModes;
-
-		DebugSourceInstructions m_DebugSources;
-		DebugNameInstructions m_DebugNames;
-		DebugModuleProcesseInstructions m_DebugModuleProcessedInstructions;
-
-		AnnotationInstructions m_Annotations;
-		TypeDeclarationInstructions m_TypeDeclarations;
-
-		FunctionDeclarationInstructions m_FunctionDeclarations;
-		std::list<FunctionBuilder> m_FunctionDefinitions;
-
-		std::string m_MemoryModel;
+		Json m_SourceJSON;
 	};
 } // namespace ShaderBuilder

@@ -4,13 +4,8 @@
 
 namespace ShaderBuilder
 {
-	std::string FunctionBuilder::getString() const
+	FunctionBuilder::~FunctionBuilder()
 	{
-		std::stringstream finalTransform;
-
-		finalTransform << m_Variables.getString();
-		finalTransform << m_FunctionBlock.getString();
-
-		return finalTransform.str();
+		m_Source.insertFunctionDefinition(std::move(m_FunctionJSON));
 	}
 } // namespace ShaderBuilder

@@ -21,7 +21,7 @@ namespace ShaderBuilder
 		using Type = void;
 		static constexpr const char RawIdentifier[] = "void";
 		static constexpr const char Identifier[] = "%void";
-		static constexpr const char Declaration[] = "%void = OpTypeVoid";
+		static constexpr const char Declaration[] = "OpTypeVoid";
 		static constexpr uint8_t Size = 0;
 	};
 
@@ -34,7 +34,7 @@ namespace ShaderBuilder
 		using Type = bool;
 		static constexpr const char RawIdentifier[] = "bool";
 		static constexpr const char Identifier[] = "%bool";
-		static constexpr const char Declaration[] = "%bool = OpTypeBool";
+		static constexpr const char Declaration[] = "OpTypeBool";
 		static constexpr uint8_t Size = sizeof(Type);
 	};
 
@@ -47,7 +47,7 @@ namespace ShaderBuilder
 		using Type = int8_t;
 		static constexpr const char RawIdentifier[] = "int8";
 		static constexpr const char Identifier[] = "%int8";
-		static constexpr const char Declaration[] = "%int8 = OpTypeInt 8 1";
+		static constexpr const char Declaration[] = "OpTypeInt 8 1";
 		static constexpr uint8_t Size = sizeof(Type);
 	};
 
@@ -60,7 +60,7 @@ namespace ShaderBuilder
 		using Type = uint8_t;
 		static constexpr const char RawIdentifier[] = "uint8";
 		static constexpr const char Identifier[] = "%uint8";
-		static constexpr const char Declaration[] = "%uint8 = OpTypeInt 8 0";
+		static constexpr const char Declaration[] = "OpTypeInt 8 0";
 		static constexpr uint8_t Size = sizeof(Type);
 	};
 
@@ -73,7 +73,7 @@ namespace ShaderBuilder
 		using Type = int16_t;
 		static constexpr const char RawIdentifier[] = "int16";
 		static constexpr const char Identifier[] = "%int16";
-		static constexpr const char Declaration[] = "%int16 = OpTypeInt 16 1";
+		static constexpr const char Declaration[] = "OpTypeInt 16 1";
 		static constexpr uint8_t Size = sizeof(Type);
 	};
 
@@ -86,7 +86,7 @@ namespace ShaderBuilder
 		using Type = uint16_t;
 		static constexpr const char RawIdentifier[] = "uint16";
 		static constexpr const char Identifier[] = "%uint16";
-		static constexpr const char Declaration[] = "%uint16 = OpTypeInt 16 0";
+		static constexpr const char Declaration[] = "OpTypeInt 16 0";
 		static constexpr uint8_t Size = sizeof(Type);
 	};
 
@@ -99,7 +99,7 @@ namespace ShaderBuilder
 		using Type = int32_t;
 		static constexpr const char RawIdentifier[] = "int32";
 		static constexpr const char Identifier[] = "%int32";
-		static constexpr const char Declaration[] = "%int32 = OpTypeInt 32 1";
+		static constexpr const char Declaration[] = "OpTypeInt 32 1";
 		static constexpr uint8_t Size = sizeof(Type);
 	};
 
@@ -112,7 +112,7 @@ namespace ShaderBuilder
 		using Type = uint32_t;
 		static constexpr const char RawIdentifier[] = "uint32";
 		static constexpr const char Identifier[] = "%uint32";
-		static constexpr const char Declaration[] = "%uint32 = OpTypeInt 32 0";
+		static constexpr const char Declaration[] = "OpTypeInt 32 0";
 		static constexpr uint8_t Size = sizeof(Type);
 	};
 
@@ -125,7 +125,7 @@ namespace ShaderBuilder
 		using Type = int64_t;
 		static constexpr const char RawIdentifier[] = "int64";
 		static constexpr const char Identifier[] = "%int64";
-		static constexpr const char Declaration[] = "%int64 = OpTypeInt 64 1";
+		static constexpr const char Declaration[] = "OpTypeInt 64 1";
 		static constexpr uint8_t Size = sizeof(Type);
 	};
 
@@ -138,7 +138,7 @@ namespace ShaderBuilder
 		using Type = uint64_t;
 		static constexpr const char RawIdentifier[] = "uint64";
 		static constexpr const char Identifier[] = "%uint64";
-		static constexpr const char Declaration[] = "%int64 = OpTypeInt 64 0";
+		static constexpr const char Declaration[] = "OpTypeInt 64 0";
 		static constexpr uint8_t Size = sizeof(Type);
 	};
 
@@ -151,7 +151,7 @@ namespace ShaderBuilder
 		using Type = float;
 		static constexpr const char RawIdentifier[] = "float";
 		static constexpr const char Identifier[] = "%float";
-		static constexpr const char Declaration[] = "%float = OpTypeFloat 32";
+		static constexpr const char Declaration[] = "OpTypeFloat 32";
 		static constexpr uint8_t Size = sizeof(Type);
 	};
 
@@ -164,7 +164,7 @@ namespace ShaderBuilder
 		using Type = double;
 		static constexpr const char RawIdentifier[] = "double";
 		static constexpr const char Identifier[] = "%double";
-		static constexpr const char Declaration[] = "%double = OpTypeFloat 64";
+		static constexpr const char Declaration[] = "OpTypeFloat 64";
 		static constexpr uint8_t Size = sizeof(Type);
 	};
 

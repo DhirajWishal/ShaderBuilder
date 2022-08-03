@@ -3,7 +3,6 @@
 #pragma once
 
 #include "DataType.hpp"
-#include "InstructionStores.hpp"
 
 namespace ShaderBuilder
 {
@@ -38,6 +37,6 @@ namespace ShaderBuilder
 		using Type = Callable<void, Arguments...>;
 		using ValueTraits = TypeTraits<void>;
 		static constexpr const char Identifier[] = "%void_callable";
-		static constexpr const char Declaration[] = "%void_callable = OpTypeFunction %void";
+		static constexpr const char Declaration[] = "OpTypeFunction %void";
 	};
 } // namespace ShaderBuilder

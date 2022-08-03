@@ -10,8 +10,7 @@
 
 #include "FunctionBuilder.hpp"
 
-#include <sstream>
-#include <set>
+#include <functional>
 
 namespace ShaderBuilder
 {
@@ -87,9 +86,10 @@ namespace ShaderBuilder
 		[[nodiscard]] Type createInput(uint32_t location, std::string&& name)
 		{
 			registerType<Type>();
-			m_Source.insertTypeDeclaration("%input_", name, " = OpTypePointer Input ", TypeTraits<Type>::Identifier);
-			m_Source.insertTypeDeclaration("%", name, " = OpVariable %input_", name, " Input");
-			m_Source.insertDebugName("OpName %", name, " \"", name, "\"");
+
+			m_Source.insertType("%input_" + name, std::string("OpTypePointer Input ") + TypeTraits<Type>::Identifier);
+			m_Source.insertType("%" + name, std::string("OpVariable %input_") + name + " Input");
+			m_Source.insertName("%" + name, name);
 
 			return Type(m_Source, name);
 		}
@@ -105,9 +105,10 @@ namespace ShaderBuilder
 		[[nodiscard]] Type createOutput(uint32_t location, std::string&& name)
 		{
 			registerType<Type>();
-			m_Source.insertTypeDeclaration("%output_", name, " = OpTypePointer Output ", TypeTraits<Type>::Identifier);
-			m_Source.insertTypeDeclaration("%", name, " = OpVariable %output_", name, " Output");
-			m_Source.insertDebugName("OpName %", name, " \"", name, "\"");
+
+			m_Source.insertType("%output_" + name, std::string("OpTypePointer Output ") + TypeTraits<Type>::Identifier);
+			m_Source.insertType("%" + name, std::string("OpVariable %output_") + name + " Output");
+			m_Source.insertName("%" + name, name);
 
 			return Type(m_Source, name);
 		}
@@ -126,9 +127,9 @@ namespace ShaderBuilder
 		[[nodiscard]] Type createLocalVariable(std::string&& name, Types&&... initializer)
 		{
 			registerType<Type>();
-			m_Source.insertTypeDeclaration("%variable_type_", TypeTraits<Type>::RawIdentifier, " = OpTypePointer Function ", TypeTraits<Type>::Identifier);
-			m_Source.insertFunctionDefinition("%", name, " = OpVariable %variable_type_", TypeTraits<Type>::RawIdentifier, " Function");
-			m_Source.insertDebugName("OpName %", name, " \"", name, "\"");
+			// m_Source.insertFunctionDefinition("%", name, " = OpVariable %variable_type_", TypeTraits<Type>::RawIdentifier, " Function");
+			m_Source.insertType(std::string("%variable_type_") + TypeTraits<Type>::RawIdentifier, std::string("OpTypePointer Function ") + TypeTraits<Type>::Identifier);
+			m_Source.insertName("%" + name, name);
 
 			return Type(m_Source, name, std::forward<Types>(initializer)...);
 		}
@@ -156,28 +157,27 @@ namespace ShaderBuilder
 		[[nodiscard]] Type createUniform(uint32_t set, uint32_t binding, const std::string& name, Members... members)
 		{
 			// Register the members.
-			m_Source.insertTypeDeclaration("%type_", name, " = OpTypeStruct ", resolveMemberVariableTypeIdentifiers<Members...>());
+			m_Source.insertType(std::string("%type_") + name, "OpTypeStruct " + resolveMemberVariableTypeIdentifiers<Members...>());
 
 			// Setup type declarations.
-			m_Source.insertTypeDeclaration("%uniform_", name, " = OpTypePointer Uniform %type_", name);
-			m_Source.insertTypeDeclaration("%", name, " = OpVariable %uniform_", name, " Uniform");
+			m_Source.insertType("%uniform_" + name, "OpTypePointer Uniform %type_" + name);
+			m_Source.insertType("%" + name, "OpVariable %uniform_" + name + " Uniform");
 
 			// Set the type debug information and annotations.
-			m_Source.insertDebugName("OpName %uniform_", name, " \"", name, "\"");
-			m_Source.insertDebugName("OpName %", name, " \"\"");
+			m_Source.insertName("%uniform_" + name, name);
+			m_Source.insertName("%" + name, "");
 
-			m_Source.insertAnnotation("OpDecorate %", name, " DescriptorSet ", set);
-			m_Source.insertAnnotation("OpDecorate %", name, " Binding ", binding);
+			m_Source.insertAnnotation("OpDecorate %" + name + " DescriptorSet " + std::to_string(set));
+			m_Source.insertAnnotation("OpDecorate %" + name + " Binding " + std::to_string(binding));
 
 			// Create the uniform.
 			auto uniform = Type(m_Source, name);
 
-			uint32_t counter = 0;
-			uint64_t offsets = 0;
+			uint64_t counter = 0, offsets = 0;
 			auto logMemberInformation = [this, &uniform, &name, &counter, &offsets](auto member)
 			{
-				m_Source.insertDebugName("OpMemberName %type_", name, " ", counter, " \"", uniform.*member, "\"");
-				m_Source.insertAnnotation("OpMemberDecorate %type_", name, " ", counter, " Offset ", offsets);
+				m_Source.insertMemberName("%type_" + name, counter, (uniform.*member).getName());
+				m_Source.insertAnnotation("OpMemberDecorate %type_" + name + " " + std::to_string(counter) + " Offset " + std::to_string(offsets));
 
 				counter++;
 				offsets += TypeTraits<typename MemberVariableType<decltype(member)>::Type>::Size;
@@ -192,25 +192,15 @@ namespace ShaderBuilder
 		 *
 		 * @tparam Type The function type.
 		 * @param name The name of the function.
-		 * @param function The function definition. Make sure that the function must contain a single parameter of FunctionBuilder&.
+		 * @param function The function definition. Make sure that the function must contain a single parameter of const FunctionBuilder&.
 		 * @return The callable type.
 		 */
-		template<class Type>
-		[[nodiscard]] decltype(auto) createFunction(std::string&& name, Type&& function)
+		template<class ReturnType>
+		[[nodiscard]] decltype(auto) createFunction(std::string&& name, std::function<void(FunctionBuilder&&)>&& function)
 		{
-			using ReturnType = std::invoke_result_t<Type>;
 			registerCallable<Callable<ReturnType>>();
 
-			m_Source.insertDebugName("OpName %", name, " \"", name, "\"");
-			auto& functionDefinition = m_Source.createFunctionDefinition();
-			functionDefinition.insertFunctionDefinition("%", name, " = OpFunction ", TypeTraits<ReturnType>::Identifier, " None ", TypeTraits<Callable<ReturnType>>::Identifier);
-			functionDefinition.insertFunctionDefinition("%function_block_", name, " = OpLabel");
-
-			function();
-
-			functionDefinition.insertFunctionDefinition("OpReturn");
-			functionDefinition.insertFunctionDefinition("OpFunctionEnd");
-
+			function(FunctionBuilder(m_Source, name, FunctionBuilderReturnType<ReturnType>()));
 			return Callable<ReturnType>(m_Source, name);
 		}
 
@@ -225,40 +215,41 @@ namespace ShaderBuilder
 		template<class... Attributes>
 		void addEntryPoint(ShaderType shaderType, std::string&& name, Attributes&&... attributes)
 		{
-			std::stringstream entryPoint;
-			entryPoint << "OpEntryPoint ";
-
 			// Resolve the proper shader type.
+			std::string executionModel;
 			switch (shaderType)
 			{
 			case ShaderBuilder::ShaderType::Vertex:
-				entryPoint << "Vertex ";
+				executionModel = "Vertex ";
 				break;
+
 			case ShaderBuilder::ShaderType::TessellationControl:
-				entryPoint << "TessellationControl ";
+				executionModel = "TessellationControl ";
 				break;
+
 			case ShaderBuilder::ShaderType::TessellationEvaluation:
-				entryPoint << "TessellationEvaluation ";
+				executionModel = "TessellationEvaluation ";
 				break;
+
 			case ShaderBuilder::ShaderType::Geometry:
-				entryPoint << "Geometry ";
+				executionModel = "Geometry ";
 				break;
+
 			case ShaderBuilder::ShaderType::Fragment:
-				entryPoint << "Fragment ";
+				executionModel = "Fragment ";
 				break;
+
 			case ShaderBuilder::ShaderType::Compute:
-				entryPoint << "GLCompute ";
+				executionModel = "GLCompute ";
 				break;
 			}
 
-			// Setup the entry point function information.
-			entryPoint << "%" << name << " \"" << name << "\" ";
-
 			// Setup the inputs.
-			auto insertAttribute = [&entryPoint](auto&& attribute) { entryPoint << "%" << attribute << " "; };
+			std::vector<std::string> attributeStrings;
+			auto insertAttribute = [&attributeStrings](auto&& attribute) { attributeStrings.emplace_back(std::move(attribute)); };
 			(insertAttribute(std::move(attributes)), ...);
 
-			m_Source.insertEntryPoint(entryPoint.str());
+			m_Source.insertEntryPoint(executionModel, "%" + name, name, attributeStrings);
 		}
 
 	public:
@@ -290,7 +281,7 @@ namespace ShaderBuilder
 			if constexpr (IsCompexType<Type>)
 				registerType<typename TypeTraits<Type>::ValueTraits::Type>();
 
-			m_Source.insertTypeDeclaration(TypeTraits<Type>::Declaration);
+			m_Source.insertType(TypeTraits<Type>::Identifier, TypeTraits<Type>::Declaration);
 		}
 
 		/**
@@ -303,7 +294,7 @@ namespace ShaderBuilder
 		{
 			// Try and register value types.
 			registerType<typename TypeTraits<Type>::ValueTraits::Type>();
-			m_Source.insertTypeDeclaration(TypeTraits<Type>::Declaration);
+			m_Source.insertType(TypeTraits<Type>::Identifier, TypeTraits<Type>::Declaration);
 		}
 
 		/**
