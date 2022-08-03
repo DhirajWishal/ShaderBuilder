@@ -114,6 +114,13 @@ namespace ShaderBuilder
 		 */
 		[[nodiscard]] std::string getSourceAssembly() const;
 
+		/**
+		 * Get the internal JSON representation.
+		 *
+		 * @return The JSON representation as a string.
+		 */
+		[[nodiscard]] std::string getJSON() const;
+
 	private:
 		Json m_SourceJSON;
 	};

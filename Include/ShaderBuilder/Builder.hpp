@@ -2,12 +2,7 @@
 
 #pragma once
 
-#include "Callable.hpp"
-#include "DataType.hpp"
-
-#include "SPIRVSource.hpp"
 #include "SPIRVBinary.hpp"
-
 #include "FunctionBuilder.hpp"
 
 #include <functional>
@@ -259,6 +254,13 @@ namespace ShaderBuilder
 		 * @return The string.
 		 */
 		[[nodiscard]] std::string getString() const;
+
+		/**
+		 * Get the internal JSON representation.
+		 *
+		 * @return The JSON representation as a string.
+		 */
+		[[nodiscard]] std::string getJSON() const;
 
 		/**
 		 * Compile the shader code and inform if there were any errors.

@@ -186,4 +186,9 @@ namespace ShaderBuilder
 		return finalTransform.str();
 	}
 
+	std::string SPIRVSource::getJSON() const
+	{
+		return m_SourceJSON.dump(2);
+	}
+
 } // namespace ShaderBuilder

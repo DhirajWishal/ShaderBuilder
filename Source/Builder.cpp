@@ -59,6 +59,11 @@ namespace ShaderBuilder
 		return m_Source.getSourceAssembly();
 	}
 
+	std::string Builder::getJSON() const
+	{
+		return m_Source.getJSON();
+	}
+
 	SPIRVBinary Builder::compile(bool shouldOptimize /*= true*/) const
 	{
 		auto errorMessageConsumer = [](spv_message_level_t level, const char*, const spv_position_t& position, const char* message) { throw BuilderError(message); };

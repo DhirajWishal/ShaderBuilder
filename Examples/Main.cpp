@@ -36,11 +36,17 @@ int main()
 
 	shaderSource.addEntryPoint(ShaderBuilder::ShaderType::Vertex, "main", "inPosition", "inTextureCoordinates", "outTextureCoordinates");
 
+	// Show the raw data.
+	std::cout << "-------------------- JSON --------------------" << std::endl;
+	std::cout << shaderSource.getJSON() << std::endl;
+
 	std::cout << "-------------------- Generated Assembly --------------------" << std::endl;
 	std::cout << shaderSource.getString() << std::endl;
 
+	// Generate the shader.
 	const auto output = shaderSource.compile();
 
+	// Show the generated data.
 	std::cout << "-------------------- Compiled Assembly --------------------" << std::endl;
 	std::cout << output.disassemble() << std::endl;
 

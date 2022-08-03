@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "DataType.hpp"
+#include "Callable.hpp"
 #include "SPIRVSource.hpp"
 
 namespace ShaderBuilder
