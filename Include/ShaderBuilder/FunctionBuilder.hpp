@@ -31,7 +31,9 @@ namespace ShaderBuilder
 		explicit FunctionBuilder(SPIRVSource& source, const std::string& name, [[maybe_unused]] FunctionBuilderReturnType<ReturnType>&& returnType = {}) : DataType<FunctionBuilder>(source, name)
 		{
 			source.insertName("%" + name, name);
-			m_FunctionJSON["declaration"] = "%" + name + " = OpFunction " + TypeTraits<ReturnType>::Identifier + " None " + TypeTraits<Callable<ReturnType>>::Identifier;
+			m_FunctionJSON["declaration"] = "%" + name + " = OpFunction " + TypeTraits<ReturnType>::Identifier + " None " + GetFunctionIdentifier<ReturnType>();
+
+			m_FunctionJSON["firstBlock"] = "block_" + std::to_string(source.getUniqueID());
 		}
 
 		/**
@@ -60,6 +62,24 @@ namespace ShaderBuilder
 
 			return Type(m_Source, name, std::forward<Types>(initializer)...);
 		}
+
+		/**
+		 * Exit from the function by returning a value.
+		 *
+		 * @tparam Type The value type.
+		 * @param value The value to return.
+		 */
+		template<class Type>
+		void exit(const Type& value)
+		{
+			m_FunctionJSON["return"] = value.getIdentifier();
+			exit();
+		}
+
+		/**
+		 * Exit the function by returning nothing.
+		 */
+		void exit();
 
 	private:
 		/**

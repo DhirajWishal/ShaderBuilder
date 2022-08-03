@@ -30,6 +30,13 @@ namespace ShaderBuilder
 		 */
 		[[nodiscard]] std::string getName() const { return m_VariableName; }
 
+		/**
+		 * Get the identifier of the variable/ function.
+		 *
+		 * @return The identifier.
+		 */
+		[[nodiscard]] std::string getIdentifier() const { return "%" + m_VariableName; }
+
 	protected:
 		std::string m_VariableName;
 		SPIRVSource& m_Source;

@@ -25,16 +25,24 @@ int main()
 
 	auto camera = shaderSource.createUniform<Camera>(0, 0, "camera", &Camera::m_Position, &Camera::m_Color);
 
-	auto mainFunction = shaderSource.createFunction<void>("main", [&shaderSource](ShaderBuilder::FunctionBuilder&& builder)
-		{
-			auto temporary = builder.createVariable<ShaderBuilder::Vec4<float>>("temporary", 100);
-			auto another = builder.createVariable<ShaderBuilder::Vec4<float>>("another");
+	{
+		auto function = shaderSource.createFunction<void>("main");
+		auto temporary = function.createVariable<ShaderBuilder::Vec4<float>>("temporary", 100);
+		auto another = function.createVariable<ShaderBuilder::Vec4<float>>("another");
 
-			another = temporary;
-		}
-	);
+		another = temporary;
 
-	shaderSource.addEntryPoint(ShaderBuilder::ShaderType::Vertex, "main", "inPosition", "inTextureCoordinates", "outTextureCoordinates");
+		shaderSource.addEntryPoint(ShaderBuilder::ShaderType::Vertex, function, "inPosition", "inTextureCoordinates", "outTextureCoordinates");
+	}
+
+	// {
+	// 	auto function = shaderSource.createFunction<ShaderBuilder::Vec4<float>>("something");
+	// 	auto temporary = function.createVariable<ShaderBuilder::Vec4<float>>("anotherThing", 100);
+	// 	auto another = function.createVariable<ShaderBuilder::Vec4<float>>("someOtherThing");
+	// 
+	// 	another = temporary;
+	// 	function.exit(another);
+	// }
 
 	// Show the raw data.
 	std::cout << "-------------------- JSON --------------------" << std::endl;

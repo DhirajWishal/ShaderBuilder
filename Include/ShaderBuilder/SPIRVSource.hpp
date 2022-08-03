@@ -121,7 +121,15 @@ namespace ShaderBuilder
 		 */
 		[[nodiscard]] std::string getJSON() const;
 
+		/**
+		 * Get a unique ID.
+		 *
+		 * @return The unique ID.
+		 */
+		[[nodsicard]] uint64_t getUniqueID() { return m_UniqueID++; }
+
 	private:
 		Json m_SourceJSON;
+		uint64_t m_UniqueID = 1;
 	};
 } // namespace ShaderBuilder

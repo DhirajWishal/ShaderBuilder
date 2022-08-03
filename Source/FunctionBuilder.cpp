@@ -6,6 +6,13 @@ namespace ShaderBuilder
 {
 	FunctionBuilder::~FunctionBuilder()
 	{
-		m_Source.insertFunctionDefinition(std::move(m_FunctionJSON));
+		exit();
 	}
+
+	void FunctionBuilder::exit()
+	{
+		if (!m_FunctionJSON.empty())
+			m_Source.insertFunctionDefinition(std::move(m_FunctionJSON));
+	}
+
 } // namespace ShaderBuilder

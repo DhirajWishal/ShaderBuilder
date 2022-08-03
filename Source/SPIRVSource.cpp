@@ -2,6 +2,8 @@
 
 #include "ShaderBuilder/SPIRVSource.hpp"
 
+#include <sstream>
+
 namespace ShaderBuilder
 {
 	SPIRVSource::SPIRVSource()
@@ -100,7 +102,6 @@ namespace ShaderBuilder
 		finalTransform << "; Magic:     0x07230203 (SPIR-V)" << std::endl;
 		finalTransform << "; Version:   0x00010000 (Version: 1.0.0)" << std::endl;
 		finalTransform << "; Generator: 0x00000000 (Shader Builder; 1)" << std::endl;
-		// finalTransform << "; Bound:     " << m_TypeDeclarations.getUniqueIDCount() + 1 << std::endl;
 		finalTransform << "; Schema:    0" << std::endl;
 		finalTransform << std::endl;
 
@@ -173,22 +174,28 @@ namespace ShaderBuilder
 		for (const auto& object : m_SourceJSON["functionDefinitions"])
 		{
 			finalTransform << object["declaration"].get<std::string>() << std::endl;
-			finalTransform << "%variables = OpLabel" << std::endl;
+			finalTransform << "%" << object["firstBlock"].get<std::string>() << " = OpLabel" << std::endl;
 
 			for (const auto& [name, declaration] : object["variables"].items())
 				finalTransform << "%" << name << " = " << declaration.get<std::string>() << std::endl;
 
-			finalTransform << "OpReturn" << std::endl;
+			// Return a value if we have defined it.
+			if (object.contains("return"))
+				finalTransform << "OpReturnValue " << object["return"].get<std::string>() << std::endl;
+
+			// Else return nothing.
+			else
+				finalTransform << "OpReturn" << std::endl;
+
+			// End the function.
 			finalTransform << "OpFunctionEnd" << std::endl;
 		}
-		finalTransform << std::endl;
 
 		return finalTransform.str();
 	}
 
 	std::string SPIRVSource::getJSON() const
 	{
-		return m_SourceJSON.dump(2);
+		return m_SourceJSON.dump(4);
 	}
-
 } // namespace ShaderBuilder

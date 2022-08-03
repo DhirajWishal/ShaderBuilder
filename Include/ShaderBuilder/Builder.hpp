@@ -5,8 +5,6 @@
 #include "SPIRVBinary.hpp"
 #include "FunctionBuilder.hpp"
 
-#include <functional>
-
 namespace ShaderBuilder
 {
 	/**
@@ -122,7 +120,6 @@ namespace ShaderBuilder
 		[[nodiscard]] Type createLocalVariable(std::string&& name, Types&&... initializer)
 		{
 			registerType<Type>();
-			// m_Source.insertFunctionDefinition("%", name, " = OpVariable %variable_type_", TypeTraits<Type>::RawIdentifier, " Function");
 			m_Source.insertType(std::string("%variable_type_") + TypeTraits<Type>::RawIdentifier, std::string("OpTypePointer Function ") + TypeTraits<Type>::Identifier);
 			m_Source.insertName("%" + name, name);
 
@@ -191,12 +188,10 @@ namespace ShaderBuilder
 		 * @return The callable type.
 		 */
 		template<class ReturnType>
-		[[nodiscard]] decltype(auto) createFunction(std::string&& name, std::function<void(FunctionBuilder&&)>&& function)
+		[[nodiscard]] FunctionBuilder createFunction(std::string&& name)
 		{
 			registerCallable<Callable<ReturnType>>();
-
-			function(FunctionBuilder(m_Source, name, FunctionBuilderReturnType<ReturnType>()));
-			return Callable<ReturnType>(m_Source, name);
+			return FunctionBuilder(m_Source, name, FunctionBuilderReturnType<ReturnType>());
 		}
 
 		/**
@@ -204,11 +199,11 @@ namespace ShaderBuilder
 		 *
 		 * @tparam Attributes The input and output attribute types.
 		 * @param shaderType The type of the shader.
-		 * @param name The name of the entry point function.
+		 * @param function The entry point function.
 		 * @param attributes The names of the input and output attributes.
 		 */
 		template<class... Attributes>
-		void addEntryPoint(ShaderType shaderType, std::string&& name, Attributes&&... attributes)
+		void addEntryPoint(ShaderType shaderType, const FunctionBuilder& function, Attributes&&... attributes)
 		{
 			// Resolve the proper shader type.
 			std::string executionModel;
@@ -244,6 +239,7 @@ namespace ShaderBuilder
 			auto insertAttribute = [&attributeStrings](auto&& attribute) { attributeStrings.emplace_back(std::move(attribute)); };
 			(insertAttribute(std::move(attributes)), ...);
 
+			const auto& name = function.getName();
 			m_Source.insertEntryPoint(executionModel, "%" + name, name, attributeStrings);
 		}
 
@@ -294,9 +290,12 @@ namespace ShaderBuilder
 		template<class Type>
 		void registerCallable()
 		{
+			using ValueType = typename TypeTraits<Type>::ValueTraits::Type;
+
 			// Try and register value types.
-			registerType<typename TypeTraits<Type>::ValueTraits::Type>();
-			m_Source.insertType(TypeTraits<Type>::Identifier, TypeTraits<Type>::Declaration);
+			registerType<ValueType>();
+
+			m_Source.insertType(GetFunctionIdentifier<ValueType>(), std::string("OpTypeFunction ") + TypeTraits<ValueType>::Identifier);
 		}
 
 		/**

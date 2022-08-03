@@ -21,22 +21,24 @@ namespace ShaderBuilder
 		 * @param name The name of the function.
 		 */
 		explicit Callable(SPIRVSource& source, const std::string& name) : DataType<Callable<Return, Arguments...>>(source, name) {}
-
-		/**
-		 * Function call operator overload.
-		 */
-		decltype(auto) operator()(Arguments&&... arguments) {}
 	};
 
 	/**
 	 * Callable void specialization.
 	 */
-	template<class... Arguments>
-	struct TypeTraits<Callable<void, Arguments...>>
+	template<class Return, class... Arguments>
+	struct TypeTraits<Callable<Return, Arguments...>>
 	{
-		using Type = Callable<void, Arguments...>;
-		using ValueTraits = TypeTraits<void>;
-		static constexpr const char Identifier[] = "%void_callable";
-		static constexpr const char Declaration[] = "OpTypeFunction %void";
+		using Type = Callable<Return, Arguments...>;
+		using ValueTraits = TypeTraits<Return>;
 	};
+
+	/**
+	 * Get a function's identifier using the value type.
+	 *
+	 * @tparam ValueType The value type.
+	 * @return The identifier string.
+	 */
+	template<class ValueType>
+	[[nodiscard]] std::string GetFunctionIdentifier() { return std::string(TypeTraits<ValueType>::Identifier) + "_callable"; }
 } // namespace ShaderBuilder
