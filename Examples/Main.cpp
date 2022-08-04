@@ -5,25 +5,52 @@
 #include "ShaderBuilder/Vec3.hpp"
 #include "ShaderBuilder/Vec4.hpp"
 
+#include "Profiler.hpp"
+
 #include <iostream>
 
-class Camera final : public ShaderBuilder::DataType<Camera>
+/**
+ * This generates the same SPIRV as the following GLSL.
+ *
+ * ```GLSL
+ * layout (location = 0) in vec3 inPosition;
+ * layout (location = 12) in vec2 inTextureCoordinates;
+ * layout (location = 0) out vec2 outTextureCoordinates;
+ *
+ * layout (set = 0, binding = 0) uniform Camera
+ * {
+ * 		mat4 m_Projection;
+ * 		mat4 m_View;
+ * } camera;
+ *
+ * void main()
+ * {
+ *		vec4 temporary = vec4(100);
+ *		vec4 another;
+ *
+ *		another = temporary;
+ * }
+ * ```
+ */
+[[nodiscard]] ShaderBuilder::SPIRVBinary CreateVertexShader()
 {
-public:
-	explicit Camera(ShaderBuilder::SPIRVSource& source, const std::string& name) : ShaderBuilder::DataType<Camera>(source, name), m_Position(source, "m_Position"), m_Color(source, "m_Color") {}
+	[[maybe_unused]] Profiler _profiler;
 
-	ShaderBuilder::Vec4<float> m_Position;
-	ShaderBuilder::Vec2<float> m_Color;
-};
-
-int main()
-{
 	ShaderBuilder::Builder shaderSource;
-	auto inPosition = shaderSource.createInput<ShaderBuilder::Vec3<float>>(0, "inPosition");
-	auto inTextureCoordinates = shaderSource.createInput<ShaderBuilder::Vec2<float>>(12, "inTextureCoordinates");
-	auto outTextureCoordinates = shaderSource.createOutput<ShaderBuilder::Vec2<float>>(0, "outTextureCoordinates");
+	auto inPosition = shaderSource.createInput<ShaderBuilder::Vec3<float>>(0, "inPosition");						
+	auto inTextureCoordinates = shaderSource.createInput<ShaderBuilder::Vec2<float>>(12, "inTextureCoordinates");	
+	auto outTextureCoordinates = shaderSource.createOutput<ShaderBuilder::Vec2<float>>(0, "outTextureCoordinates"); 
 
-	auto camera = shaderSource.createUniform<Camera>(0, 0, "camera", &Camera::m_Position, &Camera::m_Color);
+	class Camera final : public ShaderBuilder::DataType<Camera>
+	{
+	public:
+		explicit Camera(ShaderBuilder::SPIRVSource& source, const std::string& name) : ShaderBuilder::DataType<Camera>(source, name), m_Projection(source, "m_Projection"), m_View(source, "m_View") {}
+
+		ShaderBuilder::Vec4<float> m_Projection;	// These should be Mat4.
+		ShaderBuilder::Vec2<float> m_View;			// These should be Mat4.
+	};
+
+	auto camera = shaderSource.createUniform<Camera>(0, 0, "camera", &Camera::m_Projection, &Camera::m_View);
 
 	{
 		auto function = shaderSource.createFunction<void>("main");
@@ -35,24 +62,13 @@ int main()
 		shaderSource.addEntryPoint(ShaderBuilder::ShaderType::Vertex, function, "inPosition", "inTextureCoordinates", "outTextureCoordinates");
 	}
 
-	// {
-	// 	auto function = shaderSource.createFunction<ShaderBuilder::Vec4<float>>("something");
-	// 	auto temporary = function.createVariable<ShaderBuilder::Vec4<float>>("anotherThing", 100);
-	// 	auto another = function.createVariable<ShaderBuilder::Vec4<float>>("someOtherThing");
-	// 
-	// 	another = temporary;
-	// 	function.exit(another);
-	// }
+	return shaderSource.compile();
+}
 
-	// Show the raw data.
-	std::cout << "-------------------- JSON --------------------" << std::endl;
-	std::cout << shaderSource.getJSON() << std::endl;
-
-	std::cout << "-------------------- Generated Assembly --------------------" << std::endl;
-	std::cout << shaderSource.getString() << std::endl;
-
+int main()
+{
 	// Generate the shader.
-	const auto output = shaderSource.compile();
+	const auto output = CreateVertexShader();
 
 	// Show the generated data.
 	std::cout << "-------------------- Compiled Assembly --------------------" << std::endl;

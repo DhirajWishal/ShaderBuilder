@@ -12,6 +12,8 @@ add_executable(
 	ShaderBuilderExamples
 
 	"Main.cpp"
+	"Profiler.hpp"
+	"Profiler.cpp"
 )
 
 # Add the optick static library as a target link.
