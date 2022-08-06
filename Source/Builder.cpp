@@ -6,6 +6,8 @@
 #include <spirv-tools/libspirv.hpp>
 #include <spirv-tools/optimizer.hpp>
 
+#include <iostream>
+
 namespace /* anonymous */
 {
 	/**
@@ -72,6 +74,8 @@ namespace ShaderBuilder
 		tools.SetMessageConsumer(errorMessageConsumer);
 
 		const auto shaderCode = getString();
+
+		std::cout << shaderCode << std::endl;
 
 		std::vector<uint32_t> spirv;
 		if (!tools.Assemble(shaderCode, &spirv))

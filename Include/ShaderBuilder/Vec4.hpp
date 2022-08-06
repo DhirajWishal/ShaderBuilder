@@ -30,6 +30,16 @@ namespace ShaderBuilder
 		/**
 		 * Explicit constructor.
 		 *
+		 * @param location The location of the attribute.
+		 * @param isInput Whether or not the attribute is input or not.
+		 * @param source The source to record all the instructions to.
+		 * @param variableName The name of the variable.
+		 */
+		explicit Vec4(uint32_t location, bool isInput, SPIRVSource& source, const std::string& variableName) : DataType<Vec4<Type>>(location, isInput, source, variableName), x(0), y(0), z(0), w(0) {}
+
+		/**
+		 * Explicit constructor.
+		 *
 		 * @param source The source to insert the instructions to.
 		 * @param variableName The name of the variable.
 		 * @param value The value to initialize the type with.

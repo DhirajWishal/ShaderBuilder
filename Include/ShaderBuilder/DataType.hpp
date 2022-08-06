@@ -24,6 +24,31 @@ namespace ShaderBuilder
 		explicit DataType(SPIRVSource& source, const std::string& variableName) : m_VariableName(variableName), m_Source(source) {}
 
 		/**
+		 * Explicit constructor.
+		 *
+		 * @param location The location of the attribute.
+		 * @param isInput Whether or not the attribute is input or not.
+		 * @param source The source to record all the instructions to.
+		 * @param variableName The name of the variable.
+		 */
+		explicit DataType(uint32_t location, bool isInput, SPIRVSource& source, const std::string& variableName) : m_VariableName(variableName), m_Source(source)
+		{
+			if (isInput)
+			{
+				m_Source.insertType("%input_" + variableName, std::string("OpTypePointer Input ") + TypeTraits<Derived>::Identifier);
+				m_Source.insertType("%" + variableName, std::string("OpVariable %input_") + variableName + " Input");
+			}
+			else
+			{
+				m_Source.insertType("%output_" + variableName, std::string("OpTypePointer Output ") + TypeTraits<Derived>::Identifier);
+				m_Source.insertType("%" + variableName, std::string("OpVariable %output_") + variableName + " Output");
+			}
+
+			m_Source.insertName("%" + variableName, variableName);
+			m_Source.insertAnnotation("OpDecorate %" + variableName + " Location " + std::to_string(location));
+		}
+
+		/**
 		 * Get the name of the variable/ function.
 		 *
 		 * @return The name.

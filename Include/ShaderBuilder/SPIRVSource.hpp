@@ -4,9 +4,13 @@
 
 #include <nlohmann/json.hpp>
 
+#include <stack>
+
 namespace ShaderBuilder
 {
 	using Json = nlohmann::ordered_json;
+	class FunctionBuilder;
+	template<class ReturnType> struct FunctionBuilderReturnType;
 
 	/**
 	 * SPIR-V Source class.
@@ -105,6 +109,19 @@ namespace ShaderBuilder
 		 * @param object The function definition.
 		 */
 		void insertFunctionDefinition(Json&& object);
+
+		// /**
+		//  * Create a new function builder.
+		//  *
+		//  * @tparam ReturnType The function's return type.
+		//  * @param name The function's name.
+		//  * @return The function builder.
+		//  */
+		// template<class ReturnType>
+		// [[nodiscard]] Json& createFunctionBuilder(std::string&& name)
+		// {
+		// 	return m_FunctionBuilders.emplace(this, std::move(name), FunctionBuilderReturnType<ReturnType>());
+		// }
 
 	public:
 		/**

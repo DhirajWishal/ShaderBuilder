@@ -79,12 +79,7 @@ namespace ShaderBuilder
 		[[nodiscard]] Type createInput(uint32_t location, std::string&& name)
 		{
 			registerType<Type>();
-
-			m_Source.insertType("%input_" + name, std::string("OpTypePointer Input ") + TypeTraits<Type>::Identifier);
-			m_Source.insertType("%" + name, std::string("OpVariable %input_") + name + " Input");
-			m_Source.insertName("%" + name, name);
-
-			return Type(m_Source, name);
+			return Type(location, true, m_Source, name);
 		}
 
 		/**
@@ -98,12 +93,7 @@ namespace ShaderBuilder
 		[[nodiscard]] Type createOutput(uint32_t location, std::string&& name)
 		{
 			registerType<Type>();
-
-			m_Source.insertType("%output_" + name, std::string("OpTypePointer Output ") + TypeTraits<Type>::Identifier);
-			m_Source.insertType("%" + name, std::string("OpVariable %output_") + name + " Output");
-			m_Source.insertName("%" + name, name);
-
-			return Type(m_Source, name);
+			return Type(location, false, m_Source, name);
 		}
 
 		/**
@@ -185,13 +175,13 @@ namespace ShaderBuilder
 		 * @tparam Type The function type.
 		 * @param name The name of the function.
 		 * @param function The function definition. Make sure that the function must contain a single parameter of const FunctionBuilder&.
-		 * @return The callable type.
+		 * @return The function builder. Note that the reference will be invalidated after another function creation.
 		 */
 		template<class ReturnType>
-		[[nodiscard]] FunctionBuilder createFunction(std::string&& name)
+		[[nodiscard]] FunctionBuilder& createFunction(std::string&& name)
 		{
 			registerCallable<Callable<ReturnType>>();
-			return FunctionBuilder(m_Source, name, FunctionBuilderReturnType<ReturnType>());
+			return m_FunctionBuilders.emplace(m_Source, name, FunctionBuilderReturnType<ReturnType>());
 		}
 
 		/**
@@ -319,5 +309,6 @@ namespace ShaderBuilder
 
 	private:
 		SPIRVSource m_Source;
+		std::stack<FunctionBuilder> m_FunctionBuilders;
 	};
 } // namespace ShaderBuilder

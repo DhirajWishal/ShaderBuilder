@@ -3,7 +3,6 @@
 #pragma once
 
 #include "Callable.hpp"
-#include "SPIRVSource.hpp"
 
 namespace ShaderBuilder
 {
