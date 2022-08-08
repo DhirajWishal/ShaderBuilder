@@ -35,16 +35,16 @@ namespace ShaderBuilder
 		{
 			if (isInput)
 			{
-				m_Source.insertType("%input_" + variableName, std::string("OpTypePointer Input ") + TypeTraits<Derived>::Identifier);
-				m_Source.insertType("%" + variableName, std::string("OpVariable %input_") + variableName + " Input");
+				m_Source.insertType("%input_" + variableName + " = OpTypePointer Input " + TypeTraits<Derived>::Identifier);
+				m_Source.insertType("%" + variableName + " = OpVariable %input_" + variableName + " Input");
 			}
 			else
 			{
-				m_Source.insertType("%output_" + variableName, std::string("OpTypePointer Output ") + TypeTraits<Derived>::Identifier);
-				m_Source.insertType("%" + variableName, std::string("OpVariable %output_") + variableName + " Output");
+				m_Source.insertType("%output_" + variableName + " = OpTypePointer Output " + TypeTraits<Derived>::Identifier);
+				m_Source.insertType("%" + variableName + " = OpVariable %output_" + variableName + " Output");
 			}
 
-			m_Source.insertName("%" + variableName, variableName);
+			m_Source.insertName("OpName %" + variableName + " \"" + variableName + "\"");
 			m_Source.insertAnnotation("OpDecorate %" + variableName + " Location " + std::to_string(location));
 		}
 

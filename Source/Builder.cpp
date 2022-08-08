@@ -51,9 +51,9 @@ namespace ShaderBuilder
 {
 	Builder::Builder(Configuration config /*= Configuration()*/)
 	{
-		m_Source.insertCompatibility("Shader");
-		m_Source.insertExtendedInstructionSet("%glsl", "GLSL.std.450");
-		m_Source.setMemoryModel(GetAddressingModel(config.m_AddressingModel), GetMemoryModel(config.m_MemoryModel));
+		m_Source.insertCapability("OpCapability Shader");
+		m_Source.insertExtendedInstructionSet("%glsl = OpExtInstImport \"GLSL.std.450\"");
+		m_Source.setMemoryModel(std::string("OpMemoryModel ") + GetAddressingModel(config.m_AddressingModel) + " " + GetMemoryModel(config.m_MemoryModel));
 	}
 
 	std::string Builder::getString() const
@@ -63,7 +63,7 @@ namespace ShaderBuilder
 
 	std::string Builder::getJSON() const
 	{
-		return m_Source.getJSON();
+		return m_Source.getSourceAssembly();
 	}
 
 	SPIRVBinary Builder::compile(bool shouldOptimize /*= true*/) const

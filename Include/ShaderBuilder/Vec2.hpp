@@ -90,6 +90,8 @@ namespace ShaderBuilder
 		Vec2& operator=(const Vec2& other)
 		{
 			// DataType<Vec2<Type>>::m_Source.insertFunctionDefinition("OpCopyMemory %", DataType<Vec2<Type>>::m_VariableName, " %", other.getName());
+			// DataType<Vec2<Type>>::m_Source.insertBlockOperation("OpCopyMemory %" +  DataType<Vec2<Type>>::m_VariableName +  " %" +  other.getName());
+
 
 			x = other.x;
 			y = other.y;

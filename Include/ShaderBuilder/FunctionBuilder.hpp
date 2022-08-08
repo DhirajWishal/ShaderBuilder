@@ -2,10 +2,12 @@
 
 #pragma once
 
-#include "Callable.hpp"
+#include "DataType.hpp"
 
 namespace ShaderBuilder
 {
+	class SPIRVSource;
+
 	/**
 	 * Function builder return type structure.
 	 * This structure is used to deduce the return type of a function builder.
@@ -29,9 +31,9 @@ namespace ShaderBuilder
 		template<class ReturnType>
 		explicit FunctionBuilder(SPIRVSource& source, const std::string& name, [[maybe_unused]] FunctionBuilderReturnType<ReturnType>&& returnType = {}) : DataType<FunctionBuilder>(source, name)
 		{
-			source.insertName("%" + name, name);
-			m_FunctionJSON["declaration"] = "%" + name + " = OpFunction " + TypeTraits<ReturnType>::Identifier + " None " + GetFunctionIdentifier<ReturnType>();
+			m_Source.insertName("%" + name, name);
 
+			m_FunctionJSON["declaration"] = "%" + name + " = OpFunction " + TypeTraits<ReturnType>::Identifier + " None " + GetFunctionIdentifier<ReturnType>();
 			m_FunctionJSON["firstBlock"] = "block_" + std::to_string(source.getUniqueID());
 		}
 
@@ -95,8 +97,5 @@ namespace ShaderBuilder
 
 			m_Source.insertType(TypeTraits<Type>::Identifier, TypeTraits<Type>::Declaration);
 		}
-
-	private:
-		Json m_FunctionJSON;
 	};
 } // namespace ShaderBuilder

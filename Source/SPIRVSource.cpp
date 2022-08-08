@@ -8,92 +8,51 @@ namespace ShaderBuilder
 {
 	SPIRVSource::SPIRVSource()
 	{
-		m_SourceJSON["compatibilities"] = {};
-		m_SourceJSON["extensions"] = {};
-		m_SourceJSON["extendedInstructions"] = {};
-		m_SourceJSON["memoryModel"] = {};
-		m_SourceJSON["entryPoint"] = {};
-		m_SourceJSON["executionModes"] = {};
-		m_SourceJSON["debug"]["names"] = {};
-		m_SourceJSON["debug"]["memberNames"] = {};
-		m_SourceJSON["annotations"] = {};
-		m_SourceJSON["types"] = {};
 	}
 
-	void SPIRVSource::insertCompatibility(const std::string& compatibility)
+	void SPIRVSource::insertCapability(std::string&& instruction)
 	{
-		m_SourceJSON["compatibilities"].emplace_back(compatibility);
+		m_Capabilities.emplace_back(std::move(instruction));
 	}
 
-	void SPIRVSource::insertExtension(const std::string& extension)
+	void SPIRVSource::insertExtension(std::string&& instruction)
 	{
-		m_SourceJSON["extensions"].emplace_back(extension);
+		m_Extensions.emplace_back(std::move(instruction));
 	}
 
-	void SPIRVSource::insertExtendedInstructionSet(const std::string& extensionName, const std::string& extension)
+	void SPIRVSource::insertExtendedInstructionSet(std::string&& instruction)
 	{
-		Json object;
-		object["name"] = extensionName;
-		object["instructions"] = extension;
-
-		m_SourceJSON["extendedInstructions"].emplace_back(object);
+		m_ExtendedInstructions.emplace_back(std::move(instruction));
 	}
 
-	void SPIRVSource::setMemoryModel(const std::string& addressingModel, const std::string& memoryModel)
+	void SPIRVSource::setMemoryModel(std::string&& instruction)
 	{
-		auto& node = m_SourceJSON["memoryModel"];
-		node["addressingModel"] = addressingModel;
-		node["memoryModel"] = memoryModel;
+		m_MemoryModel = std::move(instruction);
 	}
 
-	void SPIRVSource::insertEntryPoint(const std::string& executionModel, const std::string& entryPointIdentifier, const std::string& name, const std::vector<std::string>& attributes)
+	void SPIRVSource::insertEntryPoint(std::string&& instruction)
 	{
-		Json object;
-		object["executionModel"] = executionModel;
-		object["identifier"] = entryPointIdentifier;
-		object["name"] = name;
-		object["attributes"] = attributes;
-
-		m_SourceJSON["entryPoints"].emplace_back(object);
+		m_EntryPoints.emplace_back(std::move(instruction));
 	}
 
-	void SPIRVSource::insertExecutionMode(const std::string& mode)
+	void SPIRVSource::insertExecutionMode(std::string&& instruction)
 	{
-		m_SourceJSON["executionModes"].emplace_back(mode);
+		m_ExecutionModes.emplace_back(std::move(instruction));
 	}
 
-	void SPIRVSource::insertName(const std::string& type, const std::string& name)
+	void SPIRVSource::insertName(std::string&& instruction)
 	{
-		Json object;
-		object["type"] = type;
-		object["name"] = name;
-
-		m_SourceJSON["debug"]["names"].emplace_back(object);
+		m_DebugNames.emplace_back(std::move(instruction));
 	}
 
-	void SPIRVSource::insertMemberName(const std::string& type, uint32_t index, const std::string& name)
+	void SPIRVSource::insertAnnotation(std::string&& instruction)
 	{
-		Json object;
-		object["type"] = type;
-		object["index"] = index;
-		object["name"] = name;
-
-		m_SourceJSON["debug"]["memberNames"].emplace_back(object);
+		m_Annotations.emplace_back(std::move(instruction));
 	}
 
-	void SPIRVSource::insertAnnotation(const std::string& annotation)
+	void SPIRVSource::insertType(std::string&& instruction)
 	{
-		m_SourceJSON["annotations"].emplace_back(annotation);
-	}
-
-	void SPIRVSource::insertType(const std::string& name, const std::string& declaration)
-	{
-		m_SourceJSON["types"][name] = declaration;
-	}
-
-	void SPIRVSource::insertFunctionDefinition(Json&& object)
-	{
-		m_SourceJSON["functionDefinitions"].emplace_back(std::move(object));
+		m_Types.emplace_back(std::move(instruction));
 	}
 
 	std::string SPIRVSource::getSourceAssembly() const
@@ -108,60 +67,48 @@ namespace ShaderBuilder
 		finalTransform << "; Core instructions." << std::endl;
 
 		// Insert the compatibilities.
-		for (const auto& object : m_SourceJSON["compatibilities"])
-			finalTransform << "OpCapability " << object.get<std::string>() << std::endl;
+		for (const auto& instruction : m_Capabilities)
+			finalTransform << instruction << std::endl;
 
 		// Insert the extensions.
-		for (const auto& object : m_SourceJSON["extensions"])
-			finalTransform << "OpExtension " << object.get<std::string>() << std::endl;
+		for (const auto& instruction : m_Extensions)
+			finalTransform << instruction << std::endl;
 
 		// Insert the extended instructions.
-		for (const auto& object : m_SourceJSON["extendedInstructions"])
-			finalTransform << object["name"].get<std::string>() << " = OpExtInstImport \"" << object["instructions"].get<std::string>() << "\"" << std::endl;
+		for (const auto& instruction : m_ExtendedInstructions)
+			finalTransform << instruction << std::endl;
 
 		// Set the memory model.
-		if (m_SourceJSON["memoryModel"].contains("addressingModel") && m_SourceJSON["memoryModel"].contains("memoryModel"))
-			finalTransform << "OpMemoryModel " << m_SourceJSON["memoryModel"]["addressingModel"].get<std::string>() << " " << m_SourceJSON["memoryModel"]["memoryModel"].get<std::string>() << std::endl;
+		finalTransform << m_MemoryModel << std::endl;
 
 		// Insert the entry points.
-		for (const auto& object : m_SourceJSON["entryPoints"])
-		{
-			finalTransform << "OpEntryPoint " << object["executionModel"].get<std::string>() << " " << object["identifier"].get<std::string>() << " \"" << object["name"].get<std::string>() << "\" ";
-
-			for (const auto& attribute : object["attributes"])
-				finalTransform << "%" << attribute.get<std::string>() << " ";
-
-			finalTransform << std::endl;
-		}
+		for (const auto& instruction : m_EntryPoints)
+			finalTransform << instruction << std::endl;
 
 		// Insert the execution modes.
-		for (const auto& object : m_SourceJSON["executionModes"])
-			finalTransform << "OpExecutionMode " << object.get<std::string>() << std::endl;
+		for (const auto& instruction : m_ExecutionModes)
+			finalTransform << instruction << std::endl;
 
 		finalTransform << std::endl;
 
 		// Insert the debug names.
 		finalTransform << "; Debug information." << std::endl;
-		for (const auto& object : m_SourceJSON["debug"]["names"])
-			finalTransform << "OpName " << object["type"].get<std::string>() << " \"" << object["name"].get<std::string>() << "\"" << std::endl;
-
-		// Insert the debug member names.
-		for (const auto& object : m_SourceJSON["debug"]["memberNames"])
-			finalTransform << "OpMemberName " << object["type"].get<std::string>() << " " << object["index"].get<uint32_t>() << " \"" << object["name"].get<std::string>() << "\"" << std::endl;
+		for (const auto& instruction : m_DebugNames)
+			finalTransform << instruction << std::endl;
 
 		finalTransform << std::endl;
 
 		// Insert the annotations.
 		finalTransform << "; Annotations." << std::endl;
-		for (const auto& object : m_SourceJSON["annotations"])
-			finalTransform << object.get<std::string>() << std::endl;
+		for (const auto& instruction : m_Annotations)
+			finalTransform << instruction << std::endl;
 
 		finalTransform << std::endl;
 
 		// Insert type information.
 		finalTransform << "; Type declarations." << std::endl;
-		for (const auto& [key, value] : m_SourceJSON["types"].items())
-			finalTransform << key << " = " << value.get<std::string>() << std::endl;
+		for (const auto& instruction : m_Types)
+			finalTransform << instruction << std::endl;
 
 		finalTransform << std::endl;
 
@@ -170,32 +117,27 @@ namespace ShaderBuilder
 		finalTransform << std::endl;
 
 		// Insert function definitions.
-		finalTransform << "; Function definitions." << std::endl;
-		for (const auto& object : m_SourceJSON["functionDefinitions"])
-		{
-			finalTransform << object["declaration"].get<std::string>() << std::endl;
-			finalTransform << "%" << object["firstBlock"].get<std::string>() << " = OpLabel" << std::endl;
-
-			for (const auto& [name, declaration] : object["variables"].items())
-				finalTransform << "%" << name << " = " << declaration.get<std::string>() << std::endl;
-
-			// Return a value if we have defined it.
-			if (object.contains("return"))
-				finalTransform << "OpReturnValue " << object["return"].get<std::string>() << std::endl;
-
-			// Else return nothing.
-			else
-				finalTransform << "OpReturn" << std::endl;
-
-			// End the function.
-			finalTransform << "OpFunctionEnd" << std::endl;
-		}
+		// finalTransform << "; Function definitions." << std::endl;
+		// for (const auto& object : m_SourceJSON["functionDefinitions"])
+		// {
+		// 	finalTransform << object["declaration"].get<std::string>() << std::endl;
+		// 	finalTransform << "%" << object["firstBlock"].get<std::string>() << " = OpLabel" << std::endl;
+		// 
+		// 	for (const auto& [name, declaration] : object["variables"].items())
+		// 		finalTransform << "%" << name << " = " << declaration.get<std::string>() << std::endl;
+		// 
+		// 	// Return a value if we have defined it.
+		// 	if (object.contains("return"))
+		// 		finalTransform << "OpReturnValue " << object["return"].get<std::string>() << std::endl;
+		// 
+		// 	// Else return nothing.
+		// 	else
+		// 		finalTransform << "OpReturn" << std::endl;
+		// 
+		// 	// End the function.
+		// 	finalTransform << "OpFunctionEnd" << std::endl;
+		// }
 
 		return finalTransform.str();
-	}
-
-	std::string SPIRVSource::getJSON() const
-	{
-		return m_SourceJSON.dump(4);
 	}
 } // namespace ShaderBuilder

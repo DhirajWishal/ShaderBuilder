@@ -110,8 +110,8 @@ namespace ShaderBuilder
 		[[nodiscard]] Type createLocalVariable(std::string&& name, Types&&... initializer)
 		{
 			registerType<Type>();
-			m_Source.insertType(std::string("%variable_type_") + TypeTraits<Type>::RawIdentifier, std::string("OpTypePointer Function ") + TypeTraits<Type>::Identifier);
-			m_Source.insertName("%" + name, name);
+			m_Source.insertType(std::string("%variable_type_") + TypeTraits<Type>::RawIdentifier + " = OpTypePointer Function " + TypeTraits<Type>::Identifier);
+			m_Source.insertName("OpName %" + name + " \"" + name + "\"");
 
 			return Type(m_Source, name, std::forward<Types>(initializer)...);
 		}
@@ -139,14 +139,14 @@ namespace ShaderBuilder
 		[[nodiscard]] Type createUniform(uint32_t set, uint32_t binding, const std::string& name, Members... members)
 		{
 			// Register the members.
-			m_Source.insertType(std::string("%type_") + name, "OpTypeStruct " + resolveMemberVariableTypeIdentifiers<Members...>());
+			m_Source.insertType("%type_" + name + " = OpTypeStruct " + resolveMemberVariableTypeIdentifiers<Members...>());
 
 			// Setup type declarations.
-			m_Source.insertType("%uniform_" + name, "OpTypePointer Uniform %type_" + name);
-			m_Source.insertType("%" + name, "OpVariable %uniform_" + name + " Uniform");
+			m_Source.insertType("%uniform_" + name + " = OpTypePointer Uniform %type_" + name);
+			m_Source.insertType("%" + name + " = OpVariable %uniform_" + name + " Uniform");
 
 			// Set the type debug information and annotations.
-			m_Source.insertName("%uniform_" + name, name);
+			m_Source.insertName("OpName %uniform_" + name + " \"" + name + "\"");
 			m_Source.insertName("%" + name, "");
 
 			m_Source.insertAnnotation("OpDecorate %" + name + " DescriptorSet " + std::to_string(set));
@@ -158,7 +158,7 @@ namespace ShaderBuilder
 			uint64_t counter = 0, offsets = 0;
 			auto logMemberInformation = [this, &uniform, &name, &counter, &offsets](auto member)
 			{
-				m_Source.insertMemberName("%type_" + name, counter, (uniform.*member).getName());
+				m_Source.insertName("OpMemberName %type_" + name + " " + std::to_string(counter) " \"" + (uniform.*member).getName() + "\"");
 				m_Source.insertAnnotation("OpMemberDecorate %type_" + name + " " + std::to_string(counter) + " Offset " + std::to_string(offsets));
 
 				counter++;
@@ -181,7 +181,7 @@ namespace ShaderBuilder
 		[[nodiscard]] FunctionBuilder& createFunction(std::string&& name)
 		{
 			registerCallable<Callable<ReturnType>>();
-			return m_FunctionBuilders.emplace(m_Source, name, FunctionBuilderReturnType<ReturnType>());
+			return m_Source.createFunctionBuilder(std::move(name));
 		}
 
 		/**
@@ -225,12 +225,12 @@ namespace ShaderBuilder
 			}
 
 			// Setup the inputs.
-			std::vector<std::string> attributeStrings;
-			auto insertAttribute = [&attributeStrings](auto&& attribute) { attributeStrings.emplace_back(std::move(attribute)); };
+			std::string attributeString;
+			auto insertAttribute = [&attributeString](auto&& attribute) { attributeString += " %" + std::move(attribute); };
 			(insertAttribute(std::move(attributes)), ...);
 
 			const auto& name = function.getName();
-			m_Source.insertEntryPoint(executionModel, "%" + name, name, attributeStrings);
+			m_Source.insertEntryPoint("OpEntryPoint " + executionModel + " %" + name + " \"" + name + "\"" + attributeString);
 		}
 
 	public:
@@ -309,6 +309,5 @@ namespace ShaderBuilder
 
 	private:
 		SPIRVSource m_Source;
-		std::stack<FunctionBuilder> m_FunctionBuilders;
 	};
 } // namespace ShaderBuilder

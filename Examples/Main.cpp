@@ -52,15 +52,15 @@
 
 	auto camera = shaderSource.createUniform<Camera>(0, 0, "camera", &Camera::m_Projection, &Camera::m_View);
 
-	{
-		auto function = shaderSource.createFunction<void>("main");
-		auto temporary = function.createVariable<ShaderBuilder::Vec4<float>>("temporary", 100);
-		auto another = function.createVariable<ShaderBuilder::Vec4<float>>("another");
-
-		another = temporary;
-
-		shaderSource.addEntryPoint(ShaderBuilder::ShaderType::Vertex, function, "inPosition", "inTextureCoordinates", "outTextureCoordinates");
-	}
+	// {
+	// 	auto function = shaderSource.createFunction<void>("main");
+	// 	auto temporary = function.createVariable<ShaderBuilder::Vec4<float>>("temporary", 100);
+	// 	auto another = function.createVariable<ShaderBuilder::Vec4<float>>("another");
+	// 
+	// 	another = temporary;
+	// 
+	// 	shaderSource.addEntryPoint(ShaderBuilder::ShaderType::Vertex, function, "inPosition", "inTextureCoordinates", "outTextureCoordinates");
+	// }
 
 	return shaderSource.compile();
 }

@@ -4,13 +4,12 @@
 
 #include <nlohmann/json.hpp>
 
+#include <optional>
 #include <stack>
 
 namespace ShaderBuilder
 {
-	using Json = nlohmann::ordered_json;
 	class FunctionBuilder;
-	template<class ReturnType> struct FunctionBuilderReturnType;
 
 	/**
 	 * SPIR-V Source class.
@@ -25,26 +24,25 @@ namespace ShaderBuilder
 		SPIRVSource();
 
 		/**
-		 * Insert a new shader compatibility.
+		 * Insert a new shader capability.
 		 *
-		 * @param compatibility The shader compatibility.
+		 * @param instruction The shader capability.
 		 */
-		void insertCompatibility(const std::string& compatibility);
+		void insertCapability(std::string&& instruction);
 
 		/**
 		 * Insert a new extension.
 		 *
-		 * @param extension The extension to insert.
+		 * @param instruction The extension to insert.
 		 */
-		void insertExtension(const std::string& extension);
+		void insertExtension(std::string&& instruction);
 
 		/**
 		 * Insert a new extended instruction set.
 		 *
-		 * @param extensionName The extension name.
-		 * @param extension The instruction set.
+		 * @param instruction The instruction.
 		 */
-		void insertExtendedInstructionSet(const std::string& extensionName, const std::string& extension);
+		void insertExtendedInstructionSet(std::string&& instruction);
 
 		/**
 		 * Set the memory model.
@@ -52,76 +50,42 @@ namespace ShaderBuilder
 		 * @param addressingModel The addressing model to set.
 		 * @param memoryModel The memory model to set.
 		 */
-		void setMemoryModel(const std::string& addressingModel, const std::string& memoryModel);
+		void setMemoryModel(std::string&& instruction);
 
 		/**
 		 * Insert an entry point.
 		 *
-		 * @param executionModel The execution model.
-		 * @param entryPointIdentifier The entry point identifier.
-		 * @param name The name of the entry point.
-		 * @param attributes The entry point's inputs and outputs.
+		 * @param instruction The instruction.
 		 */
-		void insertEntryPoint(const std::string& executionModel, const std::string& entryPointIdentifier, const std::string& name, const std::vector<std::string>& attributes);
+		void insertEntryPoint(std::string&& instruction);
 
 		/**
 		 * Insert a new execution mode.
 		 *
-		 * @param mode The execution model
+		 * @param instruction The instruction.
 		 */
-		void insertExecutionMode(const std::string& mode);
+		void insertExecutionMode(std::string&& instruction);
 
 		/**
 		 * Insert a new debug name.
 		 *
-		 * @param type The type of the name.
-		 * @param name The name to insert.
+		 * @param instruction The instruction.
 		 */
-		void insertName(const std::string& type, const std::string& name);
-
-		/**
-		 * Insert a new debug member name.
-		 *
-		 * @param type The type of the name.
-		 * @param index The index of the variable in the structure.
-		 * @param name The name to insert.
-		 */
-		void insertMemberName(const std::string& type, uint32_t index, const std::string& name);
+		void insertName(std::string&& instruction);
 
 		/**
 		 * Insert a new annotation.
 		 *
-		 * @param annotation The annotation to insert.
+		 * @param instruction The instruction.
 		 */
-		void insertAnnotation(const std::string& annotation);
+		void insertAnnotation(std::string&& instruction);
 
 		/**
 		 * Insert a new type.
 		 *
-		 * @param name The name of the type.
-		 * @param declaration The type declaration.
+		 * @param instruction The instruction.
 		 */
-		void insertType(const std::string& name, const std::string& declaration);
-
-		/**
-		 * Insert a new function definition.
-		 *
-		 * @param object The function definition.
-		 */
-		void insertFunctionDefinition(Json&& object);
-
-		// /**
-		//  * Create a new function builder.
-		//  *
-		//  * @tparam ReturnType The function's return type.
-		//  * @param name The function's name.
-		//  * @return The function builder.
-		//  */
-		// template<class ReturnType>
-		// [[nodiscard]] Json& createFunctionBuilder(std::string&& name)
-		// {
-		// 	return m_FunctionBuilders.emplace(this, std::move(name), FunctionBuilderReturnType<ReturnType>());
-		// }
+		void insertType(std::string&& instruction);
 
 	public:
 		/**
@@ -132,21 +96,26 @@ namespace ShaderBuilder
 		[[nodiscard]] std::string getSourceAssembly() const;
 
 		/**
-		 * Get the internal JSON representation.
-		 *
-		 * @return The JSON representation as a string.
-		 */
-		[[nodiscard]] std::string getJSON() const;
-
-		/**
 		 * Get a unique ID.
 		 *
 		 * @return The unique ID.
 		 */
-		[[nodsicard]] uint64_t getUniqueID() { return m_UniqueID++; }
+		[[nodiscard]] uint64_t getUniqueID() { return m_UniqueID++; }
 
 	private:
-		Json m_SourceJSON;
+		std::stack<FunctionBuilder> m_FunctionBuilders;
 		uint64_t m_UniqueID = 1;
+
+		std::vector<std::string> m_Capabilities;
+		std::vector<std::string> m_Extensions;
+		std::vector<std::string> m_ExtendedInstructions;
+
+		std::string m_MemoryModel;
+
+		std::vector<std::string> m_EntryPoints;
+		std::vector<std::string> m_ExecutionModes;
+		std::vector<std::string> m_DebugNames;
+		std::vector<std::string> m_Annotations;
+		std::vector<std::string> m_Types;
 	};
 } // namespace ShaderBuilder
