@@ -4,6 +4,9 @@
 
 #include "SPIRVBinary.hpp"
 #include "FunctionBuilder.hpp"
+#include "Callable.hpp"
+
+#include <functional>
 
 namespace ShaderBuilder
 {
@@ -60,6 +63,8 @@ namespace ShaderBuilder
 	 */
 	class Builder final
 	{
+		using Callback = std::function<void(SPIRVSource&)>;
+
 	public:
 		/**
 		 * Explicit constructor.
@@ -147,7 +152,7 @@ namespace ShaderBuilder
 
 			// Set the type debug information and annotations.
 			m_Source.insertName("OpName %uniform_" + name + " \"" + name + "\"");
-			m_Source.insertName("%" + name, "");
+			m_Source.insertName("OpName %" + name + " \"\"");
 
 			m_Source.insertAnnotation("OpDecorate %" + name + " DescriptorSet " + std::to_string(set));
 			m_Source.insertAnnotation("OpDecorate %" + name + " Binding " + std::to_string(binding));
@@ -158,7 +163,7 @@ namespace ShaderBuilder
 			uint64_t counter = 0, offsets = 0;
 			auto logMemberInformation = [this, &uniform, &name, &counter, &offsets](auto member)
 			{
-				m_Source.insertName("OpMemberName %type_" + name + " " + std::to_string(counter) " \"" + (uniform.*member).getName() + "\"");
+				m_Source.insertName("OpMemberName %type_" + name + " " + std::to_string(counter) + " \"" + (uniform.*member).getName() + "\"");
 				m_Source.insertAnnotation("OpMemberDecorate %type_" + name + " " + std::to_string(counter) + " Offset " + std::to_string(offsets));
 
 				counter++;
@@ -178,10 +183,10 @@ namespace ShaderBuilder
 		 * @return The function builder. Note that the reference will be invalidated after another function creation.
 		 */
 		template<class ReturnType>
-		[[nodiscard]] FunctionBuilder& createFunction(std::string&& name)
+		[[nodiscard]] FunctionBuilder createFunction(std::string&& name)
 		{
 			registerCallable<Callable<ReturnType>>();
-			return m_Source.createFunctionBuilder(std::move(name));
+			return FunctionBuilder(m_Source, std::move(name), FunctionBuilderReturnType<ReturnType>());
 		}
 
 		/**
@@ -226,7 +231,7 @@ namespace ShaderBuilder
 
 			// Setup the inputs.
 			std::string attributeString;
-			auto insertAttribute = [&attributeString](auto&& attribute) { attributeString += " %" + std::move(attribute); };
+			auto insertAttribute = [&attributeString](auto&& attribute) { attributeString += std::string(" %") + std::move(attribute); };
 			(insertAttribute(std::move(attributes)), ...);
 
 			const auto& name = function.getName();
@@ -269,7 +274,7 @@ namespace ShaderBuilder
 			if constexpr (IsCompexType<Type>)
 				registerType<typename TypeTraits<Type>::ValueTraits::Type>();
 
-			m_Source.insertType(TypeTraits<Type>::Identifier, TypeTraits<Type>::Declaration);
+			m_Source.insertType(std::string(TypeTraits<Type>::Identifier) + " = " + TypeTraits<Type>::Declaration);
 		}
 
 		/**
@@ -285,7 +290,7 @@ namespace ShaderBuilder
 			// Try and register value types.
 			registerType<ValueType>();
 
-			m_Source.insertType(GetFunctionIdentifier<ValueType>(), std::string("OpTypeFunction ") + TypeTraits<ValueType>::Identifier);
+			m_Source.insertType(GetFunctionIdentifier<ValueType>() + " = OpTypeFunction " + TypeTraits<ValueType>::Identifier);
 		}
 
 		/**
@@ -309,5 +314,6 @@ namespace ShaderBuilder
 
 	private:
 		SPIRVSource m_Source;
+		std::vector<Callback> m_Callbacks;
 	};
 } // namespace ShaderBuilder

@@ -6,7 +6,10 @@
 #include <spirv-tools/libspirv.hpp>
 #include <spirv-tools/optimizer.hpp>
 
+#ifdef SB_DEBUG
 #include <iostream>
+
+#endif
 
 namespace /* anonymous */
 {
@@ -75,7 +78,12 @@ namespace ShaderBuilder
 
 		const auto shaderCode = getString();
 
+#ifdef SB_DEBUG
+		std::cout << "-------------------- Intermediate Output --------------------" << std::endl;
 		std::cout << shaderCode << std::endl;
+		std::cout << "-------------------- Intermediate Output --------------------" << std::endl;
+
+#endif
 
 		std::vector<uint32_t> spirv;
 		if (!tools.Assemble(shaderCode, &spirv))

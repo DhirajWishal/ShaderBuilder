@@ -6,13 +6,15 @@ namespace ShaderBuilder
 {
 	FunctionBuilder::~FunctionBuilder()
 	{
-		exit();
+		if (!m_IsComplete)
+			exit();
 	}
 
 	void FunctionBuilder::exit()
 	{
-		if (!m_FunctionJSON.empty())
-			m_Source.insertFunctionDefinition(std::move(m_FunctionJSON));
+		auto& block = m_Source.getCurrentFunctionBlock();
+		block.m_Instructions.insert("OpReturn");
+		m_IsComplete = true;
 	}
 
 } // namespace ShaderBuilder

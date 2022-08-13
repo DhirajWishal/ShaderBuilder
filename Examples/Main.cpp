@@ -52,15 +52,17 @@
 
 	auto camera = shaderSource.createUniform<Camera>(0, 0, "camera", &Camera::m_Projection, &Camera::m_View);
 
-	// {
-	// 	auto function = shaderSource.createFunction<void>("main");
-	// 	auto temporary = function.createVariable<ShaderBuilder::Vec4<float>>("temporary", 100);
-	// 	auto another = function.createVariable<ShaderBuilder::Vec4<float>>("another");
-	// 
-	// 	another = temporary;
-	// 
-	// 	shaderSource.addEntryPoint(ShaderBuilder::ShaderType::Vertex, function, "inPosition", "inTextureCoordinates", "outTextureCoordinates");
-	// }
+	{
+		auto function = shaderSource.createFunction<void>("main");
+		auto temporary = function.createVariable<ShaderBuilder::Vec4<float>>("temporary", 100);
+		auto another = function.createVariable<ShaderBuilder::Vec4<float>>("another");
+		auto coordinates = function.createVariable<ShaderBuilder::Vec2<float>>("coordinates", 10, 20);
+
+		another = temporary;
+		outTextureCoordinates = coordinates;
+
+		shaderSource.addEntryPoint(ShaderBuilder::ShaderType::Vertex, function, "inPosition", "inTextureCoordinates", "outTextureCoordinates");
+	}
 
 	return shaderSource.compile();
 }
@@ -70,7 +72,7 @@ int main()
 	// Generate the shader.
 	const auto output = CreateVertexShader();
 
-	// Show the generated data.
+	// Show the generated data.g
 	std::cout << "-------------------- Compiled Assembly --------------------" << std::endl;
 	std::cout << output.disassemble() << std::endl;
 

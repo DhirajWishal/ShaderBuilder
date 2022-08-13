@@ -6,8 +6,6 @@
 
 namespace ShaderBuilder
 {
-	class SPIRVSource;
-
 	/**
 	 * Function builder return type structure.
 	 * This structure is used to deduce the return type of a function builder.
@@ -31,10 +29,11 @@ namespace ShaderBuilder
 		template<class ReturnType>
 		explicit FunctionBuilder(SPIRVSource& source, const std::string& name, [[maybe_unused]] FunctionBuilderReturnType<ReturnType>&& returnType = {}) : DataType<FunctionBuilder>(source, name)
 		{
-			m_Source.insertName("%" + name, name);
+			m_Source.insertName("OpName %" + name + " \"" + name + "\"");
 
-			m_FunctionJSON["declaration"] = "%" + name + " = OpFunction " + TypeTraits<ReturnType>::Identifier + " None " + GetFunctionIdentifier<ReturnType>();
-			m_FunctionJSON["firstBlock"] = "block_" + std::to_string(source.getUniqueID());
+			auto& block = source.createFunctionBlock();
+			block.m_Name = name;
+			block.m_Definition.insert("%" + name + " = OpFunction " + TypeTraits<ReturnType>::Identifier + " None " + GetFunctionIdentifier<ReturnType>());
 		}
 
 		/**
@@ -56,10 +55,11 @@ namespace ShaderBuilder
 		[[nodiscard]] Type createVariable(std::string&& name, Types&&... initializer)
 		{
 			registerType<Type>();
-			m_Source.insertType(std::string("%variable_type_") + TypeTraits<Type>::RawIdentifier, std::string("OpTypePointer Function ") + TypeTraits<Type>::Identifier);
-			m_Source.insertName("%" + name, name);
+			m_Source.insertType(std::string("%variable_type_") + TypeTraits<Type>::RawIdentifier + " = OpTypePointer Function " + TypeTraits<Type>::Identifier);
+			m_Source.insertName("OpName %" + name + " \"" + name + "\"");
 
-			m_FunctionJSON["variables"][name] = std::string("OpVariable %variable_type_") + TypeTraits<Type>::RawIdentifier + " Function";
+			auto& block = m_Source.getCurrentFunctionBlock();
+			block.m_Variables.insert("%" + name + " = OpVariable %variable_type_" + TypeTraits<Type>::RawIdentifier + " Function");
 
 			return Type(m_Source, name, std::forward<Types>(initializer)...);
 		}
@@ -73,8 +73,9 @@ namespace ShaderBuilder
 		template<class Type>
 		void exit(const Type& value)
 		{
-			m_FunctionJSON["return"] = value.getIdentifier();
-			exit();
+			// auto& block = m_Source.getCurrentFunctionBlock();
+			// block.m_Instructions.insert("OpReturn");
+			m_IsComplete = true;
 		}
 
 		/**
@@ -95,7 +96,10 @@ namespace ShaderBuilder
 			if constexpr (IsCompexType<Type>)
 				registerType<typename TypeTraits<Type>::ValueTraits::Type>();
 
-			m_Source.insertType(TypeTraits<Type>::Identifier, TypeTraits<Type>::Declaration);
+			m_Source.insertType(std::string(TypeTraits<Type>::Identifier) + " = " + TypeTraits<Type>::Declaration);
 		}
+
+	private:
+		bool m_IsComplete = false;
 	};
 } // namespace ShaderBuilder

@@ -48,11 +48,14 @@ if (NOT SPIRV_TOOLS_INIT_STATUS)
 	# Set the xxHash header include directory.
 	set(XXHASH_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/xxHash)
 
-	# Set the json header include directory.
-	set(JSON_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/json/include)
+	# Set global compile definitions.
+	add_compile_definitions(
+		$<$<CONFIG:Debug>:SB_DEBUG>
+		$<$<CONFIG:Release>:SB_RELEASE>
 
-	# Set the json header include directory.
-	set(SPIRV_HEADERS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/SPIRV-Headers/include)
+		$<$<CONFIG:RelWithDebInfo>:SB_DEBUG>
+		$<$<CONFIG:MinSizeRel>:SB_RELEASE>
+	)
 
 	# Set the central include directory.
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include)

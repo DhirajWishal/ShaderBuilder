@@ -2,14 +2,23 @@
 
 #pragma once
 
-#include <nlohmann/json.hpp>
-
-#include <optional>
-#include <stack>
+#include "Storages/UniqueInstructionStorage.hpp"
 
 namespace ShaderBuilder
 {
-	class FunctionBuilder;
+	/**
+	 * Function block structure.
+	 * This stores information about a single function.
+	 */
+	struct FunctionBlock final
+	{
+		InstructionStorage m_Definition;
+		InstructionStorage m_Instructions;
+
+		UniqueInstructionStorage m_Variables;
+
+		std::string m_Name;
+	};
 
 	/**
 	 * SPIR-V Source class.
@@ -87,6 +96,26 @@ namespace ShaderBuilder
 		 */
 		void insertType(std::string&& instruction);
 
+		/**
+		 * Insert a new instruction.
+		 * This instruction will be stored in the function definitions.
+		 */
+		void insertInstruction(std::string&& instruction);
+
+		/**
+		 * Create a new function block.
+		 *
+		 * @return The created block reference.
+		 */
+		[[nodiscard]] FunctionBlock& createFunctionBlock();
+
+		/**
+		 * Get current function block.
+		 *
+		 * @return The current function block.
+		 */
+		[[nodiscard]] FunctionBlock& getCurrentFunctionBlock();
+
 	public:
 		/**
 		 * Get the source assembly.
@@ -103,19 +132,23 @@ namespace ShaderBuilder
 		[[nodiscard]] uint64_t getUniqueID() { return m_UniqueID++; }
 
 	private:
-		std::stack<FunctionBuilder> m_FunctionBuilders;
-		uint64_t m_UniqueID = 1;
+		std::vector<FunctionBlock> m_FunctionBlocks;
 
-		std::vector<std::string> m_Capabilities;
-		std::vector<std::string> m_Extensions;
-		std::vector<std::string> m_ExtendedInstructions;
+		InstructionStorage m_Capabilities;
+		InstructionStorage m_Extensions;
+		InstructionStorage m_ExtendedInstructions;
 
 		std::string m_MemoryModel;
 
-		std::vector<std::string> m_EntryPoints;
-		std::vector<std::string> m_ExecutionModes;
-		std::vector<std::string> m_DebugNames;
-		std::vector<std::string> m_Annotations;
-		std::vector<std::string> m_Types;
+		InstructionStorage m_EntryPoints;
+		InstructionStorage m_ExecutionModes;
+		InstructionStorage m_DebugNames;
+		InstructionStorage m_Annotations;
+		UniqueInstructionStorage m_Types;
+
+		InstructionStorage m_FunctionDeclarations;
+		InstructionStorage m_FunctionDefinitions;
+
+		uint64_t m_UniqueID = 1;
 	};
 } // namespace ShaderBuilder

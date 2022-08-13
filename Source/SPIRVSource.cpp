@@ -12,17 +12,17 @@ namespace ShaderBuilder
 
 	void SPIRVSource::insertCapability(std::string&& instruction)
 	{
-		m_Capabilities.emplace_back(std::move(instruction));
+		m_Capabilities.insert(std::move(instruction));
 	}
 
 	void SPIRVSource::insertExtension(std::string&& instruction)
 	{
-		m_Extensions.emplace_back(std::move(instruction));
+		m_Extensions.insert(std::move(instruction));
 	}
 
 	void SPIRVSource::insertExtendedInstructionSet(std::string&& instruction)
 	{
-		m_ExtendedInstructions.emplace_back(std::move(instruction));
+		m_ExtendedInstructions.insert(std::move(instruction));
 	}
 
 	void SPIRVSource::setMemoryModel(std::string&& instruction)
@@ -32,27 +32,37 @@ namespace ShaderBuilder
 
 	void SPIRVSource::insertEntryPoint(std::string&& instruction)
 	{
-		m_EntryPoints.emplace_back(std::move(instruction));
+		m_EntryPoints.insert(std::move(instruction));
 	}
 
 	void SPIRVSource::insertExecutionMode(std::string&& instruction)
 	{
-		m_ExecutionModes.emplace_back(std::move(instruction));
+		m_ExecutionModes.insert(std::move(instruction));
 	}
 
 	void SPIRVSource::insertName(std::string&& instruction)
 	{
-		m_DebugNames.emplace_back(std::move(instruction));
+		m_DebugNames.insert(std::move(instruction));
 	}
 
 	void SPIRVSource::insertAnnotation(std::string&& instruction)
 	{
-		m_Annotations.emplace_back(std::move(instruction));
+		m_Annotations.insert(std::move(instruction));
 	}
 
 	void SPIRVSource::insertType(std::string&& instruction)
 	{
-		m_Types.emplace_back(std::move(instruction));
+		m_Types.insert(std::move(instruction));
+	}
+
+	ShaderBuilder::FunctionBlock& SPIRVSource::createFunctionBlock()
+	{
+		return m_FunctionBlocks.emplace_back();
+	}
+
+	ShaderBuilder::FunctionBlock& SPIRVSource::getCurrentFunctionBlock()
+	{
+		return m_FunctionBlocks.back();
 	}
 
 	std::string SPIRVSource::getSourceAssembly() const
@@ -62,81 +72,79 @@ namespace ShaderBuilder
 		finalTransform << "; Version:   0x00010000 (Version: 1.0.0)" << std::endl;
 		finalTransform << "; Generator: 0x00000000 (Shader Builder; 1)" << std::endl;
 		finalTransform << "; Schema:    0" << std::endl;
-		finalTransform << std::endl;
 
-		finalTransform << "; Core instructions." << std::endl;
 
-		// Insert the compatibilities.
+		// Insert the capabilities.
+		finalTransform << std::endl << "; Capabilities." << std::endl;
 		for (const auto& instruction : m_Capabilities)
 			finalTransform << instruction << std::endl;
 
 		// Insert the extensions.
+		finalTransform << std::endl << "; Extensions." << std::endl;
 		for (const auto& instruction : m_Extensions)
 			finalTransform << instruction << std::endl;
 
 		// Insert the extended instructions.
+		finalTransform << std::endl << "; Extended Instructions." << std::endl;
 		for (const auto& instruction : m_ExtendedInstructions)
 			finalTransform << instruction << std::endl;
 
 		// Set the memory model.
+		finalTransform << std::endl << "; Memory Model." << std::endl;
 		finalTransform << m_MemoryModel << std::endl;
 
 		// Insert the entry points.
+		finalTransform << std::endl << "; Entry Points." << std::endl;
 		for (const auto& instruction : m_EntryPoints)
 			finalTransform << instruction << std::endl;
 
 		// Insert the execution modes.
+		finalTransform << std::endl << "; Execution modes." << std::endl;
 		for (const auto& instruction : m_ExecutionModes)
 			finalTransform << instruction << std::endl;
 
-		finalTransform << std::endl;
-
 		// Insert the debug names.
-		finalTransform << "; Debug information." << std::endl;
+		finalTransform << std::endl << "; Debug information." << std::endl;
 		for (const auto& instruction : m_DebugNames)
 			finalTransform << instruction << std::endl;
 
-		finalTransform << std::endl;
-
 		// Insert the annotations.
-		finalTransform << "; Annotations." << std::endl;
+		finalTransform << std::endl << "; Annotations." << std::endl;
 		for (const auto& instruction : m_Annotations)
 			finalTransform << instruction << std::endl;
 
-		finalTransform << std::endl;
-
 		// Insert type information.
-		finalTransform << "; Type declarations." << std::endl;
+		finalTransform << std::endl << "; Type declarations." << std::endl;
 		for (const auto& instruction : m_Types)
 			finalTransform << instruction << std::endl;
 
-		finalTransform << std::endl;
-
 		// Insert function declarations.
-		finalTransform << "; Function declarations." << std::endl;
-		finalTransform << std::endl;
+		finalTransform << std::endl << "; Function declarations." << std::endl;
+		for (const auto& instruction : m_FunctionDeclarations)
+			finalTransform << instruction << std::endl;
 
 		// Insert function definitions.
-		// finalTransform << "; Function definitions." << std::endl;
-		// for (const auto& object : m_SourceJSON["functionDefinitions"])
-		// {
-		// 	finalTransform << object["declaration"].get<std::string>() << std::endl;
-		// 	finalTransform << "%" << object["firstBlock"].get<std::string>() << " = OpLabel" << std::endl;
-		// 
-		// 	for (const auto& [name, declaration] : object["variables"].items())
-		// 		finalTransform << "%" << name << " = " << declaration.get<std::string>() << std::endl;
-		// 
-		// 	// Return a value if we have defined it.
-		// 	if (object.contains("return"))
-		// 		finalTransform << "OpReturnValue " << object["return"].get<std::string>() << std::endl;
-		// 
-		// 	// Else return nothing.
-		// 	else
-		// 		finalTransform << "OpReturn" << std::endl;
-		// 
-		// 	// End the function.
-		// 	finalTransform << "OpFunctionEnd" << std::endl;
-		// }
+		finalTransform << std::endl << std::endl << "; Function definitions." << std::endl;
+		for (const auto& block : m_FunctionBlocks)
+		{
+			// Insert the function definition.
+			for (const auto& instruction : block.m_Definition)
+				finalTransform << instruction << std::endl;
+
+			// Insert the first block containing the variables.
+			finalTransform << "%first_block_" << block.m_Name << " = OpLabel" << std::endl;
+
+			// Insert the variables.
+			for (const auto& instruction : block.m_Variables)
+				finalTransform << instruction << std::endl;
+
+			// Insert the instructions.
+			for (const auto& instruction : block.m_Instructions)
+				finalTransform << instruction << std::endl;
+
+			// End the function definition.
+			finalTransform << "OpFunctionEnd" << std::endl;
+		}
 
 		return finalTransform.str();
 	}

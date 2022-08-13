@@ -46,16 +46,19 @@ namespace ShaderBuilder
 		 */
 		explicit Vec3(SPIRVSource& source, const std::string& variableName, Type value) : DataType<Vec3<Type>>(source, variableName), x(value), y(value), z(value)
 		{
-			// // Setup the values.
-			// source.insertTypeDeclaration("%const_", static_cast<uint64_t>(value), " = OpConstant ", TypeTraits<Type>::Identifier, " ", value);
-			// 
-			// // Setup the vector constant.
-			// const Type vector[] = { value, value, value };
-			// const auto hash = GenerateHash(vector, sizeof(vector));
-			// source.insertTypeDeclaration("%composite_", hash, " = OpConstantComposite ", Traits::Identifier, " %const_", value, " %const_", value, " %const_", value);
-			// 
-			// // Initialization happens only within function definitions, so we can simply assign it there.
-			// source.insertFunctionDefinition("OpStore %", variableName, " %composite_", hash);
+			// Setup the values.
+			source.insertType("%const_" + std::to_string(static_cast<uint64_t>(value)) + " = OpConstant " + TypeTraits<Type>::Identifier + " " + std::to_string(value));
+
+			// Setup the vector constant.
+			const Type vector[] = { value, value, value };
+			const auto hash = GenerateHash(vector, sizeof(vector));
+			source.insertType("%composite_" + std::to_string(hash) + " = OpConstantComposite " + Traits::Identifier 
+				+ " %const_" + std::to_string(static_cast<uint64_t>(value)) 
+				+ " %const_" + std::to_string(static_cast<uint64_t>(value)) 
+				+ " %const_" + std::to_string(static_cast<uint64_t>(value)));
+
+			// Initialization happens only within function definitions, so we can simply assign it there.
+			source.getCurrentFunctionBlock().m_Instructions.insert("OpStore %" + variableName + " %composite_" + hash);
 		}
 
 		/**
@@ -69,18 +72,21 @@ namespace ShaderBuilder
 		 */
 		explicit Vec3(SPIRVSource& source, const std::string& variableName, Type x, Type y, Type z) : DataType<Vec3<Type>>(source, variableName), x(x), y(y), z(z)
 		{
-			// // Setup the values.
-			// source.insertTypeDeclaration("%const_", static_cast<uint64_t>(x), " = OpConstant ", TypeTraits<Type>::Identifier, " ", x);
-			// source.insertTypeDeclaration("%const_", static_cast<uint64_t>(y), " = OpConstant ", TypeTraits<Type>::Identifier, " ", y);
-			// source.insertTypeDeclaration("%const_", static_cast<uint64_t>(z), " = OpConstant ", TypeTraits<Type>::Identifier, " ", z);
-			// 
-			// // Setup the vector constant.
-			// const Type vector[] = { x, y, z };
-			// const auto hash = GenerateHash(vector, sizeof(vector));
-			// source.insertTypeDeclaration("%composite_", hash, " = OpConstantComposite ", Traits::Identifier, " %const_", x, " %const_", y, " %const_", z);
-			// 
-			// // Initialization happens only within function definitions, so we can simply assign it there.
-			// source.insertFunctionDefinition("OpStore %", variableName, " %composite_", hash);
+			// Setup the values.
+			source.insertType("%const_" + std::to_string(static_cast<uint64_t>(x)) + " = OpConstant " + TypeTraits<Type>::Identifier + " " + std::to_string(x));
+			source.insertType("%const_" + std::to_string(static_cast<uint64_t>(y)) + " = OpConstant " + TypeTraits<Type>::Identifier + " " + std::to_string(y));
+			source.insertType("%const_" + std::to_string(static_cast<uint64_t>(z)) + " = OpConstant " + TypeTraits<Type>::Identifier + " " + std::to_string(z));
+
+			// Setup the vector constant.
+			const Type vector[] = { x, y, z };
+			const auto hash = GenerateHash(vector, sizeof(vector));
+			source.insertType("%composite_" + std::to_string(hash) + " = OpConstantComposite " + Traits::Identifier 
+				+ " %const_" + std::to_string(static_cast<uint64_t>(x)) 
+				+ " %const_" + std::to_string(static_cast<uint64_t>(y)) 
+				+ " %const_" + std::to_string(static_cast<uint64_t>(z)));
+
+			// Initialization happens only within function definitions, so we can simply assign it there.
+			source.getCurrentFunctionBlock().m_Instructions.insert("OpStore %" + variableName + " %composite_" + std::to_string(hash));
 		}
 
 		/**
@@ -91,7 +97,7 @@ namespace ShaderBuilder
 		 */
 		Vec3& operator=(const Vec3& other)
 		{
-			// DataType<Vec3<Type>>::m_Source.insertFunctionDefinition("OpCopyMemory %", DataType<Vec3<Type>>::m_VariableName, " %", other.getName());
+			DataType<Vec3<Type>>::m_Source.getCurrentFunctionBlock().m_Instructions.insert("OpCopyMemory %" + DataType<Vec3<Type>>::m_VariableName + " %" + other.getName());
 
 			x = other.x;
 			y = other.y;
