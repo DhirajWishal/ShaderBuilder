@@ -10,6 +10,8 @@ namespace ShaderBuilder
 	/**
 	 * Data type class.
 	 * This class is the base class for all the supported types.
+	 *
+	 * @tparam Derived The derived type.
 	 */
 	template<class Derived>
 	class DataType

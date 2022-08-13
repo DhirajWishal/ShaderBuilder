@@ -9,6 +9,9 @@ namespace ShaderBuilder
 	/**
 	 * Callable class.
 	 * This class contains the return type and other information about a function.
+	 *
+	 * @tparam Return The return type.
+	 * @tparam Arguments The argument types.
 	 */
 	template<class Return, class... Arguments>
 	class Callable final : public DataType<Callable<Return, Arguments...>>
@@ -25,6 +28,9 @@ namespace ShaderBuilder
 
 	/**
 	 * Callable void specialization.
+	 * 
+	 * @tparam Return The return type.
+	 * @tparam Arguments The argument types.
 	 */
 	template<class Return, class... Arguments>
 	struct TypeTraits<Callable<Return, Arguments...>>

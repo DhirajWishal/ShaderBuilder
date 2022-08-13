@@ -69,7 +69,7 @@ namespace ShaderBuilder
 		return m_Source.getSourceAssembly();
 	}
 
-	SPIRVBinary Builder::compile(bool shouldOptimize /*= true*/) const
+	SPIRVBinary Builder::compile(OptimizationFlags flags /*= OptimizationFlags::Release*/) const
 	{
 		auto errorMessageConsumer = [](spv_message_level_t level, const char*, const spv_position_t& position, const char* message) { throw BuilderError(message); };
 
@@ -79,9 +79,9 @@ namespace ShaderBuilder
 		const auto shaderCode = getString();
 
 #ifdef SB_DEBUG
-		std::cout << "-------------------- Intermediate Output --------------------" << std::endl;
+		std::cout << "-------------------- Debug Output --------------------" << std::endl;
 		std::cout << shaderCode << std::endl;
-		std::cout << "-------------------- Intermediate Output --------------------" << std::endl;
+		std::cout << "-------------------- Debug Output --------------------" << std::endl;
 
 #endif
 
@@ -93,18 +93,29 @@ namespace ShaderBuilder
 			throw BuilderError("The generated SPIR-V is invalid!");
 
 		// Optimize the binary if requested to.
-		if (shouldOptimize)
+		if (flags != OptimizationFlags::None)
 		{
 			auto optimizer = spvtools::Optimizer(SPV_ENV_UNIVERSAL_1_6);
 			optimizer.SetMessageConsumer(errorMessageConsumer);
 
 			// Configure it.
-			optimizer.RegisterPass(spvtools::CreateFreezeSpecConstantValuePass())
-				.RegisterPass(spvtools::CreateUnifyConstantPass())
-				.RegisterPass(spvtools::CreateStripNonSemanticInfoPass())
-				.RegisterPass(spvtools::CreateEliminateDeadFunctionsPass())
-				.RegisterPass(spvtools::CreateEliminateDeadMembersPass())
-				.RegisterPass(spvtools::CreateStripDebugInfoPass());
+			if (flags & OptimizationFlags::FreezeCosntants)
+				optimizer.RegisterPass(spvtools::CreateFreezeSpecConstantValuePass());
+
+			if (flags & OptimizationFlags::UnifyConstants)
+				optimizer.RegisterPass(spvtools::CreateUnifyConstantPass());
+
+			if (flags & OptimizationFlags::StripNonSemanticInfo)
+				optimizer.RegisterPass(spvtools::CreateStripNonSemanticInfoPass());
+
+			if (flags & OptimizationFlags::EliminateDeadFunctions)
+				optimizer.RegisterPass(spvtools::CreateEliminateDeadFunctionsPass());
+
+			if (flags & OptimizationFlags::EliminateDeadMembers)
+				optimizer.RegisterPass(spvtools::CreateEliminateDeadMembersPass());
+
+			if (flags & OptimizationFlags::StripDebugInfo)
+				optimizer.RegisterPass(spvtools::CreateStripDebugInfoPass());
 
 			// Optimize!
 			if (!optimizer.Run(spirv.data(), spirv.size(), &spirv))

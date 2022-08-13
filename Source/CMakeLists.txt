@@ -22,8 +22,8 @@ add_library(
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/SPIRVSource.hpp"
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Utilities.hpp"
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/FunctionBuilder.hpp"
-	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/TypeStorage.hpp"
-	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/InputStorage.hpp"
+	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Storages/InstructionStorage.hpp"
+	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Storages/UniqueInstructionStorage.hpp"
 	
 	"Builder.cpp" 
 	"SPIRVBinary.cpp"

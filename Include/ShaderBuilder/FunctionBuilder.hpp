@@ -2,13 +2,15 @@
 
 #pragma once
 
-#include "DataType.hpp"
+#include "Callable.hpp"
 
 namespace ShaderBuilder
 {
 	/**
 	 * Function builder return type structure.
 	 * This structure is used to deduce the return type of a function builder.
+	 *
+	 * @tparam Type The return type of the function.
 	 */
 	template<class Type>
 	struct FunctionBuilderReturnType {};
@@ -22,6 +24,7 @@ namespace ShaderBuilder
 		/**
 		 * Explicit constructor.
 		 *
+		 * @tparam ReturnType The return type of the function.
 		 * @param source The source to record all the commands to.
 		 * @param name The name of the function.
 		 * @param returnType The return type containing the return type. Default is {};

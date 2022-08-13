@@ -29,6 +29,7 @@
  *		vec4 another;
  *
  *		another = temporary;
+ *		outTextureCoordinates = inTextureCoordinates;
  * }
  * ```
  */
@@ -37,9 +38,9 @@
 	[[maybe_unused]] Profiler _profiler;
 
 	ShaderBuilder::Builder shaderSource;
-	auto inPosition = shaderSource.createInput<ShaderBuilder::Vec3<float>>(0, "inPosition");						
-	auto inTextureCoordinates = shaderSource.createInput<ShaderBuilder::Vec2<float>>(12, "inTextureCoordinates");	
-	auto outTextureCoordinates = shaderSource.createOutput<ShaderBuilder::Vec2<float>>(0, "outTextureCoordinates"); 
+	auto inPosition = shaderSource.createInput<ShaderBuilder::Vec3<float>>(0, "inPosition");
+	auto inTextureCoordinates = shaderSource.createInput<ShaderBuilder::Vec2<float>>(12, "inTextureCoordinates");
+	auto outTextureCoordinates = shaderSource.createOutput<ShaderBuilder::Vec2<float>>(0, "outTextureCoordinates");
 
 	class Camera final : public ShaderBuilder::DataType<Camera>
 	{
@@ -54,17 +55,16 @@
 
 	{
 		auto function = shaderSource.createFunction<void>("main");
-		auto temporary = function.createVariable<ShaderBuilder::Vec4<float>>("temporary", 100);
+		auto temporary = function.createVariable<ShaderBuilder::Vec4<float>>("temporary", 100.0f);
 		auto another = function.createVariable<ShaderBuilder::Vec4<float>>("another");
-		auto coordinates = function.createVariable<ShaderBuilder::Vec2<float>>("coordinates", 10, 20);
 
 		another = temporary;
-		outTextureCoordinates = coordinates;
+		outTextureCoordinates = inTextureCoordinates;
 
 		shaderSource.addEntryPoint(ShaderBuilder::ShaderType::Vertex, function, "inPosition", "inTextureCoordinates", "outTextureCoordinates");
 	}
 
-	return shaderSource.compile();
+	return shaderSource.compile(ShaderBuilder::OptimizationFlags::DebugMode);
 }
 
 int main()

@@ -131,6 +131,14 @@ namespace ShaderBuilder
 		 */
 		[[nodiscard]] uint64_t getUniqueID() { return m_UniqueID++; }
 
+		/**
+		 * Get a unique identifier.
+		 * The difference between this and the getUniqueID is that this returns a string while the other returns the integer.
+		 *
+		 * @return The unique identifier.
+		 */
+		[[nodiscard]] std::string getUniqueIdentifier() { return std::to_string(m_UniqueID++); }
+
 	private:
 		std::vector<FunctionBlock> m_FunctionBlocks;
 

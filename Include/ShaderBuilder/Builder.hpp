@@ -57,6 +57,26 @@ namespace ShaderBuilder
 	};
 
 	/**
+	 * Optimization flags enum.
+	 */
+	enum class OptimizationFlags : uint8_t
+	{
+		None = 0,
+		FreezeCosntants = 1 << 0,
+		UnifyConstants = 1 << 1,
+		StripNonSemanticInfo = 1 << 2,
+		EliminateDeadFunctions = 1 << 3,
+		EliminateDeadMembers = 1 << 4,
+		StripDebugInfo = 1 << 5,
+
+		DebugMode = FreezeCosntants | UnifyConstants | StripNonSemanticInfo | EliminateDeadFunctions | EliminateDeadMembers,
+		Release = FreezeCosntants | UnifyConstants | StripNonSemanticInfo | EliminateDeadFunctions | EliminateDeadMembers | StripDebugInfo
+	};
+
+	[[nodiscard]] constexpr OptimizationFlags operator|(OptimizationFlags lhs, OptimizationFlags rhs) { return static_cast<OptimizationFlags>(static_cast<std::underlying_type_t<OptimizationFlags>>(lhs) | static_cast<std::underlying_type_t<OptimizationFlags>>(rhs)); }
+	[[nodiscard]] constexpr bool operator&(OptimizationFlags lhs, OptimizationFlags rhs) { return static_cast<std::underlying_type_t<OptimizationFlags>>(lhs) & static_cast<std::underlying_type_t<OptimizationFlags>>(rhs); }
+
+	/**
 	 * Builder class.
 	 * This class contains the base code for SPIR-V generation and can be used to
 	 * compile to other high level languages, like GLSL and HLSL.
@@ -99,26 +119,6 @@ namespace ShaderBuilder
 		{
 			registerType<Type>();
 			return Type(location, false, m_Source, name);
-		}
-
-		/**
-		 * Create a new local variable.
-		 * These variables must be created within a function.
-		 *
-		 * @tparam Type The type of the variable.
-		 * @tparam Types The initialization types.
-		 * @param name The variable name.
-		 * @param initializer The initializer types.
-		 * @return The created variable.
-		 */
-		template<class Type, class... Types>
-		[[nodiscard]] Type createLocalVariable(std::string&& name, Types&&... initializer)
-		{
-			registerType<Type>();
-			m_Source.insertType(std::string("%variable_type_") + TypeTraits<Type>::RawIdentifier + " = OpTypePointer Function " + TypeTraits<Type>::Identifier);
-			m_Source.insertName("OpName %" + name + " \"" + name + "\"");
-
-			return Type(m_Source, name, std::forward<Types>(initializer)...);
 		}
 
 		/**
@@ -256,10 +256,10 @@ namespace ShaderBuilder
 		/**
 		 * Compile the shader code and inform if there were any errors.
 		 *
-		 * @param shouldOptimize Whether or not to optimize the generated SPIR-V binary. Default is true.
+		 * @param flags Optimization flags. Default is Release.
 		 * @return The compiled binary.
 		 */
-		[[nodiscard]] SPIRVBinary compile(bool shouldOptimize = true) const;
+		[[nodiscard]] SPIRVBinary compile(OptimizationFlags flags = OptimizationFlags::Release) const;
 
 	private:
 		/**
