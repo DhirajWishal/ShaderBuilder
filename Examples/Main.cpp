@@ -25,11 +25,10 @@
  *
  * void main()
  * {
- *		vec4 temporary = vec4(100);
- *		vec4 another;
- *
- *		another = temporary;
+ *		vec4 temporary = vec4(inPosition, 1);
  *		outTextureCoordinates = inTextureCoordinates;
+ *
+ *		gl_Position = temporary;
  * }
  * ```
  */
@@ -55,12 +54,9 @@
 
 	{
 		auto function = shaderSource.createFunction<void>("main");
-		auto temporary = function.createVariable<ShaderBuilder::Vec4<float>>("temporary", 100.0f);
-		auto another = function.createVariable<ShaderBuilder::Vec4<float>>("another");
 
-		another = temporary;
 		outTextureCoordinates = inTextureCoordinates;
-		shaderSource.setPoisition(another);
+		shaderSource.setPoisition(function.createVariable<ShaderBuilder::Vec4<float>>("temporary", inPosition, 1.0f));
 		shaderSource.addEntryPoint(ShaderBuilder::ShaderType::Vertex, function, "inPosition", "inTextureCoordinates", "outTextureCoordinates");
 	}
 
