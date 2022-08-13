@@ -6,10 +6,6 @@
 
 namespace ShaderBuilder
 {
-	SPIRVSource::SPIRVSource()
-	{
-	}
-
 	void SPIRVSource::insertCapability(std::string&& instruction)
 	{
 		m_Capabilities.insert(std::move(instruction));
@@ -72,7 +68,6 @@ namespace ShaderBuilder
 		finalTransform << "; Version:   0x00010000 (Version: 1.0.0)" << std::endl;
 		finalTransform << "; Generator: 0x00000000 (Shader Builder; 1)" << std::endl;
 		finalTransform << "; Schema:    0" << std::endl;
-
 
 		// Insert the capabilities.
 		finalTransform << std::endl << "; Capabilities." << std::endl;

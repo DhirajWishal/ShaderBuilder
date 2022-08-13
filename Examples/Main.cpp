@@ -1,6 +1,6 @@
 // Copyright (c) 2022 Dhiraj Wishal
 
-#include "ShaderBuilder/Builder.hpp"
+#include "ShaderBuilder/VertexBuilder.hpp"
 #include "ShaderBuilder/Vec2.hpp"
 #include "ShaderBuilder/Vec3.hpp"
 #include "ShaderBuilder/Vec4.hpp"
@@ -37,7 +37,7 @@
 {
 	[[maybe_unused]] Profiler _profiler;
 
-	ShaderBuilder::Builder shaderSource;
+	ShaderBuilder::VertexBuilder shaderSource;
 	auto inPosition = shaderSource.createInput<ShaderBuilder::Vec3<float>>(0, "inPosition");
 	auto inTextureCoordinates = shaderSource.createInput<ShaderBuilder::Vec2<float>>(12, "inTextureCoordinates");
 	auto outTextureCoordinates = shaderSource.createOutput<ShaderBuilder::Vec2<float>>(0, "outTextureCoordinates");
@@ -60,7 +60,7 @@
 
 		another = temporary;
 		outTextureCoordinates = inTextureCoordinates;
-
+		shaderSource.setPoisition(another);
 		shaderSource.addEntryPoint(ShaderBuilder::ShaderType::Vertex, function, "inPosition", "inTextureCoordinates", "outTextureCoordinates");
 	}
 

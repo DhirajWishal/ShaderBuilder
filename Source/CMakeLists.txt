@@ -24,13 +24,14 @@ add_library(
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/FunctionBuilder.hpp"
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Storages/InstructionStorage.hpp"
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Storages/UniqueInstructionStorage.hpp"
+	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/VertexBuilder.hpp"
 	
 	"Builder.cpp" 
 	"SPIRVBinary.cpp"
 	"SPIRVSource.cpp"
 	"Utilities.cpp"
 	"FunctionBuilder.cpp"
-)
+ "VertexBuilder.cpp")
 
 # Add the target includes.
 target_include_directories(

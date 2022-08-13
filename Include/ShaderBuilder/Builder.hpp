@@ -6,7 +6,7 @@
 #include "FunctionBuilder.hpp"
 #include "Callable.hpp"
 
-#include <functional>
+#include <array>
 
 namespace ShaderBuilder
 {
@@ -81,10 +81,8 @@ namespace ShaderBuilder
 	 * This class contains the base code for SPIR-V generation and can be used to
 	 * compile to other high level languages, like GLSL and HLSL.
 	 */
-	class Builder final
+	class Builder
 	{
-		using Callback = std::function<void(SPIRVSource&)>;
-
 	public:
 		/**
 		 * Explicit constructor.
@@ -92,6 +90,11 @@ namespace ShaderBuilder
 		 * @param config The builder's initial configuration.
 		 */
 		explicit Builder(Configuration config = Configuration());
+
+		/**
+		 * Pure virtual destructor.
+		 */
+		virtual ~Builder() = 0;
 
 		/**
 		 * Create a new shader input.
@@ -190,52 +193,17 @@ namespace ShaderBuilder
 		}
 
 		/**
-		 * Add an entry point to the shader.
+		 * Store a constant to the storage.
+		 * The identifier will be const_<type identifier>_<value as a integer>.
 		 *
-		 * @tparam Attributes The input and output attribute types.
-		 * @param shaderType The type of the shader.
-		 * @param function The entry point function.
-		 * @param attributes The names of the input and output attributes.
+		 * @tparam Type The type of the value.
+		 * @param value The constant value.
 		 */
-		template<class... Attributes>
-		void addEntryPoint(ShaderType shaderType, const FunctionBuilder& function, Attributes&&... attributes)
+		template<class Type>
+		void storeConstant(const Type& value)
 		{
-			// Resolve the proper shader type.
-			std::string executionModel;
-			switch (shaderType)
-			{
-			case ShaderBuilder::ShaderType::Vertex:
-				executionModel = "Vertex ";
-				break;
-
-			case ShaderBuilder::ShaderType::TessellationControl:
-				executionModel = "TessellationControl ";
-				break;
-
-			case ShaderBuilder::ShaderType::TessellationEvaluation:
-				executionModel = "TessellationEvaluation ";
-				break;
-
-			case ShaderBuilder::ShaderType::Geometry:
-				executionModel = "Geometry ";
-				break;
-
-			case ShaderBuilder::ShaderType::Fragment:
-				executionModel = "Fragment ";
-				break;
-
-			case ShaderBuilder::ShaderType::Compute:
-				executionModel = "GLCompute ";
-				break;
-			}
-
-			// Setup the inputs.
-			std::string attributeString;
-			auto insertAttribute = [&attributeString](auto&& attribute) { attributeString += std::string(" %") + std::move(attribute); };
-			(insertAttribute(std::move(attributes)), ...);
-
-			const auto& name = function.getName();
-			m_Source.insertEntryPoint("OpEntryPoint " + executionModel + " %" + name + " \"" + name + "\"" + attributeString);
+			registerType<Type>();
+			m_Source.insertType("%" + GetConstantIdentifier(value) + " = OpConstant " + TypeTraits<Type>::Identifier + " " + std::to_string(value));
 		}
 
 	public:
@@ -261,7 +229,8 @@ namespace ShaderBuilder
 		 */
 		[[nodiscard]] SPIRVBinary compile(OptimizationFlags flags = OptimizationFlags::Release) const;
 
-	private:
+
+	protected:
 		/**
 		 * Register type function.
 		 *
@@ -275,6 +244,23 @@ namespace ShaderBuilder
 				registerType<typename TypeTraits<Type>::ValueTraits::Type>();
 
 			m_Source.insertType(std::string(TypeTraits<Type>::Identifier) + " = " + TypeTraits<Type>::Declaration);
+		}
+
+		/**
+		 * Register an array function.
+		 *
+		 * @tparam ValueType The value type of the array.
+		 * @tparam Size The size of the array.
+		 */
+		template<class ValueType, size_t Size>
+		void registerArray()
+		{
+			// Try and register value types if the Type is complex.
+			if constexpr (IsCompexType<ValueType>)
+				registerType<typename TypeTraits<ValueType>::ValueTraits::Type>();
+
+			storeConstant<uint32_t>(Size);
+			m_Source.insertType(std::string("%array_") + TypeTraits<ValueType>::RawIdentifier + "_" + std::to_string(Size) + " = OpTypeArray " + TypeTraits<ValueType>::Identifier + " %" + GetConstantIdentifier<uint32_t>(Size));
 		}
 
 		/**
@@ -312,8 +298,7 @@ namespace ShaderBuilder
 				return std::string(TypeTraits<MemberType>::Identifier);
 		}
 
-	private:
+	protected:
 		SPIRVSource m_Source;
-		std::vector<Callback> m_Callbacks;
 	};
 } // namespace ShaderBuilder

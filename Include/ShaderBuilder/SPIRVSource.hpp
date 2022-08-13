@@ -30,7 +30,7 @@ namespace ShaderBuilder
 		/**
 		 * Default constructor.
 		 */
-		SPIRVSource();
+		SPIRVSource() = default;
 
 		/**
 		 * Insert a new shader capability.
@@ -155,7 +155,6 @@ namespace ShaderBuilder
 		UniqueInstructionStorage m_Types;
 
 		InstructionStorage m_FunctionDeclarations;
-		InstructionStorage m_FunctionDefinitions;
 
 		uint64_t m_UniqueID = 1;
 	};

@@ -59,6 +59,11 @@ namespace ShaderBuilder
 		m_Source.setMemoryModel(std::string("OpMemoryModel ") + GetAddressingModel(config.m_AddressingModel) + " " + GetMemoryModel(config.m_MemoryModel));
 	}
 
+	Builder::~Builder()
+	{
+
+	}
+
 	std::string Builder::getString() const
 	{
 		return m_Source.getSourceAssembly();
@@ -71,7 +76,7 @@ namespace ShaderBuilder
 
 	SPIRVBinary Builder::compile(OptimizationFlags flags /*= OptimizationFlags::Release*/) const
 	{
-		auto errorMessageConsumer = [](spv_message_level_t level, const char*, const spv_position_t& position, const char* message) { throw BuilderError(message); };
+		auto errorMessageConsumer = [](spv_message_level_t level, const char* source, const spv_position_t& position, const char* message) { throw BuilderError(message); };
 
 		auto tools = spvtools::SpirvTools(SPV_ENV_UNIVERSAL_1_6);
 		tools.SetMessageConsumer(errorMessageConsumer);
