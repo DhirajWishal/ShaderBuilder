@@ -28,7 +28,7 @@ namespace ShaderBuilder
 
 	/**
 	 * Callable void specialization.
-	 * 
+	 *
 	 * @tparam Return The return type.
 	 * @tparam Arguments The argument types.
 	 */
@@ -46,5 +46,5 @@ namespace ShaderBuilder
 	 * @return The identifier string.
 	 */
 	template<class ValueType>
-	[[nodiscard]] std::string GetFunctionIdentifier() { return std::string(TypeTraits<ValueType>::Identifier) + "_callable"; }
+	[[nodiscard]] std::string GetFunctionIdentifier() { return std::format("{}_callable", TypeTraits<ValueType>::Identifier); }
 } // namespace ShaderBuilder

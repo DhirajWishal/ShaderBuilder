@@ -147,18 +147,18 @@ namespace ShaderBuilder
 		[[nodiscard]] Type createUniform(uint32_t set, uint32_t binding, const std::string& name, Members... members)
 		{
 			// Register the members.
-			m_Source.insertType("%type_" + name + " = OpTypeStruct " + resolveMemberVariableTypeIdentifiers<Members...>());
+			m_Source.insertType(std::format("%type_{} = OpTypeStruct {}", name, resolveMemberVariableTypeIdentifiers<Members...>()));
 
 			// Setup type declarations.
-			m_Source.insertType("%uniform_" + name + " = OpTypePointer Uniform %type_" + name);
-			m_Source.insertType("%" + name + " = OpVariable %uniform_" + name + " Uniform");
+			m_Source.insertType(std::format("%uniform_{} = OpTypePointer Uniform %type_{}", name, name));
+			m_Source.insertType(std::format("%{} = OpVariable %uniform_{} Uniform", name, name));
 
 			// Set the type debug information and annotations.
-			m_Source.insertName("OpName %uniform_" + name + " \"" + name + "\"");
-			m_Source.insertName("OpName %" + name + " \"\"");
+			m_Source.insertName(std::format("OpName %uniform_{} \"{}\"", name, name));
+			m_Source.insertName(std::format("OpName %{} \"\"", name));
 
-			m_Source.insertAnnotation("OpDecorate %" + name + " DescriptorSet " + std::to_string(set));
-			m_Source.insertAnnotation("OpDecorate %" + name + " Binding " + std::to_string(binding));
+			m_Source.insertAnnotation(std::format("OpDecorate %{} DescriptorSet {}", name, set));
+			m_Source.insertAnnotation(std::format("OpDecorate %{} Binding {}", name, binding));
 
 			// Create the uniform.
 			auto uniform = Type(m_Source, name);
@@ -166,8 +166,8 @@ namespace ShaderBuilder
 			uint64_t counter = 0, offsets = 0;
 			auto logMemberInformation = [this, &uniform, &name, &counter, &offsets](auto member)
 			{
-				m_Source.insertName("OpMemberName %type_" + name + " " + std::to_string(counter) + " \"" + (uniform.*member).getName() + "\"");
-				m_Source.insertAnnotation("OpMemberDecorate %type_" + name + " " + std::to_string(counter) + " Offset " + std::to_string(offsets));
+				m_Source.insertName(std::format("OpMemberName %type_{} {} \"{}\"", name, counter, (uniform.*member).getName()));
+				m_Source.insertAnnotation(std::format("OpMemberDecorate %type_{} {} Offset {}", name, counter, offsets));
 
 				counter++;
 				offsets += TypeTraits<typename MemberVariableType<decltype(member)>::Type>::Size;
@@ -203,7 +203,7 @@ namespace ShaderBuilder
 		void storeConstant(const Type& value)
 		{
 			registerType<Type>();
-			m_Source.insertType("%" + GetConstantIdentifier(value) + " = OpConstant " + TypeTraits<Type>::Identifier + " " + std::to_string(value));
+			m_Source.insertType(std::format("%{} = OpConstant {} {}", GetConstantIdentifier(value), TypeTraits<Type>::Identifier, value));
 		}
 
 	public:
@@ -243,7 +243,7 @@ namespace ShaderBuilder
 			if constexpr (IsCompexType<Type>)
 				registerType<typename TypeTraits<Type>::ValueTraits::Type>();
 
-			m_Source.insertType(std::string(TypeTraits<Type>::Identifier) + " = " + TypeTraits<Type>::Declaration);
+			m_Source.insertType(std::format("{} = {}", TypeTraits<Type>::Identifier, TypeTraits<Type>::Declaration));
 		}
 
 		/**
@@ -260,7 +260,7 @@ namespace ShaderBuilder
 				registerType<typename TypeTraits<ValueType>::ValueTraits::Type>();
 
 			storeConstant<uint32_t>(Size);
-			m_Source.insertType(std::string("%array_") + TypeTraits<ValueType>::RawIdentifier + "_" + std::to_string(Size) + " = OpTypeArray " + TypeTraits<ValueType>::Identifier + " %" + GetConstantIdentifier<uint32_t>(Size));
+			m_Source.insertType(std::format("%array_{}_{} = OpTypeArray {} %{}", TypeTraits<ValueType>::RawIdentifier, Size, TypeTraits<ValueType>::Identifier, GetConstantIdentifier<uint32_t>(Size)));
 		}
 
 		/**
@@ -275,8 +275,7 @@ namespace ShaderBuilder
 
 			// Try and register value types.
 			registerType<ValueType>();
-
-			m_Source.insertType(GetFunctionIdentifier<ValueType>() + " = OpTypeFunction " + TypeTraits<ValueType>::Identifier);
+			m_Source.insertType(std::format("{} = OpTypeFunction {}", GetFunctionIdentifier<ValueType>(), TypeTraits<ValueType>::Identifier));
 		}
 
 		/**
@@ -292,7 +291,7 @@ namespace ShaderBuilder
 			registerType<MemberType>();
 
 			if constexpr (sizeof...(Rest) > 0)
-				return std::string(TypeTraits<MemberType>::Identifier) + " " + resolveMemberVariableTypeIdentifiers<Rest...>();
+				return std::format("{} {}", TypeTraits<MemberType>::Identifier, resolveMemberVariableTypeIdentifiers<Rest...>());
 
 			else
 				return std::string(TypeTraits<MemberType>::Identifier);

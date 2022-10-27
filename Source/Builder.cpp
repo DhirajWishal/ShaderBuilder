@@ -56,7 +56,7 @@ namespace ShaderBuilder
 	{
 		m_Source.insertCapability("OpCapability Shader");
 		m_Source.insertExtendedInstructionSet("%glsl = OpExtInstImport \"GLSL.std.450\"");
-		m_Source.setMemoryModel(std::string("OpMemoryModel ") + GetAddressingModel(config.m_AddressingModel) + " " + GetMemoryModel(config.m_MemoryModel));
+		m_Source.setMemoryModel(std::format("OpMemoryModel {} {}", GetAddressingModel(config.m_AddressingModel), GetMemoryModel(config.m_MemoryModel)));
 	}
 
 	Builder::~Builder()

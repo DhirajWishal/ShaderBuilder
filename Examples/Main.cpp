@@ -68,7 +68,7 @@ int main()
 	// Generate the shader.
 	const auto output = CreateVertexShader();
 
-	// Show the generated data.g
+	// Show the generated data.
 	std::cout << "-------------------- Compiled Assembly --------------------" << std::endl;
 	std::cout << output.disassemble() << std::endl;
 
