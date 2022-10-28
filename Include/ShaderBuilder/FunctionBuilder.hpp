@@ -18,7 +18,7 @@ namespace ShaderBuilder
 	/**
 	 * Function builder class.
 	 */
-	class FunctionBuilder final
+	class FunctionBuilder
 	{
 	public:
 		/**
@@ -31,7 +31,7 @@ namespace ShaderBuilder
 		/**
 		 * Default destructor.
 		 */
-		~FunctionBuilder();
+		virtual ~FunctionBuilder();
 
 		/**
 		 * Create a new variable.
@@ -83,9 +83,9 @@ namespace ShaderBuilder
 		 * Toggle the recording to false.
 		 * From here on, the builder will not record any instructions but will only create the variables.
 		 */
-		void toggleRecording() { m_IsRecording = false; }
+		void toggleRecording();
 
-	private:
+	protected:
 		SPIRVSource& m_Source;
 
 		bool m_IsComplete = false;

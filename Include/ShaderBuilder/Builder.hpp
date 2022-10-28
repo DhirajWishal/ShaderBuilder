@@ -138,35 +138,36 @@ namespace ShaderBuilder
 		 * @tparam Members The uniform's members.
 		 * @param set The descriptor set index.
 		 * @param binding The uniform's binding.
-		 * @param name The name of the uniform.
 		 * @param members The members of the uniform.
 		 * @return The created uniform.
 		 */
 		template<class Type, class... Members>
-		[[nodiscard]] Type createUniform(uint32_t set, uint32_t binding, const std::string& name, Members... members)
+		[[nodiscard]] Type createUniform(uint32_t set, uint32_t binding, Members... members)
 		{
+			const auto identifier = m_Source.getUniqueIdentifier();
+
 			// Register the members.
-			m_Source.insertType(fmt::format("%type_{} = OpTypeStruct {}", name, m_Source.resolveMemberVariableTypeIdentifiers<Members...>()));
+			m_Source.insertType(fmt::format("%type_{} = OpTypeStruct {}", identifier, m_Source.resolveMemberVariableTypeIdentifiers<Members...>()));
 
 			// Setup type declarations.
-			m_Source.insertType(fmt::format("%uniform_{} = OpTypePointer Uniform %type_{}", name, name));
-			m_Source.insertType(fmt::format("%{} = OpVariable %uniform_{} Uniform", name, name));
+			m_Source.insertType(fmt::format("%uniform_{} = OpTypePointer Uniform %type_{}", identifier, identifier));
+			m_Source.insertType(fmt::format("%{} = OpVariable %uniform_{} Uniform", identifier, identifier));
 
 			// Set the type debug information and annotations.
-			m_Source.insertName(fmt::format("OpName %uniform_{} \"{}\"", name, name));
-			m_Source.insertName(fmt::format("OpName %{} \"\"", name));
+			m_Source.insertName(fmt::format("OpName %uniform_{} \"{}\"", identifier, identifier));
+			m_Source.insertName(fmt::format("OpName %{} \"\"", identifier));
 
-			m_Source.insertAnnotation(fmt::format("OpDecorate %{} DescriptorSet {}", name, set));
-			m_Source.insertAnnotation(fmt::format("OpDecorate %{} Binding {}", name, binding));
+			m_Source.insertAnnotation(fmt::format("OpDecorate %{} DescriptorSet {}", identifier, set));
+			m_Source.insertAnnotation(fmt::format("OpDecorate %{} Binding {}", identifier, binding));
 
 			// Create the uniform.
-			auto uniform = Type(m_Source, name);
+			auto uniform = Type(m_Source, identifier);
 
 			uint64_t counter = 0, offsets = 0;
-			auto logMemberInformation = [this, &uniform, &name, &counter, &offsets](auto member)
+			auto logMemberInformation = [this, &uniform, &identifier, &counter, &offsets](auto member)
 			{
-				m_Source.insertName(fmt::format("OpMemberName %type_{} {} \"{}\"", name, counter, (uniform.*member).getName()));
-				m_Source.insertAnnotation(fmt::format("OpMemberDecorate %type_{} {} Offset {}", name, counter, offsets));
+				m_Source.insertName(fmt::format("OpMemberName %type_{} {} \"{}\"", identifier, counter, (uniform.*member).getName()));
+				m_Source.insertAnnotation(fmt::format("OpMemberDecorate %type_{} {} Offset {}", identifier, counter, offsets));
 
 				counter++;
 				offsets += TypeTraits<typename MemberVariableType<decltype(member)>::Type>::Size;
@@ -174,21 +175,6 @@ namespace ShaderBuilder
 			(logMemberInformation(members), ...);
 
 			return uniform;
-		}
-
-		/**
-		 * Create a new function.
-		 *
-		 * Note that the instructions will be recorded only in the first run.
-		 *
-		 * @tparam Lambda The lambda type.
-		 * @param function The function definition. Make sure that the function's first parameter/ argument is FunctionBuilder&.
-		 * @return The function.
-		 */
-		template<class Lambda>
-		[[nodiscard]] decltype(auto) createFunction(Lambda&& function)
-		{
-			return Function(m_Source, std::function(std::move(function)));
 		}
 
 	public:

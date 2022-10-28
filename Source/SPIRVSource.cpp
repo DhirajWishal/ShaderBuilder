@@ -6,6 +6,20 @@
 
 namespace ShaderBuilder
 {
+	void FunctionBlock::enableRecording()
+	{
+		m_Definition.setShouldRecord(true);
+		m_Instructions.setShouldRecord(true);
+		m_Variables.setShouldRecord(true);
+	}
+
+	void FunctionBlock::disableRecording()
+	{
+		m_Definition.setShouldRecord(false);
+		m_Instructions.setShouldRecord(false);
+		m_Variables.setShouldRecord(false);
+	}
+
 	void SPIRVSource::insertCapability(std::string&& instruction)
 	{
 		m_Capabilities.insert(std::move(instruction));

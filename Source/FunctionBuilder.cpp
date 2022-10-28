@@ -20,4 +20,10 @@ namespace ShaderBuilder
 		}
 	}
 
+	void FunctionBuilder::toggleRecording()
+	{
+		m_IsRecording = false;
+		m_Source.getCurrentFunctionBlock().disableRecording();
+	}
+
 } // namespace ShaderBuilder

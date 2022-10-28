@@ -44,22 +44,22 @@
 	class Camera final : public ShaderBuilder::DataType<Camera>
 	{
 	public:
-		explicit Camera(ShaderBuilder::SPIRVSource& source, const std::string& name) : ShaderBuilder::DataType<Camera>(source, name), m_Projection(source, "m_Projection"), m_View(source, "m_View") {}
+		explicit Camera(ShaderBuilder::SPIRVSource& source, const std::string& identifier) : ShaderBuilder::DataType<Camera>(source, identifier), m_Projection(source, source.getUniqueIdentifier()), m_View(source, source.getUniqueIdentifier()) {}
 
 		ShaderBuilder::Vec4<float> m_Projection;	// These should be Mat4.
 		ShaderBuilder::Vec2<float> m_View;			// These should be Mat4.
 	};
 
-	auto camera = shaderSource.createUniform<Camera>(0, 0, "camera", &Camera::m_Projection, &Camera::m_View);
+	auto camera = shaderSource.createUniform<Camera>(0, 0, &Camera::m_Projection, &Camera::m_View);
 
-	auto function = shaderSource.createFunction([&](ShaderBuilder::FunctionBuilder& builder)
+	auto function = shaderSource.createFunction([&](ShaderBuilder::VertexFunctionBuilder& builder)
 		{
 			outTextureCoordinates = inTextureCoordinates;
-			shaderSource.setPoisition(builder.createVariable<ShaderBuilder::Vec4<float>>(inPosition.value(), 1.0f));
+			builder.setPoisition(builder.createVariable<ShaderBuilder::Vec4<float>>(inPosition.value(), 1.0f));
 		}
 	);
 
-	// function();
+	function();
 	shaderSource.addEntryPoint(function, inPosition, inTextureCoordinates, outTextureCoordinates);
 
 	return shaderSource.compile(ShaderBuilder::OptimizationFlags::DebugMode);

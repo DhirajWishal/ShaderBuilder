@@ -9,10 +9,10 @@
 namespace ShaderBuilder
 {
 	/**
-	 * Vertex builder class.
-	 * This contains the default vertex shader outputs and other information.
+	 * Vertex function builder class.
+	 * This contains the vertex shader specific code that can be accessed by a vertex shader.
 	 */
-	class VertexBuilder final : public Builder
+	class VertexFunctionBuilder final : public FunctionBuilder
 	{
 		/**
 		 * Built in structure.
@@ -27,9 +27,43 @@ namespace ShaderBuilder
 
 	public:
 		/**
+		 * Explicit constructor.
+		 *
+		 * @param source The SPIRV source.
+		 */
+		explicit VertexFunctionBuilder(SPIRVSource& source);
+
+		/**
+		 * Set the position value.
+		 *
+		 * @param value The value to set.
+		 */
+		void setPoisition(const Vec4<float>& value);
+	};
+
+	/**
+	 * Vertex builder class.
+	 * This contains the default vertex shader outputs and other information.
+	 */
+	class VertexBuilder final : public Builder
+	{
+	public:
+		/**
 		 * Default constructor.
 		 */
-		VertexBuilder();
+		VertexBuilder() = default;
+
+		/**
+		 * Create a new function.
+		 *
+		 * Note that the instructions will be recorded only in the first run.
+		 *
+		 * @tparam Lambda The lambda type.
+		 * @param function The function definition. Make sure that the function's first parameter/ argument is FunctionBuilder&.
+		 * @return The function.
+		 */
+		template<class Lambda>
+		[[nodiscard]] decltype(auto) createFunction(Lambda&& function) { return Function(m_Source, std::function(std::move(function))); }
 
 		/**
 		 * Add an entry point to the shader.
@@ -58,12 +92,5 @@ namespace ShaderBuilder
 			const auto& name = function.getName();
 			m_Source.insertEntryPoint(fmt::format("OpEntryPoint Vertex %{} \"{}\" %perVertex {}", name, name, attributeString));
 		}
-
-		/**
-		 * Set the position value.
-		 *
-		 * @param value The value to set.
-		 */
-		void setPoisition(const Vec4<float>& value);
 	};
 } // namespace ShaderBuilder

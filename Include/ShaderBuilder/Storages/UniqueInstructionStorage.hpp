@@ -35,7 +35,7 @@ namespace ShaderBuilder
 		 */
 		void insert(std::string&& instruction) override
 		{
-			if (registerInstruction(GenerateHash(instruction.data(), instruction.size())))
+			if (m_ShouldRecord && registerInstruction(GenerateHash(instruction.data(), instruction.size())))
 				m_Instructions.emplace_back(std::move(instruction));
 		}
 

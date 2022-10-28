@@ -15,12 +15,12 @@ namespace ShaderBuilder
 	 * @tparam Return The return type.
 	 * @tparam Parameters The parameter types.
 	 */
-	template<class Return, class...Parameters>
-	class Function final : public DataType<Function<Return, Parameters...>>
+	template<class FunctionBuilderType, class Return, class...Parameters>
+	class Function final : public DataType<Function<FunctionBuilderType, Return, Parameters...>>
 	{
 	public:
-		using Super = DataType<Function<Return, Parameters...>>;
-		using FunctionType = std::function<Return(FunctionBuilder&, Parameters...)>;
+		using Super = DataType<Function<FunctionBuilderType, Return, Parameters...>>;
+		using FunctionType = std::function<Return(FunctionBuilderType&, Parameters...)>;
 		using ReturnType = Return;
 
 		static constexpr uint32_t ParameterCount = sizeof...(Parameters);
@@ -62,7 +62,7 @@ namespace ShaderBuilder
 		}
 
 	private:
-		FunctionBuilder m_Builder;
+		FunctionBuilderType m_Builder;
 		FunctionType m_Function;
 	};
 }

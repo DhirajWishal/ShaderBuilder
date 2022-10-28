@@ -61,7 +61,6 @@ namespace ShaderBuilder
 
 	Builder::~Builder()
 	{
-
 	}
 
 	std::string Builder::getString() const

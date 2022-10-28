@@ -4,7 +4,8 @@
 
 namespace ShaderBuilder
 {
-	VertexBuilder::VertexBuilder()
+	VertexFunctionBuilder::VertexFunctionBuilder(SPIRVSource& source)
+		: FunctionBuilder(source)
 	{
 		// Setup the annotations.
 		m_Source.insertAnnotation("OpMemberDecorate %gl_PerVertex 0 BuiltIn Position");
@@ -32,17 +33,22 @@ namespace ShaderBuilder
 		m_Source.insertType("%perVertex = OpVariable %pointer_gl_PerVertex Output");
 		m_Source.insertType("%type_gl_Position = OpTypePointer Output %vec4_float");
 
+		// Setup constants.
 		m_Source.storeConstant(0);
 		m_Source.storeConstant(1);
 	}
 
-	void VertexBuilder::setPoisition(const Vec4<float>& value)
+	void VertexFunctionBuilder::setPoisition(const Vec4<float>& value)
 	{
-		const auto valuePointer = fmt::format("%{}", m_Source.getUniqueIdentifier());
-		m_Source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("{} = OpLoad %vec4_float %{}", valuePointer, value.getName()));
+		if (m_IsRecording)
+		{
+			auto& currentBlock = m_Source.getCurrentFunctionBlock();
+			const auto valuePointer = fmt::format("%{}", m_Source.getUniqueIdentifier());
+			currentBlock.m_Instructions.insert(fmt::format("{} = OpLoad %vec4_float %{}", valuePointer, value.getName()));
 
-		const auto positionPointer = fmt::format("%{}", m_Source.getUniqueIdentifier());
-		m_Source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("{} = OpAccessChain %type_gl_Position %perVertex %{}", positionPointer, GetConstantIdentifier(0)));
-		m_Source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("OpStore {} {}", positionPointer, valuePointer));
+			const auto positionPointer = fmt::format("%{}", m_Source.getUniqueIdentifier());
+			currentBlock.m_Instructions.insert(fmt::format("{} = OpAccessChain %type_gl_Position %perVertex %{}", positionPointer, GetConstantIdentifier(0)));
+			currentBlock.m_Instructions.insert(fmt::format("OpStore {} {}", positionPointer, valuePointer));
+		}
 	}
 } // namespace ShaderBuilder

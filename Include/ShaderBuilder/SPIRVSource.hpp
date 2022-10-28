@@ -12,6 +12,17 @@ namespace ShaderBuilder
 	 */
 	struct FunctionBlock final
 	{
+		/**
+		 * Enable the function block's instruction recording.
+		 */
+		void enableRecording();
+
+		/**
+		 * Disable the function block's instruction recording.
+		 */
+		void disableRecording();
+
+	public:
 		InstructionStorage m_Definition;
 		InstructionStorage m_Instructions;
 

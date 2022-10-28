@@ -29,7 +29,14 @@ namespace ShaderBuilder
 		 *
 		 * @param instruction The instruction to be stored.
 		 */
-		virtual void insert(std::string&& instruction) { m_Instructions.emplace_back(std::move(instruction)); }
+		virtual void insert(std::string&& instruction) { if (m_ShouldRecord) m_Instructions.emplace_back(std::move(instruction)); }
+
+		/**
+		 * Set if the storage should record or ignore the instruction.
+		 *
+		 * @param shouldRecord Whether the storage should record or not.
+		 */
+		void setShouldRecord(bool shouldRecord) { m_ShouldRecord = shouldRecord; }
 
 		/**
 		 * Get the begin iterator.
@@ -61,5 +68,6 @@ namespace ShaderBuilder
 
 	protected:
 		std::vector<std::string> m_Instructions;
+		bool m_ShouldRecord = true;
 	};
 } // namespace ShaderBuilder
