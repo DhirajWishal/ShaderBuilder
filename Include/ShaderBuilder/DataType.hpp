@@ -47,6 +47,20 @@ namespace ShaderBuilder
 		 */
 		[[nodiscard]] std::string getIdentifier() const { return "%" + m_VariableName; }
 
+		/**
+		 * Get the source to which the instructions are written to.
+		 *
+		 * @return The source reference.
+		 */
+		[[nodiscard]] SPIRVSource& getSource() { return m_Source; }
+
+		/**
+		 * Get the source to which the instructions are written to.
+		 *
+		 * @return The const source reference.
+		 */
+		[[nodiscard]] const SPIRVSource& getSource() const { return m_Source; }
+
 	protected:
 		std::string m_VariableName;
 		SPIRVSource& m_Source;

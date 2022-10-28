@@ -4,6 +4,8 @@
 
 #include "Storages/UniqueInstructionStorage.hpp"
 
+#include <stack>
+
 namespace ShaderBuilder
 {
 	/**
@@ -24,6 +26,7 @@ namespace ShaderBuilder
 
 	public:
 		InstructionStorage m_Definition;
+		InstructionStorage m_Parameters;
 		InstructionStorage m_Instructions;
 
 		UniqueInstructionStorage m_Variables;
@@ -114,11 +117,11 @@ namespace ShaderBuilder
 		void insertInstruction(std::string&& instruction);
 
 		/**
-		 * Create a new function block.
+		 * Create a new function block and push it to the stack.
 		 *
 		 * @return The created block reference.
 		 */
-		[[nodiscard]] FunctionBlock& createFunctionBlock();
+		FunctionBlock& pushFunctionBlock();
 
 		/**
 		 * Get current function block.
@@ -126,6 +129,11 @@ namespace ShaderBuilder
 		 * @return The current function block.
 		 */
 		[[nodiscard]] FunctionBlock& getCurrentFunctionBlock();
+
+		/**
+		 * This will pop the top of the function block stack and will place it in the finished queue.
+		 */
+		[[nodiscard]] void finishFunctionBlock();
 
 	public:
 		/**
@@ -221,7 +229,7 @@ namespace ShaderBuilder
 		 * @return The identifier.
 		 */
 		template<class Type>
-		std::string getTypeIdentifier()
+		[[nodiscard]] std::string getTypeIdentifier()
 		{
 			registerType<Type>();
 			return fmt::format("{} ", TypeTraits<Type>::Identifier);
@@ -235,7 +243,7 @@ namespace ShaderBuilder
 		 * @return The identifier.
 		 */
 		template<class Type, class... Types>
-		std::string getTypeIdentifiers()
+		[[nodiscard]] std::string getTypeIdentifiers()
 		{
 			registerType<Type>();
 			if constexpr (sizeof...(Types) > 0)
@@ -243,6 +251,41 @@ namespace ShaderBuilder
 
 			else
 				return fmt::format("{} ", TypeTraits<Type>::Identifier);
+		}
+
+		/**
+		 * Get the parameter identifier of multiple parameter types.
+		 *
+		 * @tparam Type The parameter type.
+		 * @tparam Types The rest of the parameters
+		 * @return The type string.
+		 */
+		template<class Type, class... Types>
+		[[nodiscard]] std::string getParameterIdentifier()
+		{
+			registerType<Type>();
+			if constexpr (sizeof...(Types) > 0)
+				return fmt::format("{}_{}", TypeTraits<Type>::RawIdentifier, getParameterIdentifier<Types...>());
+
+			else
+				return TypeTraits<Type>::RawIdentifier;
+		}
+
+		/**
+		 * Get a function's identifier using the value type.
+		 *
+		 * @tparam Return The return type.
+		 * @tparam Parameters The parameter types.
+		 * @return The identifier string.
+		 */
+		template<class Return, class... Parameters>
+		[[nodiscard]] std::string getFunctionIdentifier()
+		{
+			if constexpr (sizeof...(Parameters) > 0)
+				return fmt::format("{}_{}_callable", TypeTraits<Return>::Identifier, getParameterIdentifier<Parameters...>());
+
+			else
+				return fmt::format("{}_callable", TypeTraits<Return>::Identifier);
 		}
 
 		/**
@@ -262,7 +305,7 @@ namespace ShaderBuilder
 			if constexpr (sizeof...(Parameters) > 0)
 				parameterTypes = getTypeIdentifiers<Parameters...>();
 
-			insertType(fmt::format("{} = OpTypeFunction {} {}", GetFunctionIdentifier<ReturnType>(), TypeTraits<ReturnType>::Identifier, parameterTypes));
+			insertType(fmt::format("{} = OpTypeFunction {} {}", getFunctionIdentifier<ReturnType, Parameters...>(), TypeTraits<ReturnType>::Identifier, parameterTypes));
 		}
 
 		/**
@@ -285,6 +328,7 @@ namespace ShaderBuilder
 		}
 
 	private:
+		std::stack<FunctionBlock> m_FunctionBlockStack;
 		std::vector<FunctionBlock> m_FunctionBlocks;
 
 		InstructionStorage m_Capabilities;

@@ -4,7 +4,6 @@
 
 #include "SPIRVBinary.hpp"
 #include "Function.hpp"
-#include "Callable.hpp"
 
 #include "Input.hpp"
 #include "Output.hpp"

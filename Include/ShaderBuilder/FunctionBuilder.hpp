@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Callable.hpp"
+#include "DataType.hpp"
 
 namespace ShaderBuilder
 {
@@ -58,6 +58,22 @@ namespace ShaderBuilder
 		}
 
 		/**
+		 * Call a function from the builder.
+		 *
+		 * @tparam FunctionType The function type to call.
+		 * @tparam Arguments The argument types.
+		 * @param function The function to call.
+		 * @param arguments The arguments to pass into the function.
+		 * @return The return from the function.
+		 */
+		template<class FunctionType, class... Arguments>
+		decltype(auto) call(FunctionType& function, Arguments&&... arguments)
+		{
+			m_Source.pushFunctionBlock();
+			return function(std::forward<Arguments>(arguments)...);
+		}
+
+		/**
 		 * Exit from the function by returning a value.
 		 *
 		 * @tparam Type The value type.
@@ -84,6 +100,14 @@ namespace ShaderBuilder
 		 * From here on, the builder will not record any instructions but will only create the variables.
 		 */
 		void toggleRecording();
+
+		/**
+		 * Check if the builder is recording or not.
+		 *
+		 * @return True if the builder is recording.
+		 * @return False if the builder is not recording.
+		 */
+		[[nodiscard]] bool isRecording() const { return m_IsRecording; }
 
 	protected:
 		SPIRVSource& m_Source;

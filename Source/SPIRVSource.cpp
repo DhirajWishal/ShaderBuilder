@@ -10,6 +10,7 @@ namespace ShaderBuilder
 	{
 		m_Definition.setShouldRecord(true);
 		m_Instructions.setShouldRecord(true);
+		m_Parameters.setShouldRecord(true);
 		m_Variables.setShouldRecord(true);
 	}
 
@@ -17,6 +18,7 @@ namespace ShaderBuilder
 	{
 		m_Definition.setShouldRecord(false);
 		m_Instructions.setShouldRecord(false);
+		m_Parameters.setShouldRecord(false);
 		m_Variables.setShouldRecord(false);
 	}
 
@@ -65,14 +67,23 @@ namespace ShaderBuilder
 		m_Types.insert(std::move(instruction));
 	}
 
-	ShaderBuilder::FunctionBlock& SPIRVSource::createFunctionBlock()
+	ShaderBuilder::FunctionBlock& SPIRVSource::pushFunctionBlock()
 	{
-		return m_FunctionBlocks.emplace_back();
+		return m_FunctionBlockStack.emplace();
 	}
 
 	ShaderBuilder::FunctionBlock& SPIRVSource::getCurrentFunctionBlock()
 	{
-		return m_FunctionBlocks.back();
+		if (m_FunctionBlockStack.empty())
+			return m_FunctionBlockStack.emplace();
+
+		return m_FunctionBlockStack.top();
+	}
+
+	void SPIRVSource::finishFunctionBlock()
+	{
+		m_FunctionBlocks.emplace_back(m_FunctionBlockStack.top());
+		m_FunctionBlockStack.pop();
 	}
 
 	std::string SPIRVSource::getSourceAssembly() const
@@ -140,6 +151,10 @@ namespace ShaderBuilder
 			for (const auto& instruction : block.m_Definition)
 				finalTransform << instruction << std::endl;
 
+			// Insert the parameters.
+			for (const auto& instruction : block.m_Parameters)
+				finalTransform << instruction << std::endl;
+
 			// Insert the first block containing the variables.
 			finalTransform << "%first_block_" << block.m_Name << " = OpLabel" << std::endl;
 
@@ -152,7 +167,7 @@ namespace ShaderBuilder
 				finalTransform << instruction << std::endl;
 
 			// End the function definition.
-			finalTransform << "OpFunctionEnd" << std::endl;
+			finalTransform << "OpFunctionEnd" << std::endl << std::endl;
 		}
 
 		return finalTransform.str();

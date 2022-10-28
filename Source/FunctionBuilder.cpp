@@ -14,16 +14,20 @@ namespace ShaderBuilder
 	{
 		if (m_IsRecording)
 		{
-			auto& block = m_Source.getCurrentFunctionBlock();
-			block.m_Instructions.insert("OpReturn");
+			m_Source.getCurrentFunctionBlock().m_Instructions.insert("OpReturn");
+			m_Source.finishFunctionBlock();
 			m_IsComplete = true;
+			m_IsRecording = false;
 		}
 	}
 
 	void FunctionBuilder::toggleRecording()
 	{
-		m_IsRecording = false;
-		m_Source.getCurrentFunctionBlock().disableRecording();
+		if (m_IsRecording)
+		{
+			m_IsRecording = false;
+			m_Source.getCurrentFunctionBlock().disableRecording();
+		}
 	}
 
 } // namespace ShaderBuilder

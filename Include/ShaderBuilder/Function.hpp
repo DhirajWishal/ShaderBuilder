@@ -33,10 +33,6 @@ namespace ShaderBuilder
 		{
 			Super::m_Source.registerCallable<Return, Parameters...>();
 			Super::m_Source.insertName(fmt::format("OpName %{} \"{}\"", Super::m_VariableName, Super::m_VariableName));
-
-			auto& block = Super::m_Source.createFunctionBlock();
-			block.m_Name = Super::m_VariableName;
-			block.m_Definition.insert(fmt::format("%{} = OpFunction {} None {}", Super::m_VariableName, TypeTraits<Return>::Identifier, GetFunctionIdentifier<Return>()));
 		}
 
 		/**
@@ -44,6 +40,13 @@ namespace ShaderBuilder
 		 */
 		Return operator()(Parameters... arguments)
 		{
+			if (m_Builder.isRecording())
+			{
+				auto& block = Super::m_Source.getCurrentFunctionBlock();
+				block.m_Name = Super::m_VariableName;
+				block.m_Definition.insert(fmt::format("%{} = OpFunction {} None {}", Super::m_VariableName, TypeTraits<Return>::Identifier, Super::m_Source.getFunctionIdentifier<Return, Parameters...>()));
+			}
+
 			if constexpr (std::is_void_v<Return>)
 			{
 				m_Function(m_Builder, arguments...);
