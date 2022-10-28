@@ -32,11 +32,11 @@ namespace ShaderBuilder
 		template<class ReturnType>
 		explicit FunctionBuilder(SPIRVSource& source, const std::string& name, [[maybe_unused]] FunctionBuilderReturnType<ReturnType>&& returnType = {}) : DataType<FunctionBuilder>(source, name)
 		{
-			m_Source.insertName(std::format("OpName %{} \"{}\"", name, name));
+			m_Source.insertName(fmt::format("OpName %{} \"{}\"", name, name));
 
 			auto& block = source.createFunctionBlock();
 			block.m_Name = name;
-			block.m_Definition.insert(std::format("%{} = OpFunction {} None {}", name, TypeTraits<ReturnType>::Identifier, GetFunctionIdentifier<ReturnType>()));
+			block.m_Definition.insert(fmt::format("%{} = OpFunction {} None {}", name, TypeTraits<ReturnType>::Identifier, GetFunctionIdentifier<ReturnType>()));
 		}
 
 		/**
@@ -58,11 +58,11 @@ namespace ShaderBuilder
 		[[nodiscard]] Type createVariable(std::string&& name, Types&&... initializer)
 		{
 			registerType<Type>();
-			m_Source.insertType(std::format("%variable_type_{} = OpTypePointer Function {}", TypeTraits<Type>::RawIdentifier, TypeTraits<Type>::Identifier));
-			m_Source.insertName(std::format("OpName %{} \"{}\"", name, name));
+			m_Source.insertType(fmt::format("%variable_type_{} = OpTypePointer Function {}", TypeTraits<Type>::RawIdentifier, TypeTraits<Type>::Identifier));
+			m_Source.insertName(fmt::format("OpName %{} \"{}\"", name, name));
 
 			auto& block = m_Source.getCurrentFunctionBlock();
-			block.m_Variables.insert(std::format("%{} = OpVariable %variable_type_{} Function", name, TypeTraits<Type>::RawIdentifier));
+			block.m_Variables.insert(fmt::format("%{} = OpVariable %variable_type_{} Function", name, TypeTraits<Type>::RawIdentifier));
 
 			return Type(m_Source, name, std::forward<Types>(initializer)...);
 		}
@@ -99,7 +99,7 @@ namespace ShaderBuilder
 			if constexpr (IsCompexType<Type>)
 				registerType<typename TypeTraits<Type>::ValueTraits::Type>();
 
-			m_Source.insertType(std::format("{} = {}", TypeTraits<Type>::Identifier, TypeTraits<Type>::Declaration));
+			m_Source.insertType(fmt::format("{} = {}", TypeTraits<Type>::Identifier, TypeTraits<Type>::Declaration));
 		}
 
 	private:

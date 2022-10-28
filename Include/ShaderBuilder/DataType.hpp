@@ -37,17 +37,17 @@ namespace ShaderBuilder
 		{
 			if (isInput)
 			{
-				m_Source.insertType(std::format("%input_{} = OpTypePointer Input {}", variableName, TypeTraits<Derived>::Identifier));
-				m_Source.insertType(std::format("%{} = OpVariable %input_{} Input", variableName, variableName));
+				m_Source.insertType(fmt::format("%input_{} = OpTypePointer Input {}", variableName, TypeTraits<Derived>::Identifier));
+				m_Source.insertType(fmt::format("%{} = OpVariable %input_{} Input", variableName, variableName));
 			}
 			else
 			{
-				m_Source.insertType(std::format("%output_{} = OpTypePointer Output {}", variableName, TypeTraits<Derived>::Identifier));
-				m_Source.insertType(std::format("%{} = OpVariable %output_{} Output", variableName, variableName));
+				m_Source.insertType(fmt::format("%output_{} = OpTypePointer Output {}", variableName, TypeTraits<Derived>::Identifier));
+				m_Source.insertType(fmt::format("%{} = OpVariable %output_{} Output", variableName, variableName));
 			}
 
-			m_Source.insertName(std::format("OpName %{} \"{}\"", variableName, variableName));
-			m_Source.insertAnnotation(std::format("OpDecorate %{} Location {}", variableName, location));
+			m_Source.insertName(fmt::format("OpName %{} \"{}\"", variableName, variableName));
+			m_Source.insertAnnotation(fmt::format("OpDecorate %{} Location {}", variableName, location));
 		}
 
 		/**

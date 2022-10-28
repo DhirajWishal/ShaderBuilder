@@ -48,12 +48,12 @@ namespace ShaderBuilder
 			const auto identifier = GetConstantIdentifier<uint64_t>(value);
 
 			// Setup the values.
-			source.insertType(std::format("%{} = OpConstant {} {}", identifier, TypeTraits<Type>::Identifier, value));
+			source.insertType(fmt::format("%{} = OpConstant {} {}", identifier, TypeTraits<Type>::Identifier, value));
 
 			// Setup the vector constant.
 			const Type vector[] = { value, value, value, value };
 			const auto hash = GenerateHash(vector, sizeof(vector));
-			source.insertType(std::format("%composite_{} = OpConstantComposite {} %{} %{} %{} %{}", hash, Traits::Identifier
+			source.insertType(fmt::format("%composite_{} = OpConstantComposite {} %{} %{} %{} %{}", hash, Traits::Identifier
 				, identifier
 				, identifier
 				, identifier
@@ -61,7 +61,7 @@ namespace ShaderBuilder
 			));
 
 			// Initialization happens only within function definitions, so we can simply assign it there.
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("OpStore %{} %composite_{}", variableName, hash));
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("OpStore %{} %composite_{}", variableName, hash));
 		}
 
 		/**
@@ -82,15 +82,15 @@ namespace ShaderBuilder
 			const auto wIdentifier = GetConstantIdentifier<uint64_t>(w);
 
 			// Setup the values.
-			source.insertType(std::format("%{} = OpConstant {} {}", xIdentifier, TypeTraits<Type>::Identifier, x));
-			source.insertType(std::format("%{} = OpConstant {} {}", yIdentifier, TypeTraits<Type>::Identifier, y));
-			source.insertType(std::format("%{} = OpConstant {} {}", zIdentifier, TypeTraits<Type>::Identifier, z));
-			source.insertType(std::format("%{} = OpConstant {} {}", wIdentifier, TypeTraits<Type>::Identifier, w));
+			source.insertType(fmt::format("%{} = OpConstant {} {}", xIdentifier, TypeTraits<Type>::Identifier, x));
+			source.insertType(fmt::format("%{} = OpConstant {} {}", yIdentifier, TypeTraits<Type>::Identifier, y));
+			source.insertType(fmt::format("%{} = OpConstant {} {}", zIdentifier, TypeTraits<Type>::Identifier, z));
+			source.insertType(fmt::format("%{} = OpConstant {} {}", wIdentifier, TypeTraits<Type>::Identifier, w));
 
 			// Setup the vector constant.
 			const Type vector[] = { x, y, z, w };
 			const auto hash = GenerateHash(vector, sizeof(vector));
-			source.insertType(std::format("%composite_{} = OpConstantComposite {} %{} %{} %{} %{}", hash, Traits::Identifier
+			source.insertType(fmt::format("%composite_{} = OpConstantComposite {} %{} %{} %{} %{}", hash, Traits::Identifier
 				, xIdentifier
 				, yIdentifier
 				, zIdentifier
@@ -98,7 +98,7 @@ namespace ShaderBuilder
 			));
 
 			// Initialization happens only within function definitions, so we can simply assign it there.
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("OpStore %{} %composite_{}", variableName, hash));
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("OpStore %{} %composite_{}", variableName, hash));
 		}
 
 		/**
@@ -116,22 +116,22 @@ namespace ShaderBuilder
 			const auto wIdentifier = GetConstantIdentifier<uint64_t>(w);
 
 			// Setup the values.
-			source.insertType(std::format("%{} = OpConstant {} {}", zIdentifier, TypeTraits<Type>::Identifier, z));
-			source.insertType(std::format("%{} = OpConstant {} {}", wIdentifier, TypeTraits<Type>::Identifier, w));
+			source.insertType(fmt::format("%{} = OpConstant {} {}", zIdentifier, TypeTraits<Type>::Identifier, z));
+			source.insertType(fmt::format("%{} = OpConstant {} {}", wIdentifier, TypeTraits<Type>::Identifier, w));
 
 			// Load the memory.
-			const auto variableIdentifier = std::format("%{}", source.getUniqueIdentifier());
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("{} = OpLoad {} %{}", variableIdentifier, TypeTraits<Vec2<Type>>::Identifier, vec.getName()));
+			const auto variableIdentifier = fmt::format("%{}", source.getUniqueIdentifier());
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("{} = OpLoad {} %{}", variableIdentifier, TypeTraits<Vec2<Type>>::Identifier, vec.getName()));
 
-			const auto xIdentifier = std::format("%{}", DataType<Vec4<Type>>::m_Source.getUniqueIdentifier());
-			const auto yIdentifier = std::format("%{}", DataType<Vec4<Type>>::m_Source.getUniqueIdentifier());
+			const auto xIdentifier = fmt::format("%{}", DataType<Vec4<Type>>::m_Source.getUniqueIdentifier());
+			const auto yIdentifier = fmt::format("%{}", DataType<Vec4<Type>>::m_Source.getUniqueIdentifier());
 
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("{} = OpCompositeExtract {} {} 0", xIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("{} = OpCompositeExtract {} {} 1", yIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("{} = OpCompositeExtract {} {} 0", xIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("{} = OpCompositeExtract {} {} 1", yIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
 
 			// Create the composite.
-			const auto compositeIdentifier = std::format("%{}", source.getUniqueIdentifier());
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("{} = OpCompositeConstruct {} {} {} %{} %{}", compositeIdentifier, Traits::Identifier
+			const auto compositeIdentifier = fmt::format("%{}", source.getUniqueIdentifier());
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("{} = OpCompositeConstruct {} {} {} %{} %{}", compositeIdentifier, Traits::Identifier
 				, xIdentifier
 				, yIdentifier
 				, zIdentifier
@@ -139,7 +139,7 @@ namespace ShaderBuilder
 			));
 
 			// Store it.
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("OpStore %{} {}", variableName, compositeIdentifier));
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("OpStore %{} {}", variableName, compositeIdentifier));
 		}
 
 		/**
@@ -157,22 +157,22 @@ namespace ShaderBuilder
 			const auto wIdentifier = GetConstantIdentifier<uint64_t>(w);
 
 			// Setup the values.
-			source.insertType(std::format("%{} = OpConstant {} {}", xIdentifier, TypeTraits<Type>::Identifier, x));
-			source.insertType(std::format("%{} = OpConstant {} {}", wIdentifier, TypeTraits<Type>::Identifier, w));
+			source.insertType(fmt::format("%{} = OpConstant {} {}", xIdentifier, TypeTraits<Type>::Identifier, x));
+			source.insertType(fmt::format("%{} = OpConstant {} {}", wIdentifier, TypeTraits<Type>::Identifier, w));
 
 			// Load the memory.
-			const auto variableIdentifier = std::format("%{}", source.getUniqueIdentifier());
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("{} = OpLoad {} %{}", variableIdentifier, TypeTraits<Vec2<Type>>::Identifier, vec.getName()));
+			const auto variableIdentifier = fmt::format("%{}", source.getUniqueIdentifier());
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("{} = OpLoad {} %{}", variableIdentifier, TypeTraits<Vec2<Type>>::Identifier, vec.getName()));
 
-			const auto yIdentifier = std::format("%{}", DataType<Vec4<Type>>::m_Source.getUniqueIdentifier());
-			const auto zIdentifier = std::format("%{}", DataType<Vec4<Type>>::m_Source.getUniqueIdentifier());
+			const auto yIdentifier = fmt::format("%{}", DataType<Vec4<Type>>::m_Source.getUniqueIdentifier());
+			const auto zIdentifier = fmt::format("%{}", DataType<Vec4<Type>>::m_Source.getUniqueIdentifier());
 
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("{} = OpCompositeExtract {} {} 0", yIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("{} = OpCompositeExtract {} {} 1", zIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("{} = OpCompositeExtract {} {} 0", yIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("{} = OpCompositeExtract {} {} 1", zIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
 
 			// Create the composite.
-			const auto compositeIdentifier = std::format("%{}", source.getUniqueIdentifier());
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("{} = OpCompositeConstruct {} %{} {} {} %{}", compositeIdentifier, Traits::Identifier
+			const auto compositeIdentifier = fmt::format("%{}", source.getUniqueIdentifier());
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("{} = OpCompositeConstruct {} %{} {} {} %{}", compositeIdentifier, Traits::Identifier
 				, xIdentifier
 				, yIdentifier
 				, zIdentifier
@@ -180,7 +180,7 @@ namespace ShaderBuilder
 			));
 
 			// Store it.
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("OpStore %{} {}", variableName, compositeIdentifier));
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("OpStore %{} {}", variableName, compositeIdentifier));
 		}
 
 		/**
@@ -198,22 +198,22 @@ namespace ShaderBuilder
 			const auto yIdentifier = GetConstantIdentifier<uint64_t>(y);
 
 			// Setup the values.
-			source.insertType(std::format("%{} = OpConstant {} {}", xIdentifier, TypeTraits<Type>::Identifier, x));
-			source.insertType(std::format("%{} = OpConstant {} {}", yIdentifier, TypeTraits<Type>::Identifier, y));
+			source.insertType(fmt::format("%{} = OpConstant {} {}", xIdentifier, TypeTraits<Type>::Identifier, x));
+			source.insertType(fmt::format("%{} = OpConstant {} {}", yIdentifier, TypeTraits<Type>::Identifier, y));
 
 			// Load the memory.
-			const auto variableIdentifier = std::format("%{}", source.getUniqueIdentifier());
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("{} = OpLoad {} %{}", variableIdentifier, TypeTraits<Vec2<Type>>::Identifier, vec.getName()));
+			const auto variableIdentifier = fmt::format("%{}", source.getUniqueIdentifier());
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("{} = OpLoad {} %{}", variableIdentifier, TypeTraits<Vec2<Type>>::Identifier, vec.getName()));
 
-			const auto zIdentifier = std::format("%{}", DataType<Vec4<Type>>::m_Source.getUniqueIdentifier());
-			const auto wIdentifier = std::format("%{}", DataType<Vec4<Type>>::m_Source.getUniqueIdentifier());
+			const auto zIdentifier = fmt::format("%{}", DataType<Vec4<Type>>::m_Source.getUniqueIdentifier());
+			const auto wIdentifier = fmt::format("%{}", DataType<Vec4<Type>>::m_Source.getUniqueIdentifier());
 
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("{} = OpCompositeExtract {} {} 0", zIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("{} = OpCompositeExtract {} {} 1", wIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("{} = OpCompositeExtract {} {} 0", zIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("{} = OpCompositeExtract {} {} 1", wIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
 
 			// Create the composite.
-			const auto compositeIdentifier = std::format("%{}", source.getUniqueIdentifier());
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("{} = OpCompositeConstruct {} %{} %{} {} {}", compositeIdentifier, Traits::Identifier
+			const auto compositeIdentifier = fmt::format("%{}", source.getUniqueIdentifier());
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("{} = OpCompositeConstruct {} %{} %{} {} {}", compositeIdentifier, Traits::Identifier
 				, xIdentifier
 				, yIdentifier
 				, zIdentifier
@@ -221,7 +221,7 @@ namespace ShaderBuilder
 			));
 
 			// Store it.
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("OpStore %{} {}", variableName, compositeIdentifier));
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("OpStore %{} {}", variableName, compositeIdentifier));
 		}
 
 		/**
@@ -237,23 +237,23 @@ namespace ShaderBuilder
 			const auto wIdentifier = GetConstantIdentifier<uint64_t>(w);
 
 			// Setup the values.
-			source.insertType(std::format("%{} = OpConstant {} {}", wIdentifier, TypeTraits<Type>::Identifier, w));
+			source.insertType(fmt::format("%{} = OpConstant {} {}", wIdentifier, TypeTraits<Type>::Identifier, w));
 
 			// Load the memory.
-			const auto variableIdentifier = std::format("%{}", source.getUniqueIdentifier());
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("{} = OpLoad {} %{}", variableIdentifier, TypeTraits<Vec3<Type>>::Identifier, vec.getName()));
+			const auto variableIdentifier = fmt::format("%{}", source.getUniqueIdentifier());
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("{} = OpLoad {} %{}", variableIdentifier, TypeTraits<Vec3<Type>>::Identifier, vec.getName()));
 
-			const auto xIdentifier = std::format("%{}", DataType<Vec4<Type>>::m_Source.getUniqueIdentifier());
-			const auto yIdentifier = std::format("%{}", DataType<Vec4<Type>>::m_Source.getUniqueIdentifier());
-			const auto zIdentifier = std::format("%{}", DataType<Vec4<Type>>::m_Source.getUniqueIdentifier());
+			const auto xIdentifier = fmt::format("%{}", DataType<Vec4<Type>>::m_Source.getUniqueIdentifier());
+			const auto yIdentifier = fmt::format("%{}", DataType<Vec4<Type>>::m_Source.getUniqueIdentifier());
+			const auto zIdentifier = fmt::format("%{}", DataType<Vec4<Type>>::m_Source.getUniqueIdentifier());
 
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("{} = OpCompositeExtract {} {} 0", xIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("{} = OpCompositeExtract {} {} 1", yIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("{} = OpCompositeExtract {} {} 2", zIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("{} = OpCompositeExtract {} {} 0", xIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("{} = OpCompositeExtract {} {} 1", yIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("{} = OpCompositeExtract {} {} 2", zIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
 
 			// Create the composite.
-			const auto compositeIdentifier = std::format("%{}", source.getUniqueIdentifier());
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("{} = OpCompositeConstruct {} {} {} {} %{}", compositeIdentifier, Traits::Identifier
+			const auto compositeIdentifier = fmt::format("%{}", source.getUniqueIdentifier());
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("{} = OpCompositeConstruct {} {} {} {} %{}", compositeIdentifier, Traits::Identifier
 				, xIdentifier
 				, yIdentifier
 				, zIdentifier
@@ -261,7 +261,7 @@ namespace ShaderBuilder
 			));
 
 			// Store it.
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("OpStore %{} {}", variableName, compositeIdentifier));
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("OpStore %{} {}", variableName, compositeIdentifier));
 		}
 
 		/**
@@ -277,23 +277,23 @@ namespace ShaderBuilder
 			const auto xIdentifier = GetConstantIdentifier<uint64_t>(x);
 
 			// Setup the values.
-			source.insertType(std::format("%{} = OpConstant {} {}", xIdentifier, TypeTraits<Type>::Identifier, x));
+			source.insertType(fmt::format("%{} = OpConstant {} {}", xIdentifier, TypeTraits<Type>::Identifier, x));
 
 			// Load the memory.
-			const auto variableIdentifier = std::format("%{}", source.getUniqueIdentifier());
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("{} = OpLoad {} %{}", variableIdentifier, TypeTraits<Vec3<Type>>::Identifier, vec.getName()));
+			const auto variableIdentifier = fmt::format("%{}", source.getUniqueIdentifier());
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("{} = OpLoad {} %{}", variableIdentifier, TypeTraits<Vec3<Type>>::Identifier, vec.getName()));
 
-			const auto yIdentifier = std::format("%{}", DataType<Vec4<Type>>::m_Source.getUniqueIdentifier());
-			const auto zIdentifier = std::format("%{}", DataType<Vec4<Type>>::m_Source.getUniqueIdentifier());
-			const auto wIdentifier = std::format("%{}", DataType<Vec4<Type>>::m_Source.getUniqueIdentifier());
+			const auto yIdentifier = fmt::format("%{}", DataType<Vec4<Type>>::m_Source.getUniqueIdentifier());
+			const auto zIdentifier = fmt::format("%{}", DataType<Vec4<Type>>::m_Source.getUniqueIdentifier());
+			const auto wIdentifier = fmt::format("%{}", DataType<Vec4<Type>>::m_Source.getUniqueIdentifier());
 
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("{} = OpCompositeExtract {} {} 0", yIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("{} = OpCompositeExtract {} {} 1", zIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("{} = OpCompositeExtract {} {} 2", wIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("{} = OpCompositeExtract {} {} 0", yIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("{} = OpCompositeExtract {} {} 1", zIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("{} = OpCompositeExtract {} {} 2", wIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
 
 			// Create the composite.
-			const auto compositeIdentifier = std::format("%{}", source.getUniqueIdentifier());
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("{} = OpCompositeConstruct {} %{} {} {} {}", compositeIdentifier, Traits::Identifier
+			const auto compositeIdentifier = fmt::format("%{}", source.getUniqueIdentifier());
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("{} = OpCompositeConstruct {} %{} {} {} {}", compositeIdentifier, Traits::Identifier
 				, xIdentifier
 				, yIdentifier
 				, zIdentifier
@@ -301,7 +301,7 @@ namespace ShaderBuilder
 			));
 
 			// Store it.
-			source.getCurrentFunctionBlock().m_Instructions.insert(std::format("OpStore %{} {}", variableName, compositeIdentifier));
+			source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("OpStore %{} {}", variableName, compositeIdentifier));
 		}
 
 		/**
@@ -312,7 +312,7 @@ namespace ShaderBuilder
 		 */
 		Vec4& operator=(const Vec4& other)
 		{
-			DataType<Vec2<Type>>::m_Source.getCurrentFunctionBlock().m_Instructions.insert(std::format("OpCopyMemory %{} %{}", DataType<Vec4<Type>>::m_VariableName, other.getName()));
+			DataType<Vec2<Type>>::m_Source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("OpCopyMemory %{} %{}", DataType<Vec4<Type>>::m_VariableName, other.getName()));
 
 			x = other.x;
 			y = other.y;

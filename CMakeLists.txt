@@ -48,6 +48,10 @@ if (NOT SPIRV_TOOLS_INIT_STATUS)
 	# Set the xxHash header include directory.
 	set(XXHASH_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/xxHash)
 
+	# Set the fmt header include directory and add the subdirectory.
+	set(FMT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/fmt/include)
+	add_subdirectory(ThirdParty/fmt)
+
 	# Set global compile definitions.
 	add_compile_definitions(
 		$<$<CONFIG:Debug>:SB_DEBUG>

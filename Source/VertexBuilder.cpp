@@ -38,11 +38,11 @@ namespace ShaderBuilder
 
 	void VertexBuilder::setPoisition(const Vec4<float>& value)
 	{
-		const auto valuePointer = std::format("%{}", m_Source.getUniqueIdentifier());
-		m_Source.getCurrentFunctionBlock().m_Instructions.insert(std::format("{} = OpLoad %vec4_float %{}", valuePointer, value.getName()));
+		const auto valuePointer = fmt::format("%{}", m_Source.getUniqueIdentifier());
+		m_Source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("{} = OpLoad %vec4_float %{}", valuePointer, value.getName()));
 
-		const auto positionPointer = std::format("%{}", m_Source.getUniqueIdentifier());
-		m_Source.getCurrentFunctionBlock().m_Instructions.insert(std::format("{} = OpAccessChain %type_gl_Position %perVertex %{}", positionPointer, GetConstantIdentifier(0)));
-		m_Source.getCurrentFunctionBlock().m_Instructions.insert(std::format("OpStore {} {}", positionPointer, valuePointer));
+		const auto positionPointer = fmt::format("%{}", m_Source.getUniqueIdentifier());
+		m_Source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("{} = OpAccessChain %type_gl_Position %perVertex %{}", positionPointer, GetConstantIdentifier(0)));
+		m_Source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("OpStore {} {}", positionPointer, valuePointer));
 	}
 } // namespace ShaderBuilder

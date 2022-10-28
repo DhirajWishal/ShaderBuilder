@@ -7,3 +7,6 @@
 [submodule "ThirdParty/xxHash"]
 	path = ThirdParty/xxHash
 	url = https://github.com/Cyan4973/xxHash
+[submodule "ThirdParty/fmt"]
+	path = ThirdParty/fmt
+	url = https://github.com/fmtlib/fmt

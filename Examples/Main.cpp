@@ -57,7 +57,7 @@
 
 		outTextureCoordinates = inTextureCoordinates;
 		shaderSource.setPoisition(function.createVariable<ShaderBuilder::Vec4<float>>("temporary", inPosition, 1.0f));
-		shaderSource.addEntryPoint(ShaderBuilder::ShaderType::Vertex, function, "inPosition", "inTextureCoordinates", "outTextureCoordinates");
+		shaderSource.addEntryPoint(function, "inPosition", "inTextureCoordinates", "outTextureCoordinates");
 	}
 
 	return shaderSource.compile(ShaderBuilder::OptimizationFlags::DebugMode);

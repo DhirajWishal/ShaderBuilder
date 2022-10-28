@@ -34,20 +34,19 @@ namespace ShaderBuilder
 		 * Add an entry point to the shader.
 		 *
 		 * @tparam Attributes The input and output attribute types.
-		 * @param shaderType The type of the shader.
 		 * @param function The entry point function.
 		 * @param attributes The names of the input and output attributes.
 		 */
 		template<class... Attributes>
-		void addEntryPoint(ShaderType shaderType, const FunctionBuilder& function, Attributes&&... attributes)
+		void addEntryPoint(const FunctionBuilder& function, Attributes&&... attributes)
 		{
 			// Setup the inputs.
 			std::string attributeString;
-			auto insertAttribute = [&attributeString](auto&& attribute) { attributeString += std::string(" %") + std::move(attribute); };
+			auto insertAttribute = [&attributeString](auto&& attribute) { attributeString += fmt::format(" %{}", std::move(attribute)); };
 			(insertAttribute(std::move(attributes)), ...);
 
 			const auto& name = function.getName();
-			m_Source.insertEntryPoint("OpEntryPoint Vertex %" + name + " \"" + name + "\" %perVertex " + attributeString);
+			m_Source.insertEntryPoint(fmt::format("OpEntryPoint Vertex %{} \"{}\" %perVertex {}", name, name, attributeString));
 		}
 
 		/**

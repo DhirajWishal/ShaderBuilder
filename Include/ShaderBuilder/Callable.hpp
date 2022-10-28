@@ -46,5 +46,5 @@ namespace ShaderBuilder
 	 * @return The identifier string.
 	 */
 	template<class ValueType>
-	[[nodiscard]] std::string GetFunctionIdentifier() { return std::format("{}_callable", TypeTraits<ValueType>::Identifier); }
+	[[nodiscard]] std::string GetFunctionIdentifier() { return fmt::format("{}_callable", TypeTraits<ValueType>::Identifier); }
 } // namespace ShaderBuilder

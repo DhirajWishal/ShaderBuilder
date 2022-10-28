@@ -31,7 +31,8 @@ add_library(
 	"SPIRVSource.cpp"
 	"Utilities.cpp"
 	"FunctionBuilder.cpp"
- "VertexBuilder.cpp")
+	"VertexBuilder.cpp"
+)
 
 # Add the target includes.
 target_include_directories(
@@ -40,10 +41,11 @@ target_include_directories(
 	PRIVATE ${SPIRV_TOOLS_INCLUDE_DIR}
 	PRIVATE ${SPIRV_CROSS_INCLUDE_DIR}
 	PRIVATE ${XXHASH_INCLUDE_DIR}
+	PUBLIC ${FMT_INCLUDE_DIR}
 )
 
 # Add the target links.
-target_link_libraries(ShaderBuilder SPIRV-Tools-opt spirv-cross-c)
+target_link_libraries(ShaderBuilder SPIRV-Tools-opt spirv-cross-c fmt::fmt)
 
 # Make sure to specify the C++ standard to C++20.
 set_property(TARGET ShaderBuilder PROPERTY CXX_STANDARD 20)

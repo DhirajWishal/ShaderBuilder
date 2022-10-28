@@ -4,7 +4,7 @@
 
 #include "TypeTraits.hpp"
 
-#include <format>
+#include <fmt/format.h>
 
 namespace ShaderBuilder
 {
@@ -28,6 +28,6 @@ namespace ShaderBuilder
 	template<class Type>
 	[[nodiscard]] static std::string GetConstantIdentifier(const Type& value)
 	{
-		return std::format("const_{}_{}", TypeTraits<Type>::RawIdentifier, value);
+		return fmt::format("const_{}_{}", TypeTraits<Type>::RawIdentifier, value);
 	}
 } // namespace ShaderBuilder
