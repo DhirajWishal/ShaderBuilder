@@ -16,6 +16,8 @@ namespace ShaderBuilder
 	template<class Return, class... Arguments>
 	class Callable final : public DataType<Callable<Return, Arguments...>>
 	{
+		using Super = DataType<Callable<Return, Arguments...>>;
+
 	public:
 		/**
 		 * Explicit constructor.
@@ -24,6 +26,18 @@ namespace ShaderBuilder
 		 * @param name The name of the function.
 		 */
 		explicit Callable(SPIRVSource& source, const std::string& name) : DataType<Callable<Return, Arguments...>>(source, name) {}
+
+		std::string getArgumentTypes()
+		{
+		}
+
+	private:
+		template<class Argument>
+		std::string getArgumetnType()
+		{
+			Super::m_Source.registerType<Argument>();
+			return TypeTraits<Argument>::Identifier;
+		}
 	};
 
 	/**

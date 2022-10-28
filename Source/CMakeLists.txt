@@ -28,6 +28,7 @@ add_library(
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Attribute.hpp"
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Input.hpp"
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Output.hpp"
+	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Function.hpp"
 	
 	"Builder.cpp" 
 	"SPIRVBinary.cpp"

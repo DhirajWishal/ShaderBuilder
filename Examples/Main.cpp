@@ -52,13 +52,15 @@
 
 	auto camera = shaderSource.createUniform<Camera>(0, 0, "camera", &Camera::m_Projection, &Camera::m_View);
 
-	{
-		auto function = shaderSource.createFunction<void>("main");
+	auto function = shaderSource.createFunction([&](ShaderBuilder::FunctionBuilder& builder)
+		{
+			outTextureCoordinates = inTextureCoordinates;
+			shaderSource.setPoisition(builder.createVariable<ShaderBuilder::Vec4<float>>(inPosition.value(), 1.0f));
+		}
+	);
 
-		outTextureCoordinates = inTextureCoordinates;
-		shaderSource.setPoisition(function.createVariable<ShaderBuilder::Vec4<float>>(inPosition.value(), 1.0f));
-		shaderSource.addEntryPoint(function, inPosition, inTextureCoordinates, outTextureCoordinates);
-	}
+	// function();
+	shaderSource.addEntryPoint(function, inPosition, inTextureCoordinates, outTextureCoordinates);
 
 	return shaderSource.compile(ShaderBuilder::OptimizationFlags::DebugMode);
 }

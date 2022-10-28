@@ -3,7 +3,7 @@
 #pragma once
 
 #include "SPIRVBinary.hpp"
-#include "FunctionBuilder.hpp"
+#include "Function.hpp"
 #include "Callable.hpp"
 
 #include "Input.hpp"
@@ -179,16 +179,16 @@ namespace ShaderBuilder
 		/**
 		 * Create a new function.
 		 *
-		 * @tparam Type The function type.
-		 * @param name The name of the function.
-		 * @param function The function definition. Make sure that the function must contain a single parameter of const FunctionBuilder&.
-		 * @return The function builder. Note that the reference will be invalidated after another function creation.
+		 * Note that the instructions will be recorded only in the first run.
+		 *
+		 * @tparam Lambda The lambda type.
+		 * @param function The function definition. Make sure that the function's first parameter/ argument is FunctionBuilder&.
+		 * @return The function.
 		 */
-		template<class ReturnType>
-		[[nodiscard]] FunctionBuilder createFunction(std::string&& name)
+		template<class Lambda>
+		[[nodiscard]] decltype(auto) createFunction(Lambda&& function)
 		{
-			m_Source.registerCallable<Callable<ReturnType>>();
-			return FunctionBuilder(m_Source, std::move(name), FunctionBuilderReturnType<ReturnType>());
+			return Function(m_Source, std::function(std::move(function)));
 		}
 
 	public:

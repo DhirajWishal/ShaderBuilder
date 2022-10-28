@@ -12,9 +12,12 @@ namespace ShaderBuilder
 
 	void FunctionBuilder::exit()
 	{
-		auto& block = m_Source.getCurrentFunctionBlock();
-		block.m_Instructions.insert("OpReturn");
-		m_IsComplete = true;
+		if (m_IsRecording)
+		{
+			auto& block = m_Source.getCurrentFunctionBlock();
+			block.m_Instructions.insert("OpReturn");
+			m_IsComplete = true;
+		}
 	}
 
 } // namespace ShaderBuilder

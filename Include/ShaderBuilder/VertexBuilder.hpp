@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Builder.hpp"
+#include "BuilderError.hpp"
 #include "Vec4.hpp"
 
 namespace ShaderBuilder
@@ -32,14 +33,23 @@ namespace ShaderBuilder
 
 		/**
 		 * Add an entry point to the shader.
+		 * Note that this will run the entry point function once for convenience.
 		 *
+		 * @tparam FunctionType The function type.
 		 * @tparam Attributes The input and output attribute types.
-		 * @param function The entry point function.
+		 * @param function The entry point function. Make sure that the return type is void and there are no parameters.
 		 * @param attributes The names of the input and output attributes.
 		 */
-		template<class... Attributes>
-		void addEntryPoint(const FunctionBuilder& function, const Attributes&... attributes)
+		template<class FunctionType, class... Attributes>
+		void addEntryPoint(FunctionType& function, const Attributes&... attributes)
 		{
+			// Validate the entry point and run it once.
+			if constexpr (FunctionType::ParameterCount > 0 || !std::is_void_v<typename FunctionType::ReturnType>)
+				throw BuilderError("Entry points should not have any parameters and the return type should be void!");
+
+			else
+				function();
+
 			// Setup the inputs.
 			std::string attributeString;
 			auto insertAttribute = [&attributeString](const auto& attribute) { attributeString += fmt::format(" %{}", attribute.getName()); };

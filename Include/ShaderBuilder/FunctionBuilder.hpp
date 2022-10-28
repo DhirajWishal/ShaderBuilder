@@ -18,26 +18,15 @@ namespace ShaderBuilder
 	/**
 	 * Function builder class.
 	 */
-	class FunctionBuilder final : public DataType<FunctionBuilder>
+	class FunctionBuilder final
 	{
 	public:
 		/**
 		 * Explicit constructor.
 		 *
-		 * @tparam ReturnType The return type of the function.
 		 * @param source The source to record all the commands to.
-		 * @param name The name of the function.
-		 * @param returnType The return type containing the return type. Default is {};
 		 */
-		template<class ReturnType>
-		explicit FunctionBuilder(SPIRVSource& source, const std::string& name, [[maybe_unused]] FunctionBuilderReturnType<ReturnType>&& returnType = {}) : DataType<FunctionBuilder>(source, name)
-		{
-			m_Source.insertName(fmt::format("OpName %{} \"{}\"", name, name));
-
-			auto& block = source.createFunctionBlock();
-			block.m_Name = name;
-			block.m_Definition.insert(fmt::format("%{} = OpFunction {} None {}", name, TypeTraits<ReturnType>::Identifier, GetFunctionIdentifier<ReturnType>()));
-		}
+		explicit FunctionBuilder(SPIRVSource& source) : m_Source(source) {}
 
 		/**
 		 * Default destructor.
@@ -56,11 +45,14 @@ namespace ShaderBuilder
 		template<class Type, class... Types>
 		[[nodiscard]] Type createVariable(Types&&... initializer)
 		{
-			m_Source.registerType<Type>();
-			m_Source.insertType(fmt::format("%variable_type_{} = OpTypePointer Function {}", TypeTraits<Type>::RawIdentifier, TypeTraits<Type>::Identifier));
-
 			auto identifier = m_Source.getUniqueIdentifier();
-			m_Source.getCurrentFunctionBlock().m_Variables.insert(fmt::format("%{} = OpVariable %variable_type_{} Function", identifier, TypeTraits<Type>::RawIdentifier));
+			if (m_IsRecording)
+			{
+				m_Source.registerType<Type>();
+				m_Source.insertType(fmt::format("%variable_type_{} = OpTypePointer Function {}", TypeTraits<Type>::RawIdentifier, TypeTraits<Type>::Identifier));
+
+				m_Source.getCurrentFunctionBlock().m_Variables.insert(fmt::format("%{} = OpVariable %variable_type_{} Function", identifier, TypeTraits<Type>::RawIdentifier));
+			}
 
 			return Type(m_Source, std::move(identifier), std::forward<Types>(initializer)...);
 		}
@@ -74,9 +66,12 @@ namespace ShaderBuilder
 		template<class Type>
 		void exit(const Type& value)
 		{
-			// auto& block = m_Source.getCurrentFunctionBlock();
-			// block.m_Instructions.insert("OpReturn");
-			m_IsComplete = true;
+			if (m_IsRecording)
+			{
+				// auto& block = m_Source.getCurrentFunctionBlock();
+				// block.m_Instructions.insert("OpReturn");
+				m_IsComplete = true;
+			}
 		}
 
 		/**
@@ -84,7 +79,16 @@ namespace ShaderBuilder
 		 */
 		void exit();
 
+		/**
+		 * Toggle the recording to false.
+		 * From here on, the builder will not record any instructions but will only create the variables.
+		 */
+		void toggleRecording() { m_IsRecording = false; }
+
 	private:
+		SPIRVSource& m_Source;
+
 		bool m_IsComplete = false;
+		bool m_IsRecording = true;
 	};
 } // namespace ShaderBuilder

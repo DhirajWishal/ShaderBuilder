@@ -156,6 +156,23 @@ namespace ShaderBuilder
 		}
 
 		/**
+		 * Register multiple types function.
+		 *
+		 * @tparam Type The type to register.
+		 * @tparam Types The rest of the types.
+		 */
+		template<class Type, class... Types>
+		void registerTypes()
+		{
+			// Try and register the type.
+			registerType<Type>();
+
+			// Register the rest if available.
+			if constexpr (sizeof...(Types) > 0)
+				registerTypes<Types...>();
+		}
+
+		/**
 		 * Store a constant to the storage.
 		 * The identifier will be const_<type identifier>_<value as a integer>.
 		 *
@@ -187,18 +204,54 @@ namespace ShaderBuilder
 		}
 
 		/**
+		 * Get type identifier.
+		 *
+		 * @tparam Type The type to get the identifier of.
+		 * @return The identifier.
+		 */
+		template<class Type>
+		std::string getTypeIdentifier()
+		{
+			registerType<Type>();
+			return fmt::format("{} ", TypeTraits<Type>::Identifier);
+		}
+
+		/**
+		 * Get multiple type identifiers.
+		 *
+		 * @tparam Type The type to get the identifier of.
+		 * @tparam Types The rest of the types.
+		 * @return The identifier.
+		 */
+		template<class Type, class... Types>
+		std::string getTypeIdentifiers()
+		{
+			registerType<Type>();
+			if constexpr (sizeof...(Types) > 0)
+				return fmt::format("{} {}", TypeTraits<Type>::Identifier, getTypeIdentifiers<Types...>());
+
+			else
+				return fmt::format("{} ", TypeTraits<Type>::Identifier);
+		}
+
+		/**
 		 * Register a function callback type.
 		 *
 		 * @tparam Type The callback type.
 		 */
-		template<class Type>
+		template<class Return, class... Parameters>
 		void registerCallable()
 		{
-			using ValueType = typename TypeTraits<Type>::ValueTraits::Type;
+			using ReturnType = typename TypeTraits<Return>::Type;
 
 			// Try and register value types.
-			registerType<ValueType>();
-			insertType(fmt::format("{} = OpTypeFunction {}", GetFunctionIdentifier<ValueType>(), TypeTraits<ValueType>::Identifier));
+			registerType<ReturnType>();
+
+			std::string parameterTypes;
+			if constexpr (sizeof...(Parameters) > 0)
+				parameterTypes = getTypeIdentifiers<Parameters...>();
+
+			insertType(fmt::format("{} = OpTypeFunction {} {}", GetFunctionIdentifier<ReturnType>(), TypeTraits<ReturnType>::Identifier, parameterTypes));
 		}
 
 		/**
