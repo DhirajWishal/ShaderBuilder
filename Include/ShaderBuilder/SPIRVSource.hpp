@@ -139,6 +139,87 @@ namespace ShaderBuilder
 		 */
 		[[nodiscard]] std::string getUniqueIdentifier() { return std::to_string(m_UniqueID++); }
 
+	public:
+		/**
+		 * Register type function.
+		 *
+		 * @tparam Type The type to register.
+		 */
+		template<class Type>
+		void registerType()
+		{
+			// Try and register value types if the Type is complex.
+			if constexpr (IsCompexType<Type>)
+				registerType<typename TypeTraits<Type>::ValueTraits::Type>();
+
+			insertType(fmt::format("{} = {}", TypeTraits<Type>::Identifier, TypeTraits<Type>::Declaration));
+		}
+
+		/**
+		 * Store a constant to the storage.
+		 * The identifier will be const_<type identifier>_<value as a integer>.
+		 *
+		 * @tparam Type The type of the value.
+		 * @param value The constant value.
+		 */
+		template<class Type>
+		void storeConstant(const Type& value)
+		{
+			registerType<Type>();
+			insertType(fmt::format("%{} = OpConstant {} {}", GetConstantIdentifier(value), TypeTraits<Type>::Identifier, value));
+		}
+
+		/**
+		 * Register an array function.
+		 *
+		 * @tparam ValueType The value type of the array.
+		 * @tparam Size The size of the array.
+		 */
+		template<class ValueType, size_t Size>
+		void registerArray()
+		{
+			// Try and register value types if the Type is complex.
+			if constexpr (IsCompexType<ValueType>)
+				registerType<typename TypeTraits<ValueType>::ValueTraits::Type>();
+
+			storeConstant<uint32_t>(Size);
+			insertType(fmt::format("%array_{}_{} = OpTypeArray {} %{}", TypeTraits<ValueType>::RawIdentifier, Size, TypeTraits<ValueType>::Identifier, GetConstantIdentifier<uint32_t>(Size)));
+		}
+
+		/**
+		 * Register a function callback type.
+		 *
+		 * @tparam Type The callback type.
+		 */
+		template<class Type>
+		void registerCallable()
+		{
+			using ValueType = typename TypeTraits<Type>::ValueTraits::Type;
+
+			// Try and register value types.
+			registerType<ValueType>();
+			insertType(fmt::format("{} = OpTypeFunction {}", GetFunctionIdentifier<ValueType>(), TypeTraits<ValueType>::Identifier));
+		}
+
+		/**
+		 * Resolve the member variable type identifiers to register.
+		 *
+		 * @tparam First The first type.
+		 * @tparam Rest The rest of the types.
+		 */
+		template<class First, class... Rest>
+		[[nodiscard]] std::string resolveMemberVariableTypeIdentifiers()
+		{
+			using MemberType = typename MemberVariableType<First>::Type;
+			registerType<MemberType>();
+
+			if constexpr (sizeof...(Rest) > 0)
+				return fmt::format("{} {}", TypeTraits<MemberType>::Identifier, resolveMemberVariableTypeIdentifiers<Rest...>());
+
+			else
+				return TypeTraits<MemberType>::Identifier;
+		}
+
 	private:
 		std::vector<FunctionBlock> m_FunctionBlocks;
 

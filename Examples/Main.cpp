@@ -37,9 +37,9 @@
 	[[maybe_unused]] Profiler _profiler;
 
 	ShaderBuilder::VertexBuilder shaderSource;
-	auto inPosition = shaderSource.createInput<ShaderBuilder::Vec3<float>>(0, "inPosition");
-	auto inTextureCoordinates = shaderSource.createInput<ShaderBuilder::Vec2<float>>(12, "inTextureCoordinates");
-	auto outTextureCoordinates = shaderSource.createOutput<ShaderBuilder::Vec2<float>>(0, "outTextureCoordinates");
+	auto inPosition = shaderSource.createInput<ShaderBuilder::Vec3<float>>(0);
+	auto inTextureCoordinates = shaderSource.createInput<ShaderBuilder::Vec2<float>>(12);
+	auto outTextureCoordinates = shaderSource.createOutput<ShaderBuilder::Vec2<float>>(0);
 
 	class Camera final : public ShaderBuilder::DataType<Camera>
 	{
@@ -56,8 +56,8 @@
 		auto function = shaderSource.createFunction<void>("main");
 
 		outTextureCoordinates = inTextureCoordinates;
-		shaderSource.setPoisition(function.createVariable<ShaderBuilder::Vec4<float>>("temporary", inPosition, 1.0f));
-		shaderSource.addEntryPoint(function, "inPosition", "inTextureCoordinates", "outTextureCoordinates");
+		shaderSource.setPoisition(function.createVariable<ShaderBuilder::Vec4<float>>(inPosition.value(), 1.0f));
+		shaderSource.addEntryPoint(function, inPosition, inTextureCoordinates, outTextureCoordinates);
 	}
 
 	return shaderSource.compile(ShaderBuilder::OptimizationFlags::DebugMode);

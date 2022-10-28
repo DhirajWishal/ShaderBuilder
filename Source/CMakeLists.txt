@@ -4,7 +4,7 @@
 project(
 	ShaderBuilder
 	VERSION 1.0.0
-	DESCRIPTION "Minte library"
+	DESCRIPTION "Shader Builder library"
 )
 
 # Add the library.
@@ -25,6 +25,9 @@ add_library(
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Storages/InstructionStorage.hpp"
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Storages/UniqueInstructionStorage.hpp"
 	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/VertexBuilder.hpp"
+	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Attribute.hpp"
+	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Input.hpp"
+	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/Output.hpp"
 	
 	"Builder.cpp" 
 	"SPIRVBinary.cpp"

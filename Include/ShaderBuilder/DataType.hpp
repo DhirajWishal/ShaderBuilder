@@ -26,36 +26,19 @@ namespace ShaderBuilder
 		explicit DataType(SPIRVSource& source, const std::string& variableName) : m_VariableName(variableName), m_Source(source) {}
 
 		/**
-		 * Explicit constructor.
+		 * Set a debug name to the data type.
+		 * Note: This should be done only once and must have a unique name!
 		 *
-		 * @param location The location of the attribute.
-		 * @param isInput Whether or not the attribute is input or not.
-		 * @param source The source to record all the instructions to.
-		 * @param variableName The name of the variable.
+		 * @param name The name to set.
 		 */
-		explicit DataType(uint32_t location, bool isInput, SPIRVSource& source, const std::string& variableName) : m_VariableName(variableName), m_Source(source)
-		{
-			if (isInput)
-			{
-				m_Source.insertType(fmt::format("%input_{} = OpTypePointer Input {}", variableName, TypeTraits<Derived>::Identifier));
-				m_Source.insertType(fmt::format("%{} = OpVariable %input_{} Input", variableName, variableName));
-			}
-			else
-			{
-				m_Source.insertType(fmt::format("%output_{} = OpTypePointer Output {}", variableName, TypeTraits<Derived>::Identifier));
-				m_Source.insertType(fmt::format("%{} = OpVariable %output_{} Output", variableName, variableName));
-			}
-
-			m_Source.insertName(fmt::format("OpName %{} \"{}\"", variableName, variableName));
-			m_Source.insertAnnotation(fmt::format("OpDecorate %{} Location {}", variableName, location));
-		}
+		void setDebugName(const std::string& name) { m_Source.insertName(fmt::format("OpName %{} \"{}\"", m_VariableName, name)); }
 
 		/**
 		 * Get the name of the variable/ function.
 		 *
 		 * @return The name.
 		 */
-		[[nodiscard]] std::string getName() const { return m_VariableName; }
+		[[nodiscard]] const std::string& getName() const { return m_VariableName; }
 
 		/**
 		 * Get the identifier of the variable/ function.

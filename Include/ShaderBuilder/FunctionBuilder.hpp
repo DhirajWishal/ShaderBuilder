@@ -50,21 +50,19 @@ namespace ShaderBuilder
 		 *
 		 * @tparam Type The type of the variable.
 		 * @tparam Types The initialization types.
-		 * @param name The variable name.
 		 * @param initializer The initializer types.
 		 * @return The created variable.
 		 */
 		template<class Type, class... Types>
-		[[nodiscard]] Type createVariable(std::string&& name, Types&&... initializer)
+		[[nodiscard]] Type createVariable(Types&&... initializer)
 		{
-			registerType<Type>();
+			m_Source.registerType<Type>();
 			m_Source.insertType(fmt::format("%variable_type_{} = OpTypePointer Function {}", TypeTraits<Type>::RawIdentifier, TypeTraits<Type>::Identifier));
-			m_Source.insertName(fmt::format("OpName %{} \"{}\"", name, name));
 
-			auto& block = m_Source.getCurrentFunctionBlock();
-			block.m_Variables.insert(fmt::format("%{} = OpVariable %variable_type_{} Function", name, TypeTraits<Type>::RawIdentifier));
+			auto identifier = m_Source.getUniqueIdentifier();
+			m_Source.getCurrentFunctionBlock().m_Variables.insert(fmt::format("%{} = OpVariable %variable_type_{} Function", identifier, TypeTraits<Type>::RawIdentifier));
 
-			return Type(m_Source, name, std::forward<Types>(initializer)...);
+			return Type(m_Source, std::move(identifier), std::forward<Types>(initializer)...);
 		}
 
 		/**
@@ -85,22 +83,6 @@ namespace ShaderBuilder
 		 * Exit the function by returning nothing.
 		 */
 		void exit();
-
-	private:
-		/**
-		 * Register type function.
-		 *
-		 * @tparam Type The type to register.
-		 */
-		template<class Type>
-		void registerType()
-		{
-			// Try and register value types if the Type is complex.
-			if constexpr (IsCompexType<Type>)
-				registerType<typename TypeTraits<Type>::ValueTraits::Type>();
-
-			m_Source.insertType(fmt::format("{} = {}", TypeTraits<Type>::Identifier, TypeTraits<Type>::Declaration));
-		}
 
 	private:
 		bool m_IsComplete = false;

@@ -6,6 +6,9 @@
 #include "FunctionBuilder.hpp"
 #include "Callable.hpp"
 
+#include "Input.hpp"
+#include "Output.hpp"
+
 #include <array>
 
 namespace ShaderBuilder
@@ -100,28 +103,24 @@ namespace ShaderBuilder
 		 * Create a new shader input.
 		 *
 		 * @tparam Type The type of the variable.
-		 * @param name The variable name.
 		 * @return The created variable.
 		 */
 		template<class Type>
-		[[nodiscard]] Type createInput(uint32_t location, std::string&& name)
+		[[nodiscard]] Input<Type> createInput(uint32_t location)
 		{
-			registerType<Type>();
-			return Type(location, true, m_Source, name);
+			return Input<Type>(m_Source, location);
 		}
 
 		/**
 		 * Create a new shader output.
 		 *
 		 * @tparam Type The type of the variable.
-		 * @param name The variable name.
 		 * @return The created variable.
 		 */
 		template<class Type>
-		[[nodiscard]] Type createOutput(uint32_t location, std::string&& name)
+		[[nodiscard]] Output<Type> createOutput(uint32_t location)
 		{
-			registerType<Type>();
-			return Type(location, false, m_Source, name);
+			return Output<Type>(m_Source, location);
 		}
 
 		/**
@@ -147,7 +146,7 @@ namespace ShaderBuilder
 		[[nodiscard]] Type createUniform(uint32_t set, uint32_t binding, const std::string& name, Members... members)
 		{
 			// Register the members.
-			m_Source.insertType(fmt::format("%type_{} = OpTypeStruct {}", name, resolveMemberVariableTypeIdentifiers<Members...>()));
+			m_Source.insertType(fmt::format("%type_{} = OpTypeStruct {}", name, m_Source.resolveMemberVariableTypeIdentifiers<Members...>()));
 
 			// Setup type declarations.
 			m_Source.insertType(fmt::format("%uniform_{} = OpTypePointer Uniform %type_{}", name, name));
@@ -188,22 +187,8 @@ namespace ShaderBuilder
 		template<class ReturnType>
 		[[nodiscard]] FunctionBuilder createFunction(std::string&& name)
 		{
-			registerCallable<Callable<ReturnType>>();
+			m_Source.registerCallable<Callable<ReturnType>>();
 			return FunctionBuilder(m_Source, std::move(name), FunctionBuilderReturnType<ReturnType>());
-		}
-
-		/**
-		 * Store a constant to the storage.
-		 * The identifier will be const_<type identifier>_<value as a integer>.
-		 *
-		 * @tparam Type The type of the value.
-		 * @param value The constant value.
-		 */
-		template<class Type>
-		void storeConstant(const Type& value)
-		{
-			registerType<Type>();
-			m_Source.insertType(fmt::format("%{} = OpConstant {} {}", GetConstantIdentifier(value), TypeTraits<Type>::Identifier, value));
 		}
 
 	public:
@@ -228,74 +213,6 @@ namespace ShaderBuilder
 		 * @return The compiled binary.
 		 */
 		[[nodiscard]] SPIRVBinary compile(OptimizationFlags flags = OptimizationFlags::Release) const;
-
-
-	protected:
-		/**
-		 * Register type function.
-		 *
-		 * @tparam Type The type to register.
-		 */
-		template<class Type>
-		void registerType()
-		{
-			// Try and register value types if the Type is complex.
-			if constexpr (IsCompexType<Type>)
-				registerType<typename TypeTraits<Type>::ValueTraits::Type>();
-
-			m_Source.insertType(fmt::format("{} = {}", TypeTraits<Type>::Identifier, TypeTraits<Type>::Declaration));
-		}
-
-		/**
-		 * Register an array function.
-		 *
-		 * @tparam ValueType The value type of the array.
-		 * @tparam Size The size of the array.
-		 */
-		template<class ValueType, size_t Size>
-		void registerArray()
-		{
-			// Try and register value types if the Type is complex.
-			if constexpr (IsCompexType<ValueType>)
-				registerType<typename TypeTraits<ValueType>::ValueTraits::Type>();
-
-			storeConstant<uint32_t>(Size);
-			m_Source.insertType(fmt::format("%array_{}_{} = OpTypeArray {} %{}", TypeTraits<ValueType>::RawIdentifier, Size, TypeTraits<ValueType>::Identifier, GetConstantIdentifier<uint32_t>(Size)));
-		}
-
-		/**
-		 * Register a function callback type.
-		 *
-		 * @tparam Type The callback type.
-		 */
-		template<class Type>
-		void registerCallable()
-		{
-			using ValueType = typename TypeTraits<Type>::ValueTraits::Type;
-
-			// Try and register value types.
-			registerType<ValueType>();
-			m_Source.insertType(fmt::format("{} = OpTypeFunction {}", GetFunctionIdentifier<ValueType>(), TypeTraits<ValueType>::Identifier));
-		}
-
-		/**
-		 * Resolve the member variable type identifiers to register.
-		 *
-		 * @tparam First The first type.
-		 * @tparam Rest The rest of the types.
-		 */
-		template<class First, class... Rest>
-		[[nodiscard]] std::string resolveMemberVariableTypeIdentifiers()
-		{
-			using MemberType = typename MemberVariableType<First>::Type;
-			registerType<MemberType>();
-
-			if constexpr (sizeof...(Rest) > 0)
-				return fmt::format("{} {}", TypeTraits<MemberType>::Identifier, resolveMemberVariableTypeIdentifiers<Rest...>());
-
-			else
-				return std::string(TypeTraits<MemberType>::Identifier);
-		}
 
 	protected:
 		SPIRVSource m_Source;

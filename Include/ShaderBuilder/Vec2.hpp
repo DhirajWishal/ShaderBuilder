@@ -16,6 +16,7 @@ namespace ShaderBuilder
 	class Vec2 final : public DataType<Vec2<Type>>
 	{
 	public:
+		using Super = DataType<Vec2<Type>>;
 		using Traits = TypeTraits<Vec2<Type>>;
 
 	public:
@@ -25,17 +26,7 @@ namespace ShaderBuilder
 		 * @param source The source to insert the instructions to.
 		 * @param variableName The name of the variable.
 		 */
-		explicit Vec2(SPIRVSource& source, const std::string& variableName) : DataType<Vec2<Type>>(source, variableName), x(0), y(0) {}
-
-		/**
-		 * Explicit constructor.
-		 *
-		 * @param location The location of the attribute.
-		 * @param isInput Whether or not the attribute is input or not.
-		 * @param source The source to record all the instructions to.
-		 * @param variableName The name of the variable.
-		 */
-		explicit Vec2(uint32_t location, bool isInput, SPIRVSource& source, const std::string& variableName) : DataType<Vec2<Type>>(location, isInput, source, variableName), x(0), y(0) {}
+		explicit Vec2(SPIRVSource& source, const std::string& variableName) : Super(source, variableName), x(0), y(0) {}
 
 		/**
 		 * Explicit constructor.
@@ -44,7 +35,7 @@ namespace ShaderBuilder
 		 * @param variableName The name of the variable.
 		 * @param value The value to initialize the type with.
 		 */
-		explicit Vec2(SPIRVSource& source, const std::string& variableName, Type value) : DataType<Vec2<Type>>(source, variableName), x(value), y(value)
+		explicit Vec2(SPIRVSource& source, const std::string& variableName, Type value) : Super(source, variableName), x(value), y(value)
 		{
 			const auto identifier = GetConstantIdentifier<uint64_t>(value);
 			// Setup the values.
@@ -67,7 +58,7 @@ namespace ShaderBuilder
 		 * @param x The x to initialize the x member with.
 		 * @param y The y to initialize the y member with.
 		 */
-		explicit Vec2(SPIRVSource& source, const std::string& variableName, Type x, Type y) : DataType<Vec2<Type>>(source, variableName), x(x), y(y)
+		explicit Vec2(SPIRVSource& source, const std::string& variableName, Type x, Type y) : Super(source, variableName), x(x), y(y)
 		{
 			const auto xIdentifier = GetConstantIdentifier<uint64_t>(x);
 			const auto yIdentifier = GetConstantIdentifier<uint64_t>(y);
@@ -93,7 +84,7 @@ namespace ShaderBuilder
 		 */
 		Vec2& operator=(const Vec2& other)
 		{
-			DataType<Vec2<Type>>::m_Source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("OpCopyMemory %{} %{}", DataType<Vec2<Type>>::m_VariableName, other.getName()));
+			Super::m_Source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("OpCopyMemory %{} %{}", Super::m_VariableName, other.getName()));
 
 			x = other.x;
 			y = other.y;

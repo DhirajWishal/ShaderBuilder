@@ -21,10 +21,10 @@ namespace ShaderBuilder
 		m_Source.insertName("OpMemberName %gl_PerVertex 3 \"gl_CullDistance\"");
 
 		// Register the types.
-		registerType<Vec4<float>>();
-		registerType<float>();
-		registerType<int>();
-		registerArray<float, 1>();
+		m_Source.registerType<Vec4<float>>();
+		m_Source.registerType<float>();
+		m_Source.registerType<int>();
+		m_Source.registerArray<float, 1>();
 
 		// Setup the types.
 		m_Source.insertType("%gl_PerVertex = OpTypeStruct %vec4_float %float %array_float_1 %array_float_1");
@@ -32,8 +32,8 @@ namespace ShaderBuilder
 		m_Source.insertType("%perVertex = OpVariable %pointer_gl_PerVertex Output");
 		m_Source.insertType("%type_gl_Position = OpTypePointer Output %vec4_float");
 
-		storeConstant(0);
-		storeConstant(1);
+		m_Source.storeConstant(0);
+		m_Source.storeConstant(1);
 	}
 
 	void VertexBuilder::setPoisition(const Vec4<float>& value)
