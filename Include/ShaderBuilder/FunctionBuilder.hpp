@@ -49,7 +49,7 @@ namespace ShaderBuilder
 			if (m_IsRecording)
 			{
 				m_Source.registerType<Type>();
-				m_Source.insertType(fmt::format("%variable_type_{} = OpTypePointer Function {}", TypeTraits<Type>::RawIdentifier, TypeTraits<Type>::Identifier));
+				m_Source.insertType(fmt::format(FMT_STRING("%variable_type_{} = OpTypePointer Function {}"), TypeTraits<Type>::RawIdentifier, TypeTraits<Type>::Identifier));
 
 				m_Source.getCurrentFunctionBlock().m_Variables.insert(fmt::format("%{} = OpVariable %variable_type_{} Function", identifier, TypeTraits<Type>::RawIdentifier));
 			}
@@ -69,6 +69,25 @@ namespace ShaderBuilder
 		template<class FunctionType, class... Arguments>
 		decltype(auto) call(FunctionType& function, Arguments&&... arguments)
 		{
+			const auto returnIdentifier = m_Source.getUniqueIdentifier();
+			if constexpr (sizeof...(Arguments) > 0)
+			{
+				std::string argumentString;
+				auto argumentToString = [&argumentString](const auto& argument) mutable
+				{
+					using ArgumentType = decltype(argument);
+
+					argumentString += fmt::format("%{} ", argument.getName());
+				};
+				(argumentToString(arguments), ...);
+
+				m_Source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("%{} = OpFunctionCall {} %{} {}", returnIdentifier, TypeTraits<typename FunctionType::ReturnType>::Identifier, function.getName(), argumentString));
+			}
+			else
+			{
+				m_Source.getCurrentFunctionBlock().m_Instructions.insert(fmt::format("%{} = OpFunctionCall {} %{}", returnIdentifier, TypeTraits<typename FunctionType::ReturnType>::Identifier, function.getName()));
+			}
+
 			m_Source.pushFunctionBlock();
 			return function(std::forward<Arguments>(arguments)...);
 		}

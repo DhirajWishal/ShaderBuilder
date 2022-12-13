@@ -23,7 +23,7 @@ namespace ShaderBuilder
 		 *
 		 * @param data The data to construct the parameter with.
 		 */
-		Parameter(Type data) : Super(data.getSource(), data.getSource().getUniqueIdentifier()), m_Data(data)
+		Parameter(Type data) : Super(data.getSource(), data.getSource().getUniqueIdentifier()), m_Data(Super::m_Source, Super::m_VariableName, data, true)
 		{
 			Super::m_Source.registerType<Type>();
 			Super::m_Source.getCurrentFunctionBlock().m_Parameters.insert(fmt::format("%{} = OpFunctionParameter {}", Super::m_VariableName, TypeTraits<Type>::Identifier));

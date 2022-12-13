@@ -165,13 +165,13 @@ namespace ShaderBuilder
 		 * @tparam Type The type to register.
 		 */
 		template<class Type>
-		void registerType()
+		constexpr void registerType()
 		{
 			// Try and register value types if the Type is complex.
 			if constexpr (IsCompexType<Type>)
 				registerType<typename TypeTraits<Type>::ValueTraits::Type>();
 
-			insertType(fmt::format("{} = {}", TypeTraits<Type>::Identifier, TypeTraits<Type>::Declaration));
+			insertType(fmt::format(FMT_STRING("{} = {}"), TypeTraits<Type>::Identifier, TypeTraits<Type>::Declaration));
 		}
 
 		/**
@@ -181,7 +181,7 @@ namespace ShaderBuilder
 		 * @tparam Types The rest of the types.
 		 */
 		template<class Type, class... Types>
-		void registerTypes()
+		constexpr void registerTypes()
 		{
 			// Try and register the type.
 			registerType<Type>();
@@ -199,7 +199,7 @@ namespace ShaderBuilder
 		 * @param value The constant value.
 		 */
 		template<class Type>
-		void storeConstant(const Type& value)
+		constexpr void storeConstant(const Type& value)
 		{
 			registerType<Type>();
 			insertType(fmt::format("%{} = OpConstant {} {}", GetConstantIdentifier(value), TypeTraits<Type>::Identifier, value));
@@ -212,7 +212,7 @@ namespace ShaderBuilder
 		 * @tparam Size The size of the array.
 		 */
 		template<class ValueType, size_t Size>
-		void registerArray()
+		constexpr void registerArray()
 		{
 			// Try and register value types if the Type is complex.
 			if constexpr (IsCompexType<ValueType>)
@@ -229,10 +229,10 @@ namespace ShaderBuilder
 		 * @return The identifier.
 		 */
 		template<class Type>
-		[[nodiscard]] std::string getTypeIdentifier()
+		[[nodiscard]] constexpr std::string getTypeIdentifier()
 		{
 			registerType<Type>();
-			return fmt::format("{} ", TypeTraits<Type>::Identifier);
+			return fmt::format(FMT_STRING("{} "), TypeTraits<Type>::Identifier);
 		}
 
 		/**
@@ -243,14 +243,14 @@ namespace ShaderBuilder
 		 * @return The identifier.
 		 */
 		template<class Type, class... Types>
-		[[nodiscard]] std::string getTypeIdentifiers()
+		[[nodiscard]] constexpr std::string getTypeIdentifiers()
 		{
 			registerType<Type>();
 			if constexpr (sizeof...(Types) > 0)
 				return fmt::format("{} {}", TypeTraits<Type>::Identifier, getTypeIdentifiers<Types...>());
 
 			else
-				return fmt::format("{} ", TypeTraits<Type>::Identifier);
+				return fmt::format(FMT_STRING("{} "), TypeTraits<Type>::Identifier);
 		}
 
 		/**
@@ -261,7 +261,7 @@ namespace ShaderBuilder
 		 * @return The type string.
 		 */
 		template<class Type, class... Types>
-		[[nodiscard]] std::string getParameterIdentifier()
+		[[nodiscard]] constexpr std::string getParameterIdentifier()
 		{
 			registerType<Type>();
 			if constexpr (sizeof...(Types) > 0)
@@ -279,13 +279,13 @@ namespace ShaderBuilder
 		 * @return The identifier string.
 		 */
 		template<class Return, class... Parameters>
-		[[nodiscard]] std::string getFunctionIdentifier()
+		[[nodiscard]] constexpr std::string getFunctionIdentifier()
 		{
 			if constexpr (sizeof...(Parameters) > 0)
 				return fmt::format("{}_{}_callable", TypeTraits<Return>::Identifier, getParameterIdentifier<Parameters...>());
 
 			else
-				return fmt::format("{}_callable", TypeTraits<Return>::Identifier);
+				return fmt::format(FMT_STRING("{}_callable"), TypeTraits<Return>::Identifier);
 		}
 
 		/**
@@ -294,7 +294,7 @@ namespace ShaderBuilder
 		 * @tparam Type The callback type.
 		 */
 		template<class Return, class... Parameters>
-		void registerCallable()
+		constexpr void registerCallable()
 		{
 			using ReturnType = typename TypeTraits<Return>::Type;
 
@@ -315,7 +315,7 @@ namespace ShaderBuilder
 		 * @tparam Rest The rest of the types.
 		 */
 		template<class First, class... Rest>
-		[[nodiscard]] std::string resolveMemberVariableTypeIdentifiers()
+		[[nodiscard]] constexpr std::string resolveMemberVariableTypeIdentifiers()
 		{
 			using MemberType = typename MemberVariableType<First>::Type;
 			registerType<MemberType>();

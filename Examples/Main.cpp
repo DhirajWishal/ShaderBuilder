@@ -50,18 +50,18 @@
 		ShaderBuilder::Vec4<float> m_Projection;	// These should be Mat4.
 		ShaderBuilder::Vec2<float> m_View;			// These should be Mat4.
 	};
+	auto camera = shaderSource.createUniform<Camera>(0, 0, &Camera::m_Projection, &Camera::m_View);
 
 	auto helper = shaderSource.createFunction([](ShaderBuilder::FunctionBuilder& builder, ShaderBuilder::Parameter<ShaderBuilder::Vec3<float>> vec, ShaderBuilder::Parameter<ShaderBuilder::Vec3<float>> vec2)
 		{
-			const auto var = builder.createVariable<ShaderBuilder::Vec4<float>>(vec.value(), 21.0f);
+			const auto var = builder.createVariable<ShaderBuilder::Vec4<float>>(vec, 21.0f);
 		}
 	);
 
-	auto camera = shaderSource.createUniform<Camera>(0, 0, &Camera::m_Projection, &Camera::m_View);
-
 	auto function = shaderSource.createFunction([&](ShaderBuilder::VertexFunctionBuilder& builder)
 		{
-			builder.call(helper, inPosition.value(), inPosition.value());
+			auto temp = builder.createVariable<ShaderBuilder::Vec3<float>>(inPosition.value());
+			builder.call(helper, temp, temp);
 
 			outTextureCoordinates = inTextureCoordinates;
 			builder.setPoisition(builder.createVariable<ShaderBuilder::Vec4<float>>(inPosition.value(), 1.0f));

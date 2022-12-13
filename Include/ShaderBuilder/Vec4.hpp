@@ -27,6 +27,84 @@ namespace ShaderBuilder
 		 */
 		explicit Vec4(SPIRVSource& source, const std::string& variableName) : Super(source, variableName), x(0), y(0), z(0), w(0) {}
 
+		// /**
+		//  * Copy constructor.
+		//  *
+		//  * @param other The other vector.
+		//  */
+		// Vec4(const Vec4& other) : Super(other.m_Source, other.m_VariableName), x(other.x), y(other.y), z(other.z), w(other.w)
+		// {
+		// 	// Load the memory.
+		// 	auto& functionBlock = Super::m_Source.getCurrentFunctionBlock();
+		// 	const auto variableIdentifier = fmt::format("%{}", Super::m_Source.getUniqueIdentifier());
+		// 	functionBlock.m_Instructions.insert(fmt::format("{} = OpLoad {} %{}", variableIdentifier, TypeTraits<Vec4<Type>>::Identifier, other.getName()));
+		// 
+		// 	const auto xIdentifier = fmt::format("%{}", Super::m_Source.getUniqueIdentifier());
+		// 	const auto yIdentifier = fmt::format("%{}", Super::m_Source.getUniqueIdentifier());
+		// 	const auto zIdentifier = fmt::format("%{}", Super::m_Source.getUniqueIdentifier());
+		// 	const auto wIdentifier = fmt::format("%{}", Super::m_Source.getUniqueIdentifier());
+		// 
+		// 	functionBlock.m_Instructions.insert(fmt::format("{} = OpCompositeExtract {} {} 0", xIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
+		// 	functionBlock.m_Instructions.insert(fmt::format("{} = OpCompositeExtract {} {} 1", yIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
+		// 	functionBlock.m_Instructions.insert(fmt::format("{} = OpCompositeExtract {} {} 3", zIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
+		// 	functionBlock.m_Instructions.insert(fmt::format("{} = OpCompositeExtract {} {} 4", wIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
+		// 
+		// 	// Create the composite.
+		// 	const auto compositeIdentifier = fmt::format("%{}", Super::m_Source.getUniqueIdentifier());
+		// 	functionBlock.m_Instructions.insert(fmt::format("{} = OpCompositeConstruct {} {} {} {} {}", compositeIdentifier, Traits::Identifier, xIdentifier, yIdentifier, zIdentifier, wIdentifier));
+		// 
+		// 	// Store it.
+		// 	functionBlock.m_Instructions.insert(fmt::format("OpStore %{} {}", other.m_VariableName, compositeIdentifier));
+		// }
+		// 
+		// /**
+		//  * Move constructor.
+		//  *
+		//  * @param other The other vector.
+		//  */
+		// Vec4(Vec4&& other) noexcept
+		// 	: Super(other.m_Source, std::move(other.m_VariableName)), x(std::exchange(other.x, Type()))
+		// 	, y(std::exchange(other.y, Type())), z(std::exchange(other.z, Type())), w(std::exchange(other.w, Type()))
+		// {
+		// }
+
+		/**
+		 * Explicit constructor.
+		 *
+		 * @param source The source to insert the instructions to.
+		 * @param variableName The name of the variable.
+		 * @param other The other to copy the data from.
+		 * @param shallow Whether we need a shallow copy or not. Default is false. If a shallow copy is performed, no instructions are recorded.
+		 */
+		explicit Vec4(SPIRVSource& source, const std::string& variableName, const Vec4& other, bool shallow = false) : Super(source, variableName), x(other.x), y(other.y), z(other.z), w(other.w)
+		{
+			// If we just need a shallow copy, return without storing any instructions.
+			if (shallow)
+				return;
+
+			// Load the memory.
+			auto& functionBlock = source.getCurrentFunctionBlock();
+			const auto variableIdentifier = fmt::format("%{}", source.getUniqueIdentifier());
+			functionBlock.m_Instructions.insert(fmt::format("{} = OpLoad {} %{}", variableIdentifier, TypeTraits<Vec4<Type>>::Identifier, other.getName()));
+
+			const auto xIdentifier = fmt::format("%{}", Super::m_Source.getUniqueIdentifier());
+			const auto yIdentifier = fmt::format("%{}", Super::m_Source.getUniqueIdentifier());
+			const auto zIdentifier = fmt::format("%{}", Super::m_Source.getUniqueIdentifier());
+			const auto wIdentifier = fmt::format("%{}", Super::m_Source.getUniqueIdentifier());
+
+			functionBlock.m_Instructions.insert(fmt::format("{} = OpCompositeExtract {} {} 0", xIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
+			functionBlock.m_Instructions.insert(fmt::format("{} = OpCompositeExtract {} {} 1", yIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
+			functionBlock.m_Instructions.insert(fmt::format("{} = OpCompositeExtract {} {} 3", zIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
+			functionBlock.m_Instructions.insert(fmt::format("{} = OpCompositeExtract {} {} 4", wIdentifier, TypeTraits<Type>::Identifier, variableIdentifier));
+
+			// Create the composite.
+			const auto compositeIdentifier = fmt::format("%{}", source.getUniqueIdentifier());
+			functionBlock.m_Instructions.insert(fmt::format("{} = OpCompositeConstruct {} {} {} {} {}", compositeIdentifier, Traits::Identifier, xIdentifier, yIdentifier, zIdentifier, wIdentifier));
+
+			// Store it.
+			functionBlock.m_Instructions.insert(fmt::format("OpStore %{} {}", variableName, compositeIdentifier));
+		}
+
 		/**
 		 * Explicit constructor.
 		 *

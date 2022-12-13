@@ -8,6 +8,18 @@
 namespace ShaderBuilder
 {
 	/**
+	 * Type usage enum.
+	 * This defines what a particular type is used for.
+	 */
+	enum class TypeUsage : uint8_t
+	{
+		InputAttribute,
+		OutputAttribute,
+		Parameter,
+		Variable
+	};
+
+	/**
 	 * Data type class.
 	 * This class is the base class for all the supported types.
 	 *

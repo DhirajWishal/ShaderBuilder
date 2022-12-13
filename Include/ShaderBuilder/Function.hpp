@@ -52,6 +52,7 @@ namespace ShaderBuilder
 				m_Function(m_Builder, arguments...);
 				m_Builder.exit();
 				m_Builder.toggleRecording();
+
 			}
 
 			else
