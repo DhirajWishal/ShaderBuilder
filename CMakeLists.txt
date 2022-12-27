@@ -32,6 +32,9 @@ if (NOT SPIRV_TOOLS_INIT_STATUS)
 	# Set the SPIR-V Tools include, library and binary data.
 	set(SPIRV_TOOLS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/SPIRV-Tools/include)
 
+	set(SPIRV_SKIP_TESTS ON CACHE BOOL "Disable the SPIR-V Tools tests.")
+	set(SPIRV_SKIP_EXECUTABLES ON CACHE BOOL "We don't need the SPIR-V Tools executable either.")
+
 	# Add the SPIR-V Tools library as a subdirectory.
 	add_subdirectory(ThirdParty/SPIRV-Tools)
 
@@ -48,9 +51,8 @@ if (NOT SPIRV_TOOLS_INIT_STATUS)
 	# Set the xxHash header include directory.
 	set(XXHASH_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/xxHash)
 
-	# Set the fmt header include directory and add the subdirectory.
-	set(FMT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/fmt/include)
-	add_subdirectory(ThirdParty/fmt)
+	# Set the SPIRV header include directory.
+	set(SPIRV_HEADERS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/SPIRV-Headers/include)
 
 	# Set global compile definitions.
 	add_compile_definitions(
