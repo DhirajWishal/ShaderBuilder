@@ -10,3 +10,6 @@
 [submodule "ThirdParty/fmt"]
 	path = ThirdParty/fmt
 	url = https://github.com/fmtlib/fmt
+[submodule "ThirdParty/SPIRV-Headers"]
+	path = ThirdParty/SPIRV-Headers
+	url = https://github.com/KhronosGroup/SPIRV-Headers
