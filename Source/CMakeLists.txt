@@ -11,6 +11,10 @@ project(
 add_library(
 	ShaderBuilder
 	STATIC
+
+	"${CMAKE_SOURCE_DIR}/Include/ShaderBuilder/SPIRVSource.hpp"
+
+	"SPIRVSource.cpp"
 )
 
 # Add the target includes.
